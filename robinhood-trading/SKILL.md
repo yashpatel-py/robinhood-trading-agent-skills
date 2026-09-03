@@ -1,6 +1,7 @@
 ---
 name: robinhood-trading
 description: Research, screen, monitor, and prepare trades on Robinhood through the Robinhood Trading MCP connector — live quotes, scanners, fundamentals, SEC filings, options chains, portfolio and P&L analysis, and pre-trade order review. Use this whenever the user asks about their Robinhood account, positions, buying power, cost basis, or P&L; wants to screen or scan for stocks; asks to research a ticker's fundamentals, earnings, filings, or technicals; wants to size or price an order or find out what a trade would cost; or mentions option chains, tax lots, watchlists, or crypto pairs — even when they never say the word "Robinhood." Reach for it also whenever a request would otherwise mean calling Robinhood MCP tools ad hoc, because the connector carries account-selection, price-freshness, and order-session rules that are easy to get wrong and expensive when you do.
+license: MIT
 ---
 
 # Robinhood trading
