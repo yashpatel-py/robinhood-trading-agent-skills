@@ -1,7 +1,8 @@
-# claude-skills
+# robinhood-trading-agent-skills
 
-Open [Agent Skills](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)
-you can drop into Claude, ChatGPT, or any agent that reads `SKILL.md`.
+An open [Agent Skill](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)
+for trading research on [Robinhood's agent connector](https://robinhood.com/us/en/support/articles/agentic-trading-overview/) —
+drop it into Claude, ChatGPT, or any agent that reads `SKILL.md`.
 
 `SKILL.md` is an agent-neutral open format: YAML frontmatter (`name`, `description`) plus
 markdown instructions. Claude Code, Claude Desktop, Cursor, OpenCode, Codex and others
@@ -88,23 +89,23 @@ Skills live in `~/.claude/skills/` (available everywhere) or `.claude/skills/` i
 **Option A — skills CLI** (easiest):
 
 ```bash
-npx skills add yashpatel-py/claude-skills
+npx skills add yashpatel-py/robinhood-trading-agent-skills
 ```
 
 **Option B — clone and symlink** (best if you want to pull updates):
 
 ```bash
-git clone https://github.com/yashpatel-py/claude-skills.git ~/src/claude-skills
+git clone https://github.com/yashpatel-py/robinhood-trading-agent-skills.git ~/src/robinhood-trading-agent-skills
 mkdir -p ~/.claude/skills
-ln -s ~/src/claude-skills/robinhood-trading ~/.claude/skills/robinhood-trading
+ln -s ~/src/robinhood-trading-agent-skills/robinhood-trading ~/.claude/skills/robinhood-trading
 ```
 
 **Option C — just copy it:**
 
 ```bash
-git clone https://github.com/yashpatel-py/claude-skills.git /tmp/claude-skills
+git clone https://github.com/yashpatel-py/robinhood-trading-agent-skills.git /tmp/robinhood-trading-agent-skills
 mkdir -p ~/.claude/skills
-cp -R /tmp/claude-skills/robinhood-trading ~/.claude/skills/
+cp -R /tmp/robinhood-trading-agent-skills/robinhood-trading ~/.claude/skills/
 ```
 
 Then connect Robinhood:
@@ -162,7 +163,7 @@ The format is agent-neutral. Most tools read `SKILL.md` from a skills directory 
 yours for the path, or use a universal loader:
 
 ```bash
-npx openskills install yashpatel-py/claude-skills
+npx openskills install yashpatel-py/robinhood-trading-agent-skills
 ```
 
 ---
