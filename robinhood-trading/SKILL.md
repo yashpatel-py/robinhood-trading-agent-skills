@@ -87,7 +87,7 @@ single "price" field:
 The same discipline applies to scans: results are evaluated against live market data at
 request time, so say so when you present them.
 
-## The four workflows
+## The workflows
 
 ### Research a ticker
 Quote → fundamentals → financials → news/earnings → filings, going only as deep as the
@@ -110,6 +110,16 @@ Get a fresh quote, pick the order type deliberately, run the matching `review_*`
 `preview_*`, then present cost and alerts and hand off. Order types and session rules are
 full of traps — a market order placed at 8pm silently queues until the next open. Read
 `references/order-mechanics.md` before constructing any order.
+
+### Run the options scanner
+An unattended loop that screens for option candidates matching the user's criteria,
+analyzes them, and produces review-ready specs. Read `references/options-criteria.md` for
+the configuration and `references/options-workflow.md` for the process.
+
+The criteria in that file are the strategy, so they belong to the user. If any value is
+`<UNSET>`, stop and ask — never fill one in, and never loosen a threshold to make a scan
+return results. Both turn the user's risk limits into decoration while looking like
+compliance.
 
 ## Reporting
 
@@ -143,3 +153,7 @@ percentages; "down 12%" means something different on a $500 position than a $50,
   dollar-based rules, tax-lot selling, options and crypto specifics, idempotency.
 - `references/research.md` — scanner workflow, fundamental research ladder, SEC filing
   tools, technicals, watchlists.
+- `references/options-criteria.md` — user-defined options parameters. Agent-editable:
+  never.
+- `references/options-workflow.md` — the automated options scan, analysis, gating, and
+  position monitoring loop.
