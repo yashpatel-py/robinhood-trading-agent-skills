@@ -31,7 +31,7 @@ not do what you think, why a buy in your IRA can erase a loss your agent just to
 
 ## Demo
 
-![Preflight in Claude Code on sandbox data: a cross-account wash-sale conflict, then the order guard blocking a place call](docs/media/demo.gif)
+![How Preflight works: you ask your agent, it reads all your accounts, Preflight runs the checks, Robinhood simulates the order, and you get a checked ticket (sandbox data)](docs/media/how-it-works.png)
 
 **In the demo household (sandbox data), Preflight found** $390.00 of TSLA loss that a Roth IRA purchase would permanently disallow · $84,467.50 of positions with no working exit or alert · a $130,000.00 auto-exercise cash need against $2,480.00 of buying power · an order call it blocked. No order was placed. <!-- golden: tsla_wash.disallowed_usd protection_audit.value_unprotected_usd spy_auto_exercise.cash_needed_usd spy_auto_exercise.buying_power_usd -->
 
