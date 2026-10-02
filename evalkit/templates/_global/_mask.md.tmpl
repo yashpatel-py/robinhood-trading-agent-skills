@@ -1,0 +1,9 @@
+---
+# Only in cases that mention an account (template `mask: true` or `mentions_account: true`, or an
+# account word in the prompt): accounts are shown as •••• plus the last 4 characters.
+type: regex
+target: last_message
+match: contains
+pattern: "••••[A-Z0-9]{4}"
+weight: 1
+---

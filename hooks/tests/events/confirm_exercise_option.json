@@ -1,0 +1,15 @@
+{
+  "session_id": "confirm-session-1",
+  "transcript_path": "/tmp/rh-test/transcript.jsonl",
+  "cwd": "__CWD__",
+  "permission_mode": "default",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "mcp__robinhood-trading__exercise_option",
+  "tool_input": {
+    "account_number": "__ACCT__",
+    "option_id": "opt-leg-a",
+    "quantity": 1,
+    "ref_id": "__REF__"
+  },
+  "tool_use_id": "toolu_confirm_1"
+}

@@ -1,0 +1,411 @@
+{
+ "script": "wash_sale",
+ "about": "classify_pnl: a get_pnl_trade_history row is a share sale only when a filled get_equity_orders sell matches it (overrides O1).",
+ "cases": [
+  {
+   "name": "match on symbol, time, quantity and price",
+   "op": "classify_pnl",
+   "input": {
+    "rows": [
+     {
+      "account_last4": "M7Q5",
+      "timestamp": "2026-11-03T15:12:09Z",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "10",
+      "price": "120.20",
+      "realized_gain": "-412.00"
+     }
+    ],
+    "equity_orders": [
+     {
+      "account_last4": "M7Q5",
+      "id": "o1",
+      "symbol": "AMD",
+      "side": "sell",
+      "state": "filled",
+      "cumulative_quantity": "10",
+      "average_price": "120.20",
+      "created_at": "2026-11-03T15:12:01Z",
+      "last_transaction_at": "2026-11-03T15:12:09Z"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "rows": [
+     {
+      "classification": "equity_sale",
+      "matched_order": "o1",
+      "date": "2026-11-03"
+     }
+    ],
+    "equity_sale_losses": [
+     {
+      "shares": "10",
+      "loss_per_share": "41.20",
+      "realized_usd": "-412.00"
+     }
+    ],
+    "coverage_by_symbol": {
+     "AMD": {
+      "status": "complete"
+     }
+    }
+   }
+  },
+  {
+   "name": "an option close listed under the underlying (premium as price) does not match -> unclassified, symbol unknown",
+   "op": "classify_pnl",
+   "input": {
+    "rows": [
+     {
+      "account_last4": "M7Q5",
+      "timestamp": "2026-11-03T15:12:09Z",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "1",
+      "price": "3.30",
+      "realized_gain": "-75.00"
+     }
+    ],
+    "equity_orders": [
+     {
+      "account_last4": "M7Q5",
+      "id": "o1",
+      "symbol": "AMD",
+      "side": "sell",
+      "state": "filled",
+      "cumulative_quantity": "10",
+      "average_price": "120.20",
+      "created_at": "2026-11-03T15:12:01Z",
+      "last_transaction_at": "2026-11-03T15:12:09Z"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "rows": [
+     {
+      "classification": "unclassified"
+     }
+    ],
+    "unclassified_losses": [
+     {
+      "realized_usd": "-75.00"
+     }
+    ],
+    "coverage_by_symbol": {
+     "AMD": {
+      "status": "unknown",
+      "unclassified_loss_rows": 1
+     }
+    }
+   }
+  },
+  {
+   "name": "crypto listed under its base code has no equity sell -> unclassified",
+   "op": "classify_pnl",
+   "input": {
+    "rows": [
+     {
+      "account_last4": "X4F1",
+      "timestamp": "2026-11-10T03:00:00Z",
+      "symbol": "BTC",
+      "side": "sell",
+      "quantity": "0.01",
+      "price": "60000",
+      "realized_gain": "-20.00"
+     }
+    ],
+    "equity_orders": []
+   },
+   "expected": {
+    "ok": true,
+    "rows": [
+     {
+      "classification": "unclassified"
+     }
+    ],
+    "coverage_by_symbol": {
+     "BTC": {
+      "status": "unknown"
+     }
+    }
+   }
+  },
+  {
+   "name": "a row with no symbol is unattributed (cannot belong to any stock)",
+   "op": "classify_pnl",
+   "input": {
+    "rows": [
+     {
+      "account_last4": "X4F1",
+      "timestamp": "2026-11-10T15:00:00Z",
+      "symbol": "",
+      "side": "",
+      "quantity": "1",
+      "price": "0.40",
+      "realized_gain": "-5.00"
+     }
+    ],
+    "equity_orders": []
+   },
+   "expected": {
+    "ok": true,
+    "rows": [
+     {
+      "classification": "unattributed"
+     }
+    ],
+    "unattributed_losses": [
+     {
+      "realized_usd": "-5.00"
+     }
+    ],
+    "counts": {
+     "unattributed": 1
+    }
+   }
+  },
+  {
+   "name": "outside the order's life plus 120 s -> no match",
+   "op": "classify_pnl",
+   "input": {
+    "rows": [
+     {
+      "account_last4": "M7Q5",
+      "timestamp": "2026-11-03T15:20:00Z",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "10",
+      "price": "120.20",
+      "realized_gain": "-412.00"
+     }
+    ],
+    "equity_orders": [
+     {
+      "account_last4": "M7Q5",
+      "id": "o1",
+      "symbol": "AMD",
+      "side": "sell",
+      "state": "filled",
+      "cumulative_quantity": "10",
+      "average_price": "120.20",
+      "created_at": "2026-11-03T15:12:01Z",
+      "last_transaction_at": "2026-11-03T15:12:09Z"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "rows": [
+     {
+      "classification": "unclassified"
+     }
+    ]
+   }
+  },
+  {
+   "name": "two rows cannot share more filled quantity than the order had",
+   "op": "classify_pnl",
+   "input": {
+    "rows": [
+     {
+      "account_last4": "M7Q5",
+      "timestamp": "2026-11-03T15:12:05Z",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "6",
+      "price": "120.10",
+      "realized_gain": "-247.80"
+     },
+     {
+      "account_last4": "M7Q5",
+      "timestamp": "2026-11-03T15:12:09Z",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "6",
+      "price": "120.30",
+      "realized_gain": "-246.60"
+     }
+    ],
+    "equity_orders": [
+     {
+      "account_last4": "M7Q5",
+      "id": "o1",
+      "symbol": "AMD",
+      "side": "sell",
+      "state": "filled",
+      "cumulative_quantity": "10",
+      "average_price": "120.20",
+      "created_at": "2026-11-03T15:12:01Z",
+      "last_transaction_at": "2026-11-03T15:12:09Z"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "rows": [
+     {
+      "classification": "equity_sale"
+     },
+     {
+      "classification": "unclassified"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a cancelled order with a partial fill still matches its filled shares",
+   "op": "classify_pnl",
+   "input": {
+    "rows": [
+     {
+      "account_last4": "M7Q5",
+      "timestamp": "2026-11-03T16:00:00Z",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "2",
+      "price": "120.00",
+      "realized_gain": "-80.00"
+     }
+    ],
+    "equity_orders": [
+     {
+      "account_last4": "M7Q5",
+      "id": "o2",
+      "symbol": "AMD",
+      "side": "sell",
+      "state": "cancelled",
+      "cumulative_quantity": "2",
+      "average_price": "120.00",
+      "created_at": "2026-11-03T15:00:00Z",
+      "last_transaction_at": "2026-11-03T18:00:00Z"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "rows": [
+     {
+      "classification": "equity_sale",
+      "matched_order": "o2"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a sell in another account does not match",
+   "op": "classify_pnl",
+   "input": {
+    "rows": [
+     {
+      "account_last4": "X4F1",
+      "timestamp": "2026-11-03T15:12:09Z",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "10",
+      "price": "120.20",
+      "realized_gain": "-412.00"
+     }
+    ],
+    "equity_orders": [
+     {
+      "account_last4": "M7Q5",
+      "id": "o1",
+      "symbol": "AMD",
+      "side": "sell",
+      "state": "filled",
+      "cumulative_quantity": "10",
+      "average_price": "120.20",
+      "created_at": "2026-11-03T15:12:01Z",
+      "last_transaction_at": "2026-11-03T15:12:09Z"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "rows": [
+     {
+      "classification": "unclassified"
+     }
+    ]
+   }
+  },
+  {
+   "name": "the trade date of a row is its US Eastern date",
+   "op": "classify_pnl",
+   "input": {
+    "rows": [
+     {
+      "account_last4": "M7Q5",
+      "timestamp": "2026-11-04T01:30:00Z",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "1",
+      "price": "3.30",
+      "realized_gain": "-10.00"
+     }
+    ],
+    "equity_orders": []
+   },
+   "expected": {
+    "ok": true,
+    "rows": [
+     {
+      "date": "2026-11-03"
+     }
+    ]
+   }
+  },
+  {
+   "name": "an overnight-session row keeps its next-trading-day candidate as alt_date",
+   "op": "classify_pnl",
+   "input": {
+    "rows": [
+     {
+      "account_last4": "M7Q5",
+      "timestamp": "2026-11-11T02:00:00Z",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "10",
+      "price": "120.20",
+      "realized_gain": "-412.00"
+     }
+    ],
+    "equity_orders": [
+     {
+      "account_last4": "M7Q5",
+      "id": "o1",
+      "symbol": "AMD",
+      "side": "sell",
+      "state": "filled",
+      "cumulative_quantity": "10",
+      "average_price": "120.20",
+      "created_at": "2026-11-11T01:59:00Z",
+      "last_transaction_at": "2026-11-11T02:00:00Z"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "equity_sale_losses": [
+     {
+      "date": "2026-11-10",
+      "alt_date": "2026-11-11",
+      "shares": "10",
+      "loss_per_share": "41.20"
+     }
+    ],
+    "rows": [
+     {
+      "date": "2026-11-10",
+      "alt_date": "2026-11-11",
+      "classification": "equity_sale"
+     }
+    ]
+   }
+  }
+ ]
+}

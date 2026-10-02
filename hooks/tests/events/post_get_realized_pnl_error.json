@@ -1,0 +1,14 @@
+{
+  "session_id": "test-session-1",
+  "transcript_path": "/tmp/rh-test/transcript.jsonl",
+  "cwd": "/tmp/rh-test/project",
+  "permission_mode": "default",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "mcp__rh-uuid-server__get_realized_pnl",
+  "tool_input": {
+    "account_number": "__RHS__",
+    "span": "3month"
+  },
+  "tool_response": "Error: account __RHS__ is not accessible",
+  "tool_use_id": "toolu_test_2"
+}

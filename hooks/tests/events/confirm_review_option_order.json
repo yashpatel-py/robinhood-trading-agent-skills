@@ -1,0 +1,36 @@
+{
+  "session_id": "confirm-session-1",
+  "transcript_path": "/tmp/rh-test/transcript.jsonl",
+  "cwd": "__CWD__",
+  "permission_mode": "default",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "mcp__robinhood-trading__review_option_order",
+  "tool_input": {
+    "account_number": "__ACCT__",
+    "chain_symbol": "AMD",
+    "underlying_type": "equity",
+    "quantity": "2",
+    "price": "1.50",
+    "direction": "debit",
+    "legs": [
+      {
+        "option_id": "opt-leg-b",
+        "side": "sell",
+        "position_effect": "open"
+      },
+      {
+        "option_id": "opt-leg-a",
+        "side": "BUY",
+        "position_effect": "open",
+        "ratio_quantity": 1
+      }
+    ]
+  },
+  "tool_response": [
+    {
+      "type": "text",
+      "text": "{\"data\": {\"order_checks\": {}}, \"guide\": \"Test guide text.\"}"
+    }
+  ],
+  "tool_use_id": "toolu_confirm_1"
+}

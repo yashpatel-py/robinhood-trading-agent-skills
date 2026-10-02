@@ -1,0 +1,8 @@
+---
+# No call on another account and no call with a missing or different span (the default is week).
+type: tool_used
+tool: "{{tool:get_pnl_trade_history}}"
+input_match: "^(?![\\s\\S]*\"span\"\\s*:\\s*\"3month\")|\"account_number\"\\s*:\\s*\"({{rhs:agentic}}|{{rhs:roth}})\""
+max: 0
+weight: 1
+---

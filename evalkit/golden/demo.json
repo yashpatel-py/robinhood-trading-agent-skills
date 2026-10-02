@@ -1,0 +1,1223 @@
+{
+  "$comment": "Golden numbers for the README demo, computed by running the skill scripts on the fixture household (synthetic data). Regenerate with: python3 evalkit/gen_evals.py --golden. tools/check_readme.py compares README numbers with 'readme'.",
+  "generated_by": "evalkit/gen_evals.py --golden",
+  "fixture": "evalkit/fixtures/household.json",
+  "anchor": "2026-11-16T20:05:00-05:00",
+  "complete": true,
+  "readme": {
+    "tsla_wash.disallowed_usd": "390.00",
+    "tsla_wash.permanent": true,
+    "tsla_wash.earliest_clean_sale_date": "2026-12-07",
+    "tsla_wash.washed_shares": "5",
+    "tsla_wash.clean_shares": "15",
+    "amd_rebuy_wash.washed_shares": "3",
+    "amd_rebuy_wash.loss_per_share": "41.20",
+    "amd_rebuy_wash.disallowed_usd": "123.60",
+    "amd_rebuy_wash.clean_buy_date": "2026-12-04",
+    "spy_auto_exercise.cash_needed_usd": "130000.00",
+    "spy_auto_exercise.buying_power_usd": "2480.00",
+    "ko_early_assignment.extrinsic_mid": "0.20",
+    "ko_early_assignment.extrinsic_bid": "0.15",
+    "ko_early_assignment.dividend": "0.53",
+    "amd_call_profit.pnl_pct": 61.0,
+    "amd_call_profit.pnl_usd": "125.00",
+    "nvda_long_term.long_term_on": "2026-12-04",
+    "nvda_long_term.days_until_long_term": 18,
+    "nvda_implied_move.implied_move_usd": "25.80",
+    "nvda_implied_move.implied_move_pct": 11.3,
+    "protection_audit.value_unprotected_usd": "84467.50",
+    "protection_audit.value_partial_uncovered_usd": "403.50",
+    "protection_audit.unprotected": 7,
+    "protection_audit.partial": [
+      "AMD"
+    ],
+    "protection_audit.first_line": "ACTION NEEDED: Dollars at stake: $84,467.50 unprotected (NVDA $31,934.00 · VTI $29,000.00 · TSLA ••••M7Q5 $10,480.00) · $6,480.00 alert-only (VOO $6,480.00) · $403.50 uncovered in partial positions (AMD $403.50)",
+    "ytd_realized.taxable_usd": "8412.33"
+  },
+  "items": {
+    "tsla_wash": {
+      "script": "shared/scripts/wash_sale.py",
+      "op": "run",
+      "spec": {
+        "disallowed_usd": "390.00",
+        "permanent": true,
+        "earliest_clean_sale_date": "2026-12-07",
+        "washed_shares": "5",
+        "clean_shares": "15"
+      },
+      "status": "ok",
+      "input": {
+        "mode": "sale",
+        "as_of": "2026-11-16",
+        "symbol": "TSLA",
+        "sale": {
+          "date": "2026-11-16",
+          "account_last4": "M7Q5",
+          "price_per_share": "262.00",
+          "lots_sold": [
+            {
+              "lot_id": "551ee961-5416-5a6a-b24b-d77b60c81bca",
+              "acquired": "2026-06-02",
+              "shares": "20",
+              "cost_per_share": "340.00"
+            }
+          ]
+        },
+        "planned_buy": null,
+        "accounts": [
+          {
+            "last4": "X4F1",
+            "type": "taxable",
+            "read_status": "complete"
+          },
+          {
+            "last4": "M7Q5",
+            "type": "taxable",
+            "read_status": "complete"
+          },
+          {
+            "last4": "P0Z9",
+            "type": "retirement",
+            "read_status": "complete"
+          }
+        ],
+        "per_account": [
+          {
+            "account_last4": "X4F1",
+            "orders": []
+          },
+          {
+            "account_last4": "M7Q5",
+            "orders": [
+              {
+                "id": "8da644c1-5765-570b-b0f6-65f1de45481a",
+                "symbol": "TSLA",
+                "side": "buy",
+                "type": "limit",
+                "trigger": "immediate",
+                "state": "filled",
+                "quantity": "20",
+                "dollar_based_amount": null,
+                "cumulative_quantity": "20",
+                "price": "340.00",
+                "stop_price": null,
+                "average_price": "340.00",
+                "placed_agent": "user",
+                "time_in_force": "gfd",
+                "market_hours": "regular_hours",
+                "created_at": "2026-06-02T14:00:00Z",
+                "last_transaction_at": "2026-06-02T14:00:00Z"
+              },
+              {
+                "id": "e4a91e8a-bdc5-57e8-be1c-b9403e5ac998",
+                "symbol": "TSLA",
+                "side": "buy",
+                "type": "limit",
+                "trigger": "immediate",
+                "state": "filled",
+                "quantity": "20",
+                "dollar_based_amount": null,
+                "cumulative_quantity": "20",
+                "price": "280.00",
+                "stop_price": null,
+                "average_price": "280.00",
+                "placed_agent": "user",
+                "time_in_force": "gfd",
+                "market_hours": "regular_hours",
+                "created_at": "2025-03-10T14:05:00Z",
+                "last_transaction_at": "2025-03-10T14:05:00Z"
+              }
+            ]
+          },
+          {
+            "account_last4": "P0Z9",
+            "orders": [
+              {
+                "id": "806bd85b-2a6d-5c0a-9aa2-ffe12f47bcdb",
+                "symbol": "TSLA",
+                "side": "buy",
+                "type": "limit",
+                "trigger": "immediate",
+                "state": "cancelled",
+                "quantity": "5",
+                "dollar_based_amount": null,
+                "cumulative_quantity": "0",
+                "price": "255.00",
+                "stop_price": null,
+                "average_price": null,
+                "placed_agent": "user",
+                "time_in_force": "gfd",
+                "market_hours": "regular_hours",
+                "created_at": "2026-11-12T19:02:00Z",
+                "last_transaction_at": "2026-11-12T21:00:01Z"
+              },
+              {
+                "id": "80779291-c77d-5bc7-9c41-c8cbbb150a4e",
+                "symbol": "TSLA",
+                "side": "buy",
+                "type": "market",
+                "trigger": "immediate",
+                "state": "rejected",
+                "quantity": "5",
+                "dollar_based_amount": null,
+                "cumulative_quantity": "0",
+                "price": null,
+                "stop_price": null,
+                "average_price": null,
+                "placed_agent": "user",
+                "time_in_force": "gfd",
+                "market_hours": "regular_hours",
+                "created_at": "2026-11-10T14:40:00Z",
+                "last_transaction_at": "2026-11-10T14:40:00Z",
+                "reject_reason": "Order rejected: account restriction check failed; try again."
+              },
+              {
+                "id": "b9a7ee52-4f00-5838-ac64-e7353cc21650",
+                "symbol": "TSLA",
+                "side": "buy",
+                "type": "limit",
+                "trigger": "immediate",
+                "state": "cancelled",
+                "quantity": "5",
+                "dollar_based_amount": null,
+                "cumulative_quantity": "0",
+                "price": "262.00",
+                "stop_price": null,
+                "average_price": null,
+                "placed_agent": "user",
+                "time_in_force": "gfd",
+                "market_hours": "regular_hours",
+                "created_at": "2026-11-09T01:30:00Z",
+                "last_transaction_at": "2026-11-09T21:00:01Z"
+              },
+              {
+                "id": "730cf8d6-6f99-5d24-9dbc-383aed47ec52",
+                "symbol": "TSLA",
+                "side": "buy",
+                "type": "limit",
+                "trigger": "immediate",
+                "state": "filled",
+                "quantity": "5",
+                "dollar_based_amount": null,
+                "cumulative_quantity": "5",
+                "price": "270.00",
+                "stop_price": null,
+                "average_price": "270.00",
+                "placed_agent": "user",
+                "time_in_force": "gfd",
+                "market_hours": "regular_hours",
+                "created_at": "2026-11-06T15:05:00Z",
+                "last_transaction_at": "2026-11-06T15:05:00Z"
+              }
+            ]
+          }
+        ],
+        "buys": [],
+        "realized_losses": [],
+        "option_buys": [],
+        "recurring": [],
+        "drip": [],
+        "declared_related": [],
+        "related_buys": []
+      },
+      "values": {
+        "disallowed_usd": "390.00",
+        "permanent": true,
+        "earliest_clean_sale_date": "2026-12-07",
+        "washed_shares": "5",
+        "clean_shares": "15"
+      },
+      "matches_spec": true,
+      "mismatched_fields": [],
+      "status_line": "CONFLICT: Dollars at stake: $390.00 of TSLA loss permanently disallowed if sold before 2026-12-07"
+    },
+    "amd_rebuy_wash": {
+      "script": "shared/scripts/wash_sale.py",
+      "op": "run",
+      "spec": {
+        "washed_shares": "3",
+        "loss_per_share": "41.20",
+        "disallowed_usd": "123.60",
+        "clean_buy_date": "2026-12-04"
+      },
+      "status": "ok",
+      "input": {
+        "mode": "planned_buy",
+        "as_of": "2026-11-16",
+        "symbol": "AMD",
+        "sale": null,
+        "planned_buy": {
+          "date": "2026-11-16",
+          "account_last4": "X4F1",
+          "shares": "3"
+        },
+        "accounts": [
+          {
+            "last4": "X4F1",
+            "type": "taxable",
+            "read_status": "complete"
+          },
+          {
+            "last4": "M7Q5",
+            "type": "taxable",
+            "read_status": "complete"
+          },
+          {
+            "last4": "P0Z9",
+            "type": "retirement",
+            "read_status": "complete"
+          }
+        ],
+        "per_account": [
+          {
+            "account_last4": "X4F1",
+            "orders": [
+              {
+                "id": "17c9a507-0647-5fca-8858-6c84ede55679",
+                "symbol": "AMD",
+                "side": "sell",
+                "type": "limit",
+                "trigger": "immediate",
+                "state": "confirmed",
+                "quantity": "10",
+                "dollar_based_amount": null,
+                "cumulative_quantity": "0",
+                "price": "180.00",
+                "stop_price": null,
+                "average_price": null,
+                "placed_agent": "agentic",
+                "time_in_force": "gfd",
+                "market_hours": "regular_hours",
+                "created_at": "2026-11-17T00:48:12Z",
+                "last_transaction_at": "2026-11-17T00:48:12Z"
+              },
+              {
+                "id": "ae247bec-f54f-5c6a-b248-9a917e79a6b8",
+                "symbol": "AMD",
+                "side": "sell",
+                "type": "market",
+                "trigger": "stop",
+                "state": "confirmed",
+                "quantity": "10",
+                "dollar_based_amount": null,
+                "cumulative_quantity": "0",
+                "price": null,
+                "stop_price": "142.00",
+                "average_price": null,
+                "placed_agent": "agentic",
+                "time_in_force": "gfd",
+                "market_hours": "regular_hours",
+                "created_at": "2026-11-17T00:48:12Z",
+                "last_transaction_at": "2026-11-17T00:48:12Z"
+              },
+              {
+                "id": "e8c1f2ac-252b-5940-8117-1fe422f92995",
+                "symbol": "AMD",
+                "side": "sell",
+                "type": "limit",
+                "trigger": "immediate",
+                "state": "filled",
+                "quantity": "3",
+                "dollar_based_amount": null,
+                "cumulative_quantity": "3",
+                "price": "163.00",
+                "stop_price": null,
+                "average_price": "163.00",
+                "placed_agent": "agentic",
+                "time_in_force": "gfd",
+                "market_hours": "regular_hours",
+                "created_at": "2026-11-09T18:20:40Z",
+                "last_transaction_at": "2026-11-09T18:20:41Z"
+              },
+              {
+                "id": "35814e69-d013-53c0-bd4c-00e79dc07fa5",
+                "symbol": "AMD",
+                "side": "sell",
+                "type": "market",
+                "trigger": "stop",
+                "state": "confirmed",
+                "quantity": "5",
+                "dollar_based_amount": null,
+                "cumulative_quantity": "0",
+                "price": null,
+                "stop_price": "140.00",
+                "average_price": null,
+                "placed_agent": "agentic",
+                "time_in_force": "gtc",
+                "market_hours": "regular_hours",
+                "created_at": "2026-10-01T14:12:40Z",
+                "last_transaction_at": "2026-10-01T14:12:40Z"
+              },
+              {
+                "id": "ca219adc-f458-591e-95a1-b09615036737",
+                "symbol": "AMD",
+                "side": "buy",
+                "type": "market",
+                "trigger": "immediate",
+                "state": "filled",
+                "quantity": "2.5",
+                "dollar_based_amount": null,
+                "cumulative_quantity": "2.5",
+                "price": null,
+                "stop_price": null,
+                "average_price": "158.00",
+                "placed_agent": "agentic",
+                "time_in_force": "gfd",
+                "market_hours": "regular_hours",
+                "created_at": "2026-09-15T15:30:00Z",
+                "last_transaction_at": "2026-09-15T15:30:00Z"
+              },
+              {
+                "id": "d66db806-ff7a-5b64-8681-14bbf3bb4957",
+                "symbol": "AMD",
+                "side": "buy",
+                "type": "limit",
+                "trigger": "immediate",
+                "state": "filled",
+                "quantity": "13",
+                "dollar_based_amount": null,
+                "cumulative_quantity": "13",
+                "price": "148.00",
+                "stop_price": null,
+                "average_price": "148.00",
+                "placed_agent": "agentic",
+                "time_in_force": "gfd",
+                "market_hours": "regular_hours",
+                "created_at": "2026-08-20T14:05:00Z",
+                "last_transaction_at": "2026-08-20T14:05:00Z"
+              }
+            ],
+            "pnl_rows": [
+              {
+                "timestamp": "2026-11-09T18:20:41Z",
+                "symbol": "AMD",
+                "side": "sell",
+                "quantity": "3",
+                "price": "163.00",
+                "realized_gain": "45.00"
+              }
+            ]
+          },
+          {
+            "account_last4": "M7Q5",
+            "orders": [
+              {
+                "id": "de76183b-8207-5f96-846f-320607da54c8",
+                "symbol": "AMD",
+                "side": "sell",
+                "type": "limit",
+                "trigger": "immediate",
+                "state": "filled",
+                "quantity": "10",
+                "dollar_based_amount": null,
+                "cumulative_quantity": "10",
+                "price": "150.00",
+                "stop_price": null,
+                "average_price": "150.00",
+                "placed_agent": "user",
+                "time_in_force": "gfd",
+                "market_hours": "regular_hours",
+                "created_at": "2026-11-03T15:40:00Z",
+                "last_transaction_at": "2026-11-03T15:40:00Z"
+              },
+              {
+                "id": "5a88c587-a5b2-5515-ab0f-a2f4d5fd84b7",
+                "symbol": "AMD",
+                "side": "buy",
+                "type": "limit",
+                "trigger": "immediate",
+                "state": "filled",
+                "quantity": "10",
+                "dollar_based_amount": null,
+                "cumulative_quantity": "10",
+                "price": "191.20",
+                "stop_price": null,
+                "average_price": "191.20",
+                "placed_agent": "user",
+                "time_in_force": "gfd",
+                "market_hours": "regular_hours",
+                "created_at": "2026-02-10T15:00:00Z",
+                "last_transaction_at": "2026-02-10T15:00:00Z"
+              }
+            ],
+            "pnl_rows": [
+              {
+                "timestamp": "2026-11-03T15:40:02Z",
+                "symbol": "AMD",
+                "side": "sell",
+                "quantity": "10",
+                "price": "150.00",
+                "realized_gain": "-412.00"
+              }
+            ]
+          },
+          {
+            "account_last4": "P0Z9",
+            "orders": []
+          }
+        ],
+        "buys": [],
+        "realized_losses": [],
+        "option_buys": [],
+        "recurring": [],
+        "drip": [],
+        "declared_related": [],
+        "related_buys": []
+      },
+      "values": {
+        "washed_shares": "3",
+        "loss_per_share": "41.20",
+        "disallowed_usd": "123.60",
+        "clean_buy_date": "2026-12-04"
+      },
+      "matches_spec": true,
+      "mismatched_fields": [],
+      "status_line": "CONFLICT: Dollars at stake: $123.60 of AMD loss deferred into replacement basis if bought before 2026-12-04"
+    },
+    "spy_auto_exercise": {
+      "script": "skills/robinhood-options-monitor/scripts/expiry_risk.py",
+      "op": "run",
+      "spec": {
+        "cash_needed_usd": "130000.00",
+        "buying_power_usd": "2480.00"
+      },
+      "status": "ok",
+      "input": {
+        "as_of": "2026-11-16",
+        "radar_days": 7,
+        "positions": [
+          {
+            "account_last4": "X4F1",
+            "symbol": "KO",
+            "type": "call",
+            "side": "short",
+            "quantity": "1",
+            "strike": "70",
+            "expiration": "2026-11-20",
+            "bid": "2.20",
+            "ask": "2.30",
+            "underlying_type": "equity"
+          },
+          {
+            "account_last4": "X4F1",
+            "symbol": "SPY",
+            "type": "call",
+            "side": "long",
+            "quantity": "2",
+            "strike": "650",
+            "expiration": "2026-11-20",
+            "bid": "21.40",
+            "ask": "21.60",
+            "underlying_type": "equity"
+          },
+          {
+            "account_last4": "X4F1",
+            "symbol": "AMD",
+            "type": "call",
+            "side": "long",
+            "quantity": "1",
+            "strike": "165",
+            "expiration": "2026-11-27",
+            "bid": "3.30",
+            "ask": "3.40",
+            "underlying_type": "equity"
+          }
+        ],
+        "underlying": {
+          "KO": "72.05",
+          "SPY": "671.20",
+          "AMD": "161.40"
+        },
+        "ex_dividends": {
+          "KO": {
+            "ex_date": "2026-11-18",
+            "amount": "0.53"
+          }
+        },
+        "buying_power": {
+          "X4F1": "2480.00"
+        },
+        "shares_held": {
+          "X4F1": {
+            "KO": "100",
+            "AMD": "12.5"
+          }
+        }
+      },
+      "values": {
+        "cash_needed_usd": "130000.00",
+        "buying_power_usd": "2480.00"
+      },
+      "matches_spec": true,
+      "mismatched_fields": [],
+      "status_line": null
+    },
+    "ko_early_assignment": {
+      "script": "skills/robinhood-options-monitor/scripts/expiry_risk.py",
+      "op": "run",
+      "spec": {
+        "extrinsic_mid": "0.20",
+        "extrinsic_bid": "0.15",
+        "dividend": "0.53"
+      },
+      "status": "ok",
+      "input": {
+        "as_of": "2026-11-16",
+        "radar_days": 7,
+        "positions": [
+          {
+            "account_last4": "X4F1",
+            "symbol": "KO",
+            "type": "call",
+            "side": "short",
+            "quantity": "1",
+            "strike": "70",
+            "expiration": "2026-11-20",
+            "bid": "2.20",
+            "ask": "2.30",
+            "underlying_type": "equity"
+          },
+          {
+            "account_last4": "X4F1",
+            "symbol": "SPY",
+            "type": "call",
+            "side": "long",
+            "quantity": "2",
+            "strike": "650",
+            "expiration": "2026-11-20",
+            "bid": "21.40",
+            "ask": "21.60",
+            "underlying_type": "equity"
+          },
+          {
+            "account_last4": "X4F1",
+            "symbol": "AMD",
+            "type": "call",
+            "side": "long",
+            "quantity": "1",
+            "strike": "165",
+            "expiration": "2026-11-27",
+            "bid": "3.30",
+            "ask": "3.40",
+            "underlying_type": "equity"
+          }
+        ],
+        "underlying": {
+          "KO": "72.05",
+          "SPY": "671.20",
+          "AMD": "161.40"
+        },
+        "ex_dividends": {
+          "KO": {
+            "ex_date": "2026-11-18",
+            "amount": "0.53"
+          }
+        },
+        "buying_power": {
+          "X4F1": "2480.00"
+        },
+        "shares_held": {
+          "X4F1": {
+            "KO": "100",
+            "AMD": "12.5"
+          }
+        }
+      },
+      "values": {
+        "extrinsic_mid": "0.20",
+        "extrinsic_bid": "0.15",
+        "dividend": "0.53"
+      },
+      "matches_spec": true,
+      "mismatched_fields": [],
+      "status_line": null
+    },
+    "amd_call_profit": {
+      "script": "skills/robinhood-options-monitor/scripts/option_exits.py",
+      "op": "run",
+      "spec": {
+        "pnl_pct": 61.0,
+        "pnl_usd": "125.00"
+      },
+      "status": "ok",
+      "input": {
+        "as_of": "2026-11-16",
+        "rules": {
+          "profit_target_pct": "50",
+          "stop_loss_pct": "40",
+          "time_stop_dte": "7",
+          "max_hold_days": "UNSET"
+        },
+        "positions": [
+          {
+            "option_id": "970e5ad0-6dd3-59a5-a7b7-49136ad6da60",
+            "account_last4": "X4F1",
+            "agentic": true,
+            "symbol": "KO",
+            "type": "call",
+            "side": "short",
+            "quantity": "1",
+            "strike": "70",
+            "expiration": "2026-11-20",
+            "avg_open_price_per_share": "1.10",
+            "opened_date": "2026-10-26",
+            "chain_symbol": "KO",
+            "underlying_type": "equity"
+          },
+          {
+            "option_id": "1ca0343f-d144-53f1-82d4-722d19cdfd4a",
+            "account_last4": "X4F1",
+            "agentic": true,
+            "symbol": "SPY",
+            "type": "call",
+            "side": "long",
+            "quantity": "2",
+            "strike": "650",
+            "expiration": "2026-11-20",
+            "avg_open_price_per_share": "12.00",
+            "opened_date": "2026-10-05",
+            "chain_symbol": "SPY",
+            "underlying_type": "equity"
+          },
+          {
+            "option_id": "2e832f87-8ab9-5021-bc22-c08d5787f687",
+            "account_last4": "X4F1",
+            "agentic": true,
+            "symbol": "AMD",
+            "type": "call",
+            "side": "long",
+            "quantity": "1",
+            "strike": "165",
+            "expiration": "2026-11-27",
+            "avg_open_price_per_share": "2.05",
+            "opened_date": "2026-10-20",
+            "chain_symbol": "AMD",
+            "underlying_type": "equity"
+          }
+        ],
+        "quotes": {
+          "970e5ad0-6dd3-59a5-a7b7-49136ad6da60": {
+            "bid": "2.20",
+            "ask": "2.30",
+            "ts": "2026-11-17T01:04:00Z"
+          },
+          "1ca0343f-d144-53f1-82d4-722d19cdfd4a": {
+            "bid": "21.40",
+            "ask": "21.60",
+            "ts": "2026-11-17T01:04:00Z"
+          },
+          "2e832f87-8ab9-5021-bc22-c08d5787f687": {
+            "bid": "3.30",
+            "ask": "3.40",
+            "ts": "2026-11-17T01:04:00Z"
+          }
+        }
+      },
+      "values": {
+        "pnl_pct": 61.0,
+        "pnl_usd": "125.00"
+      },
+      "matches_spec": true,
+      "mismatched_fields": [],
+      "status_line": null
+    },
+    "nvda_long_term": {
+      "script": "skills/robinhood-tax-loss-harvesting/scripts/holding_period.py",
+      "op": "run",
+      "spec": {
+        "long_term_on": "2026-12-04",
+        "days_until_long_term": 18
+      },
+      "status": "ok",
+      "input": {
+        "as_of": "2026-11-16",
+        "price": "228.10",
+        "horizon_days": 45,
+        "lots": [
+          {
+            "lot_id": "37517a58-f956-58cc-a916-be4a82416975",
+            "acquired": "2025-03-10",
+            "shares": "100",
+            "cost_per_share": "118.00"
+          },
+          {
+            "lot_id": "8ae5b2e2-bcb8-548b-9f1f-037d13ec98f5",
+            "acquired": "2025-12-03",
+            "shares": "40",
+            "cost_per_share": "181.50"
+          }
+        ]
+      },
+      "values": {
+        "long_term_on": "2026-12-04",
+        "days_until_long_term": 18
+      },
+      "matches_spec": true,
+      "mismatched_fields": [],
+      "status_line": "NO ACTION: Dollars at stake: $1,864.00 of short-term gain in 1 lot(s) turns long-term within 45 days (next: lot 8ae5b2e2-bcb8-548b-9f1f-037d13ec98f5 on 2026-12-04, 18 days)"
+    },
+    "nvda_implied_move": {
+      "script": "skills/robinhood-options-monitor/scripts/earnings_move.py",
+      "op": "run",
+      "spec": {
+        "implied_move_usd": "25.80",
+        "implied_move_pct": 11.3
+      },
+      "status": "ok",
+      "input": {
+        "symbol": "NVDA",
+        "spot": "228.10",
+        "report": {
+          "date": "2026-11-18",
+          "timing": "pm",
+          "verified": false
+        },
+        "straddle": {
+          "expiration": "2026-11-20",
+          "strike": "230",
+          "call": {
+            "bid": "12.00",
+            "ask": "12.20"
+          },
+          "put": {
+            "bid": "13.60",
+            "ask": "13.80"
+          }
+        },
+        "past": [
+          {
+            "date": "2026-08-26",
+            "timing": "pm",
+            "close_before": "196.40",
+            "close_after": "184.80"
+          },
+          {
+            "date": "2026-05-27",
+            "timing": "pm",
+            "close_before": "171.20",
+            "close_after": "182.60"
+          },
+          {
+            "date": "2026-02-25",
+            "timing": "pm",
+            "close_before": "148.90",
+            "close_after": "141.20"
+          },
+          {
+            "date": "2025-11-19",
+            "timing": "pm",
+            "close_before": "146.10",
+            "close_after": "154.80"
+          },
+          {
+            "date": "2025-08-27",
+            "timing": "pm",
+            "close_before": "131.60",
+            "close_after": "126.20"
+          },
+          {
+            "date": "2025-05-28",
+            "timing": "pm",
+            "close_before": "124.40",
+            "close_after": "130.10"
+          },
+          {
+            "date": "2025-02-26",
+            "timing": "pm",
+            "close_before": "118.30",
+            "close_after": "108.40"
+          },
+          {
+            "date": "2024-11-20",
+            "timing": "pm",
+            "close_before": "112.60",
+            "close_after": "114.20"
+          }
+        ]
+      },
+      "values": {
+        "implied_move_usd": "25.80",
+        "implied_move_pct": 11.3
+      },
+      "matches_spec": true,
+      "mismatched_fields": [],
+      "status_line": null
+    },
+    "protection_audit": {
+      "script": "skills/robinhood-exit-guardian/scripts/protection_audit.py",
+      "op": "audit",
+      "spec": {},
+      "status": "ok",
+      "input": {
+        "now": "2026-11-17T01:05:00Z",
+        "accounts": [
+          {
+            "account_last4": "X4F1",
+            "agentic": true,
+            "in_scope": true,
+            "label": "Agentic",
+            "read": {
+              "positions": "complete",
+              "equity_orders": "complete",
+              "advanced_orders": "complete",
+              "crypto_positions": "complete",
+              "crypto_orders": "complete"
+            }
+          },
+          {
+            "account_last4": "M7Q5",
+            "agentic": false,
+            "in_scope": true,
+            "label": "Individual",
+            "read": {
+              "positions": "complete",
+              "equity_orders": "complete",
+              "advanced_orders": "complete",
+              "crypto_positions": "not_applicable",
+              "crypto_orders": "not_applicable"
+            }
+          },
+          {
+            "account_last4": "P0Z9",
+            "agentic": false,
+            "in_scope": true,
+            "label": "Roth IRA",
+            "read": {
+              "positions": "complete",
+              "equity_orders": "complete",
+              "advanced_orders": "complete",
+              "crypto_positions": "not_applicable",
+              "crypto_orders": "not_applicable"
+            }
+          }
+        ],
+        "positions": [
+          {
+            "account_last4": "X4F1",
+            "agentic": true,
+            "account_type": "taxable",
+            "asset_class": "equity",
+            "symbol": "AMD",
+            "quantity": "12.5",
+            "held_for_orders": "0",
+            "price": "161.40"
+          },
+          {
+            "account_last4": "X4F1",
+            "agentic": true,
+            "account_type": "taxable",
+            "asset_class": "equity",
+            "symbol": "PLTR",
+            "quantity": "30",
+            "held_for_orders": "0",
+            "price": "31.20"
+          },
+          {
+            "account_last4": "X4F1",
+            "agentic": true,
+            "account_type": "taxable",
+            "asset_class": "equity",
+            "symbol": "KO",
+            "quantity": "100",
+            "held_for_orders": "0",
+            "price": "72.05"
+          },
+          {
+            "account_last4": "X4F1",
+            "agentic": true,
+            "account_type": "taxable",
+            "asset_class": "crypto",
+            "symbol": "ETH",
+            "quantity": "0.42",
+            "held_for_orders": "0",
+            "price": "3000.00"
+          },
+          {
+            "account_last4": "M7Q5",
+            "agentic": false,
+            "account_type": "taxable",
+            "asset_class": "equity",
+            "symbol": "NVDA",
+            "quantity": "140",
+            "held_for_orders": "0",
+            "price": "228.10"
+          },
+          {
+            "account_last4": "M7Q5",
+            "agentic": false,
+            "account_type": "taxable",
+            "asset_class": "equity",
+            "symbol": "TSLA",
+            "quantity": "40",
+            "held_for_orders": "0",
+            "price": "262.00"
+          },
+          {
+            "account_last4": "M7Q5",
+            "agentic": false,
+            "account_type": "taxable",
+            "asset_class": "equity",
+            "symbol": "VOO",
+            "quantity": "12",
+            "held_for_orders": "0",
+            "price": "540.00"
+          },
+          {
+            "account_last4": "M7Q5",
+            "agentic": false,
+            "account_type": "taxable",
+            "asset_class": "equity",
+            "symbol": "KO",
+            "quantity": "50",
+            "held_for_orders": "0",
+            "price": "72.05"
+          },
+          {
+            "account_last4": "P0Z9",
+            "agentic": false,
+            "account_type": "retirement",
+            "asset_class": "equity",
+            "symbol": "TSLA",
+            "quantity": "5",
+            "held_for_orders": "0",
+            "price": "262.00"
+          },
+          {
+            "account_last4": "P0Z9",
+            "agentic": false,
+            "account_type": "retirement",
+            "asset_class": "equity",
+            "symbol": "VTI",
+            "quantity": "100",
+            "held_for_orders": "0",
+            "price": "290.00"
+          }
+        ],
+        "open_orders": [
+          {
+            "account_last4": "X4F1",
+            "asset_class": "equity",
+            "symbol": "AMD",
+            "side": "sell",
+            "type": "stop_market",
+            "state": "confirmed",
+            "quantity": "5",
+            "stop_price": "140.00",
+            "limit_price": null,
+            "time_in_force": "gtc"
+          },
+          {
+            "account_last4": "X4F1",
+            "asset_class": "crypto",
+            "symbol": "ETH",
+            "side": "sell",
+            "type": "stop_loss",
+            "state": "confirmed",
+            "quantity": "0.42",
+            "stop_price": "2600.00",
+            "time_in_force": "gfd"
+          }
+        ],
+        "advanced_orders": [
+          {
+            "account_last4": "X4F1",
+            "id_short": "f51",
+            "symbol": "AMD",
+            "side": "sell",
+            "quantity": "10",
+            "take_profit_limit_price": "180.00",
+            "stop_loss_stop_price": "142.00",
+            "time_in_force": "gfd",
+            "active": true
+          }
+        ],
+        "alerts": [
+          {
+            "symbol": "NVDA",
+            "asset_class": "equity",
+            "condition_type": "price_below",
+            "threshold": "150.00",
+            "enabled": false
+          },
+          {
+            "symbol": "VOO",
+            "asset_class": "equity",
+            "condition_type": "price_below",
+            "threshold": "500.00",
+            "enabled": true
+          },
+          {
+            "symbol": "AMD",
+            "asset_class": "equity",
+            "condition_type": "price_above",
+            "threshold": "160.00",
+            "enabled": true
+          },
+          {
+            "symbol": "PLTR",
+            "asset_class": "equity",
+            "condition_type": "rsi_above",
+            "threshold": "70",
+            "enabled": true
+          }
+        ],
+        "earnings": {
+          "AMD": {
+            "date": "2027-01-27",
+            "timing": "pm",
+            "verified": false
+          },
+          "NVDA": {
+            "date": "2026-11-18",
+            "timing": "pm",
+            "verified": false
+          },
+          "TSLA": {
+            "date": "2027-01-20",
+            "timing": "pm",
+            "verified": true
+          },
+          "KO": {
+            "date": "2027-02-10",
+            "timing": "am",
+            "verified": false
+          },
+          "PLTR": {
+            "date": "2027-02-02",
+            "timing": "pm",
+            "verified": false
+          }
+        },
+        "session_regular_open": false,
+        "last_regular_open_et": "2026-11-16T09:30:00-05:00",
+        "next_regular_open_et": "2026-11-17T09:30:00-05:00"
+      },
+      "values": {
+        "value_unprotected_usd": "84467.50",
+        "value_partial_uncovered_usd": "403.50",
+        "unprotected": 7,
+        "partial": [
+          "AMD"
+        ],
+        "first_line": "ACTION NEEDED: Dollars at stake: $84,467.50 unprotected (NVDA $31,934.00 · VTI $29,000.00 · TSLA ••••M7Q5 $10,480.00) · $6,480.00 alert-only (VOO $6,480.00) · $403.50 uncovered in partial positions (AMD $403.50)"
+      },
+      "matches_spec": true,
+      "mismatched_fields": [],
+      "status_line": "ACTION NEEDED: Dollars at stake: $84,467.50 unprotected (NVDA $31,934.00 · VTI $29,000.00 · TSLA ••••M7Q5 $10,480.00) · $6,480.00 alert-only (VOO $6,480.00) · $403.50 uncovered in partial positions (AMD $403.50)"
+    },
+    "ytd_realized": {
+      "script": "skills/robinhood-tax-loss-harvesting/scripts/realized_summary.py",
+      "op": "run",
+      "spec": {
+        "taxable_usd": "8412.33"
+      },
+      "status": "ok",
+      "input": {
+        "as_of": "2026-11-16",
+        "accounts": [
+          {
+            "last4": "X4F1",
+            "type": "taxable",
+            "read_status": "complete"
+          },
+          {
+            "last4": "M7Q5",
+            "type": "taxable",
+            "read_status": "complete"
+          },
+          {
+            "last4": "P0Z9",
+            "type": "retirement",
+            "read_status": "complete"
+          }
+        ],
+        "trades": [
+          {
+            "account_last4": "X4F1",
+            "symbol": "TSLA",
+            "date": "2026-10-15",
+            "realized_usd": "225.00",
+            "asset_class": "option"
+          },
+          {
+            "account_last4": "X4F1",
+            "symbol": "AMD",
+            "date": "2026-11-09",
+            "realized_usd": "45.00",
+            "asset_class": "equity"
+          },
+          {
+            "account_last4": "X4F1",
+            "symbol": "PLTR",
+            "date": "2026-11-10",
+            "realized_usd": "11.50",
+            "asset_class": "equity"
+          },
+          {
+            "account_last4": "X4F1",
+            "symbol": "ETH",
+            "date": "2026-11-10",
+            "realized_usd": "109.73",
+            "asset_class": "crypto"
+          },
+          {
+            "account_last4": "X4F1",
+            "symbol": "KO",
+            "date": "2026-11-11",
+            "realized_usd": "68.80",
+            "asset_class": "equity"
+          },
+          {
+            "account_last4": "X4F1",
+            "symbol": "KO",
+            "date": "2026-11-13",
+            "realized_usd": "2.20",
+            "asset_class": "equity"
+          },
+          {
+            "account_last4": "M7Q5",
+            "symbol": "MU",
+            "date": "2026-04-15",
+            "realized_usd": "5660.00",
+            "asset_class": "equity"
+          },
+          {
+            "account_last4": "M7Q5",
+            "symbol": "MU",
+            "date": "2026-06-25",
+            "realized_usd": "2702.10",
+            "asset_class": "equity"
+          },
+          {
+            "account_last4": "M7Q5",
+            "symbol": "",
+            "date": "2026-08-14",
+            "realized_usd": "0.00",
+            "asset_class": "other"
+          },
+          {
+            "account_last4": "M7Q5",
+            "symbol": "AMD",
+            "date": "2026-11-03",
+            "realized_usd": "-412.00",
+            "asset_class": "equity"
+          },
+          {
+            "account_last4": "P0Z9",
+            "symbol": "XOM",
+            "date": "2026-05-14",
+            "realized_usd": "1204.00",
+            "asset_class": "equity"
+          }
+        ],
+        "window": "ytd"
+      },
+      "values": {
+        "taxable_usd": "8412.33"
+      },
+      "matches_spec": true,
+      "mismatched_fields": [],
+      "status_line": "NO ACTION: Dollars at stake: +$8,412.33 realized year to date in taxable accounts (••••P0Z9 +$1,204.00 kept separate)"
+    }
+  }
+}

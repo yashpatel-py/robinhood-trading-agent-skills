@@ -1,0 +1,8 @@
+---
+# read_scope = "all": a scheduled run checks the read-only accounts for agent-placed orders without asking.
+type: tool_used
+tool: "{{tool:get_equity_orders}}"
+input_match: "^(?=[\\s\\S]*\"account_number\"\\s*:\\s*\"{{acct:individual}}\")(?=[\\s\\S]*\"placed_agent\"\\s*:\\s*\"agentic\")"
+min: 1
+weight: 1
+---

@@ -1,0 +1,9 @@
+---
+# Agentic account, every source (no placed_agent): placed_agent is an open set, so a "user" filter
+# would miss recurring and DRIP orders.
+type: tool_used
+tool: "{{tool:get_equity_orders}}"
+input_match: "^(?=[\\s\\S]*\"account_number\"\\s*:\\s*\"{{acct:agentic}}\")(?=[\\s\\S]*\"created_at_gte\"\\s*:\\s*\"2026-(0\\d-|10-|11-0\\d|11-10))(?![\\s\\S]*\"placed_agent\"\\s*:\\s*\"[^\"])"
+min: 1
+weight: 1
+---

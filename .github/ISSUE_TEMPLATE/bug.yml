@@ -1,0 +1,89 @@
+name: Skill output is wrong
+description: A skill gave a wrong number, used the wrong account, skipped a check, or broke one of its own rules.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Mask account numbers to the last 4 characters (••••X4F1) and leave out tokens and balances. This issue is public.
+
+        If the skill placed, cancelled or deleted something without the confirmation it documents, don't file it here: report it privately with the security link on the previous page.
+
+        Tip: many bugs reproduce in the sandbox with no Robinhood account (see sandbox/README.md). A sandbox reproduction is the fastest one to fix.
+  - type: dropdown
+    id: skill
+    attributes:
+      label: Skill
+      options:
+        - robinhood-trading (core)
+        - robinhood-tax-loss-harvesting
+        - robinhood-exit-guardian
+        - robinhood-options-monitor
+        - robinhood-agent-report-card
+        - robinhood-options-screener
+        - Hooks / order guard / audit log
+        - Not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Surface
+      options:
+        - Claude Code with the plugin
+        - Claude Code, skills only
+        - Claude Desktop
+        - claude.ai
+        - ChatGPT
+        - Codex
+        - Cursor
+        - Gemini CLI
+        - Grok
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: data
+    attributes:
+      label: Data source
+      options:
+        - Sandbox (sandbox/mock_server.py)
+        - Live Robinhood connector
+    validations:
+      required: true
+  - type: textarea
+    id: prompt
+    attributes:
+      label: Prompt
+      description: What you asked, word for word if you can.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+      description: What the agent said and which tools it called (masked). A transcript excerpt helps.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: metadata.version in the skill's SKILL.md, or the plugin version.
+      placeholder: e.g. 2.0.0
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety
+      options:
+        - label: I removed account numbers, tokens and personal data.
+          required: true

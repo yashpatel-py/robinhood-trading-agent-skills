@@ -1,0 +1,1 @@
+{"data":{"ok":true,"changed":{"alert_id":"{{input.alert_id}}","enabled":[{{input.enabled}}],"condition_type":"{{input.condition_type}}","threshold":"{{input.threshold}}","indicator":[{{input.indicator}}]}},"guide":""}

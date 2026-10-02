@@ -1,0 +1,8 @@
+---
+# A market order after the close would wait for the next open.
+type: tool_used
+tool: "{{tool:review_equity_order}}"
+input_match: "\"type\"\\s*:\\s*\"market\""
+max: 0
+weight: 1
+---

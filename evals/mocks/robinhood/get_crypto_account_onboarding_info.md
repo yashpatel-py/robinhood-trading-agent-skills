@@ -1,0 +1,1 @@
+{"data":{"eligible":true,"current":null,"web_url":"https://rh-sandbox.invalid/crypto/onboarding","mobile_url":"https://rh-sandbox.invalid/app/crypto/onboarding","note":"Sign the crypto agreement to open a crypto account (fixture link)."},"guide":""}

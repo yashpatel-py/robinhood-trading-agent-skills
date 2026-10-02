@@ -1,0 +1,5 @@
+# The owner's masked live responses from the Day-1 capture (spec WP0) stay on the owner's machine.
+# Only field names and types are published, in connector/FIELDS.md. Never commit a capture:
+# tools/leak_scan.py fails the build if any file other than this one is committed here.
+*
+!.gitignore

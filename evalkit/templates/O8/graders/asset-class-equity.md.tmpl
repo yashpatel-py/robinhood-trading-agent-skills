@@ -1,0 +1,8 @@
+---
+# The kit always pins asset_class on create_alert (tickers such as ETH are both a coin and an ETF).
+type: tool_used
+tool: "{{tool:create_alert}}"
+input_match: "\"asset_class\"\\s*:\\s*\"equity\""
+min: 1
+weight: 1
+---

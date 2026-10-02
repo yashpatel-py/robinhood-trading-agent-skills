@@ -1,0 +1,942 @@
+{
+ "script": "lot_select",
+ "about": "compare: each strategy's tax_lots array, realized $ and short/long split side by side; FIFO is labeled Robinhood's default; there is never a 'best' (build spec B.7.10).",
+ "cases": [
+  {
+   "name": "TSLA: FIFO sells the long-term lot, highest cost the short-term lot",
+   "op": "compare",
+   "input": {
+    "symbol": "TSLA",
+    "sell_quantity": "20",
+    "price": "262.00",
+    "as_of": "2026-11-16",
+    "lots": [
+     {
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity_available": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity_available": "20",
+      "cost_per_share": "280.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "fifo_label": "Robinhood's default",
+    "strategy_order": [
+     "fifo",
+     "highest_cost",
+     "lowest_cost",
+     "long_term_first",
+     "losses_first"
+    ],
+    "strategies": {
+     "fifo": {
+      "tax_lots": [
+       {
+        "open_lot_id": "L1",
+        "quantity": "20"
+       }
+      ],
+      "realized_usd": "-360.00",
+      "realized_short_usd": "0.00",
+      "realized_long_usd": "-360.00",
+      "lot_count": 1,
+      "valid": true,
+      "label": "Robinhood's default"
+     },
+     "highest_cost": {
+      "tax_lots": [
+       {
+        "open_lot_id": "L7",
+        "quantity": "20"
+       }
+      ],
+      "realized_usd": "-1560.00",
+      "realized_short_usd": "-1560.00",
+      "realized_long_usd": "0.00"
+     },
+     "lowest_cost": {
+      "tax_lots": [
+       {
+        "open_lot_id": "L1",
+        "quantity": "20"
+       }
+      ],
+      "realized_usd": "-360.00"
+     },
+     "long_term_first": {
+      "tax_lots": [
+       {
+        "open_lot_id": "L1",
+        "quantity": "20"
+       }
+      ]
+     },
+     "losses_first": {
+      "tax_lots": [
+       {
+        "open_lot_id": "L7",
+        "quantity": "20"
+       }
+      ],
+      "realized_short_usd": "-1560.00"
+     }
+    }
+   }
+  },
+  {
+   "name": "a sale larger than one lot spills into the next lot in order",
+   "op": "compare",
+   "input": {
+    "symbol": "TSLA",
+    "sell_quantity": "25",
+    "price": "262.00",
+    "as_of": "2026-11-16",
+    "lots": [
+     {
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity_available": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity_available": "20",
+      "cost_per_share": "280.00"
+     }
+    ],
+    "strategies": [
+     "fifo"
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "strategies": {
+     "fifo": {
+      "tax_lots": [
+       {
+        "open_lot_id": "L1",
+        "quantity": "20"
+       },
+       {
+        "open_lot_id": "L7",
+        "quantity": "5"
+       }
+      ],
+      "realized_usd": "-750.00",
+      "realized_short_usd": "-390.00",
+      "realized_long_usd": "-360.00",
+      "lot_count": 2
+     }
+    }
+   }
+  },
+  {
+   "name": "losses_first differs from highest_cost: short losses, long losses, long gains, then short gains",
+   "op": "compare",
+   "input": {
+    "symbol": "XYZ",
+    "sell_quantity": "3",
+    "price": "100.00",
+    "as_of": "2026-11-16",
+    "lots": [
+     {
+      "open_lot_id": "A",
+      "acquired": "2026-09-01",
+      "quantity_available": "1",
+      "cost_per_share": "80.00"
+     },
+     {
+      "open_lot_id": "B",
+      "acquired": "2024-01-01",
+      "quantity_available": "1",
+      "cost_per_share": "90.00"
+     },
+     {
+      "open_lot_id": "C",
+      "acquired": "2024-06-01",
+      "quantity_available": "1",
+      "cost_per_share": "110.00"
+     },
+     {
+      "open_lot_id": "D",
+      "acquired": "2026-08-01",
+      "quantity_available": "1",
+      "cost_per_share": "130.00"
+     },
+     {
+      "open_lot_id": "E",
+      "acquired": "2026-10-01",
+      "quantity_available": "1",
+      "cost_per_share": "95.00"
+     }
+    ],
+    "strategies": [
+     "highest_cost",
+     "losses_first"
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "strategies": {
+     "highest_cost": {
+      "tax_lots": [
+       {
+        "open_lot_id": "D",
+        "quantity": "1"
+       },
+       {
+        "open_lot_id": "C",
+        "quantity": "1"
+       },
+       {
+        "open_lot_id": "E",
+        "quantity": "1"
+       }
+      ],
+      "realized_usd": "-35.00",
+      "realized_short_usd": "-25.00",
+      "realized_long_usd": "-10.00"
+     },
+     "losses_first": {
+      "tax_lots": [
+       {
+        "open_lot_id": "D",
+        "quantity": "1"
+       },
+       {
+        "open_lot_id": "C",
+        "quantity": "1"
+       },
+       {
+        "open_lot_id": "B",
+        "quantity": "1"
+       }
+      ],
+      "realized_usd": "-30.00",
+      "realized_short_usd": "-30.00",
+      "realized_long_usd": "0.00"
+     }
+    }
+   }
+  },
+  {
+   "name": "long_term_first takes long-term lots oldest first",
+   "op": "compare",
+   "input": {
+    "symbol": "XYZ",
+    "sell_quantity": "3",
+    "price": "100.00",
+    "as_of": "2026-11-16",
+    "lots": [
+     {
+      "open_lot_id": "A",
+      "acquired": "2026-09-01",
+      "quantity_available": "1",
+      "cost_per_share": "80.00"
+     },
+     {
+      "open_lot_id": "B",
+      "acquired": "2024-01-01",
+      "quantity_available": "1",
+      "cost_per_share": "90.00"
+     },
+     {
+      "open_lot_id": "C",
+      "acquired": "2024-06-01",
+      "quantity_available": "1",
+      "cost_per_share": "110.00"
+     },
+     {
+      "open_lot_id": "D",
+      "acquired": "2026-08-01",
+      "quantity_available": "1",
+      "cost_per_share": "130.00"
+     },
+     {
+      "open_lot_id": "E",
+      "acquired": "2026-10-01",
+      "quantity_available": "1",
+      "cost_per_share": "95.00"
+     }
+    ],
+    "strategies": [
+     "long_term_first"
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "strategies": {
+     "long_term_first": {
+      "tax_lots": [
+       {
+        "open_lot_id": "B",
+        "quantity": "1"
+       },
+       {
+        "open_lot_id": "C",
+        "quantity": "1"
+       },
+       {
+        "open_lot_id": "D",
+        "quantity": "1"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "31 one-share lots: FIFO needs 31 -> invalid (at most 30 per order)",
+   "op": "compare",
+   "input": {
+    "symbol": "XYZ",
+    "sell_quantity": "31",
+    "price": "10.00",
+    "as_of": "2026-11-16",
+    "strategies": [
+     "fifo"
+    ],
+    "lots": [
+     {
+      "open_lot_id": "K00",
+      "acquired": "2026-01-01",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K01",
+      "acquired": "2026-01-02",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K02",
+      "acquired": "2026-01-03",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K03",
+      "acquired": "2026-01-04",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K04",
+      "acquired": "2026-01-05",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K05",
+      "acquired": "2026-01-06",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K06",
+      "acquired": "2026-01-07",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K07",
+      "acquired": "2026-01-08",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K08",
+      "acquired": "2026-01-09",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K09",
+      "acquired": "2026-01-10",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K10",
+      "acquired": "2026-01-11",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K11",
+      "acquired": "2026-01-12",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K12",
+      "acquired": "2026-01-13",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K13",
+      "acquired": "2026-01-14",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K14",
+      "acquired": "2026-01-15",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K15",
+      "acquired": "2026-01-16",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K16",
+      "acquired": "2026-01-17",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K17",
+      "acquired": "2026-01-18",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K18",
+      "acquired": "2026-01-19",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K19",
+      "acquired": "2026-01-20",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K20",
+      "acquired": "2026-01-21",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K21",
+      "acquired": "2026-01-22",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K22",
+      "acquired": "2026-01-23",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K23",
+      "acquired": "2026-01-24",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K24",
+      "acquired": "2026-01-25",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K25",
+      "acquired": "2026-01-26",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K26",
+      "acquired": "2026-01-27",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K27",
+      "acquired": "2026-01-28",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K28",
+      "acquired": "2026-02-01",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K29",
+      "acquired": "2026-02-02",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     },
+     {
+      "open_lot_id": "K30",
+      "acquired": "2026-02-03",
+      "quantity_available": "1",
+      "cost_per_share": "9.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "strategies": {
+     "fifo": {
+      "lot_count": 31,
+      "valid": false,
+      "errors": [
+       {
+        "code": "TAX_LOTS_MAX_30"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "more shares than are available -> every strategy invalid",
+   "op": "compare",
+   "input": {
+    "symbol": "TSLA",
+    "sell_quantity": "50",
+    "price": "262.00",
+    "as_of": "2026-11-16",
+    "lots": [
+     {
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity_available": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity_available": "20",
+      "cost_per_share": "280.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "strategies": {
+     "fifo": {
+      "valid": false,
+      "errors": [
+       {
+        "code": "INSUFFICIENT_AVAILABLE"
+       }
+      ]
+     },
+     "losses_first": {
+      "valid": false
+     }
+    }
+   }
+  },
+  {
+   "name": "quantity_available, not quantity, limits each lot (shares tied up by other orders)",
+   "op": "compare",
+   "input": {
+    "symbol": "TSLA",
+    "sell_quantity": "22",
+    "price": "262.00",
+    "as_of": "2026-11-16",
+    "strategies": [
+     "fifo"
+    ],
+    "lots": [
+     {
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity": "20",
+      "quantity_available": "12",
+      "cost_per_share": "280.00"
+     },
+     {
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity": "20",
+      "quantity_available": "20",
+      "cost_per_share": "340.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "strategies": {
+     "fifo": {
+      "tax_lots": [
+       {
+        "open_lot_id": "L1",
+        "quantity": "12"
+       },
+       {
+        "open_lot_id": "L7",
+        "quantity": "10"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "a lot still syncing (is_selectable false) is skipped and listed",
+   "op": "compare",
+   "input": {
+    "symbol": "TSLA",
+    "sell_quantity": "5",
+    "price": "262.00",
+    "as_of": "2026-11-16",
+    "strategies": [
+     "fifo"
+    ],
+    "lots": [
+     {
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity_available": "20",
+      "cost_per_share": "280.00",
+      "is_selectable": false
+     },
+     {
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity_available": "20",
+      "cost_per_share": "340.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "not_selectable": [
+     {
+      "open_lot_id": "L1"
+     }
+    ],
+    "strategies": {
+     "fifo": {
+      "tax_lots": [
+       {
+        "open_lot_id": "L7",
+        "quantity": "5"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "basis pending: realized is unknown (null), never computed from zero",
+   "op": "compare",
+   "input": {
+    "symbol": "XYZ",
+    "sell_quantity": "1",
+    "price": "10.00",
+    "as_of": "2026-11-16",
+    "strategies": [
+     "fifo"
+    ],
+    "lots": [
+     {
+      "open_lot_id": "P",
+      "acquired": "2026-11-16",
+      "quantity_available": "1",
+      "cost_per_share": null
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "strategies": {
+     "fifo": {
+      "realized_usd": null,
+      "valid": true,
+      "warnings": [
+       {
+        "code": "BASIS_PENDING"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "Feb 29 lot: still short-term on 2025-02-28 (Rev. Rul. 66-7: long-term from the first day of the 13th month)",
+   "op": "compare",
+   "input": {
+    "symbol": "XYZ",
+    "sell_quantity": "1",
+    "price": "10.00",
+    "as_of": "2025-02-28",
+    "strategies": [
+     "fifo"
+    ],
+    "lots": [
+     {
+      "open_lot_id": "F",
+      "acquired": "2024-02-29",
+      "quantity_available": "1",
+      "cost_per_share": "5.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "strategies": {
+     "fifo": {
+      "realized_short_usd": "5.00",
+      "lots_detail": [
+       {
+        "term": "short",
+        "long_term_on": "2025-03-01"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "Feb 29 lot: long-term on 2025-03-01",
+   "op": "compare",
+   "input": {
+    "symbol": "XYZ",
+    "sell_quantity": "1",
+    "price": "10.00",
+    "as_of": "2025-03-01",
+    "strategies": [
+     "fifo"
+    ],
+    "lots": [
+     {
+      "open_lot_id": "F",
+      "acquired": "2024-02-29",
+      "quantity_available": "1",
+      "cost_per_share": "5.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "strategies": {
+     "fifo": {
+      "realized_long_usd": "5.00",
+      "lots_detail": [
+       {
+        "term": "long"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "an unknown strategy is refused",
+   "op": "compare",
+   "input": {
+    "sell_quantity": "1",
+    "price": "1",
+    "lots": [
+     {
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity_available": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity_available": "20",
+      "cost_per_share": "280.00"
+     }
+    ],
+    "strategies": [
+     "best"
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_VALUE",
+      "field": "strategies"
+     }
+    ]
+   }
+  },
+  {
+   "name": "Feb 28 lot before a leap year: long-term from 2028-03-01, not 2028-02-29 (Rev. Rul. 66-7)",
+   "op": "compare",
+   "input": {
+    "symbol": "XYZ",
+    "sell_quantity": "1",
+    "price": "10.00",
+    "as_of": "2028-02-29",
+    "strategies": [
+     "fifo"
+    ],
+    "lots": [
+     {
+      "open_lot_id": "M",
+      "acquired": "2027-02-28",
+      "quantity_available": "1",
+      "cost_per_share": "5.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "strategies": {
+     "fifo": {
+      "realized_short_usd": "5.00",
+      "lots_detail": [
+       {
+        "term": "short",
+        "long_term_on": "2028-03-01",
+        "days_until_long_term": 1
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "Robinhood's term wins: a wash-sale replacement lot reported long-term is long-term, with the disagreement flagged",
+   "op": "compare",
+   "input": {
+    "symbol": "TSLA",
+    "sell_quantity": "20",
+    "price": "262.00",
+    "as_of": "2026-11-16",
+    "lots": [
+     {
+      "open_lot_id": "R",
+      "open_date": "2026-10-10",
+      "quantity_available": "10",
+      "cost_per_share": "300.00",
+      "term": "long"
+     },
+     {
+      "open_lot_id": "G",
+      "open_date": "2026-08-01",
+      "quantity_available": "10",
+      "cost_per_share": "290.00",
+      "term": "short"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "strategies": {
+     "highest_cost": {
+      "tax_lots": [
+       {
+        "open_lot_id": "R",
+        "quantity": "10"
+       },
+       {
+        "open_lot_id": "G",
+        "quantity": "10"
+       }
+      ],
+      "realized_short_usd": "-280.00",
+      "realized_long_usd": "-380.00",
+      "lots_detail": [
+       {
+        "open_lot_id": "R",
+        "term": "long",
+        "broker_term": "long",
+        "date_term": "short",
+        "term_agrees": false
+       },
+       {
+        "open_lot_id": "G",
+        "term": "short",
+        "term_agrees": true,
+        "long_term_on": "2027-08-02"
+       }
+      ],
+      "warnings": [
+       {
+        "code": "TERM_DISAGREES"
+       }
+      ]
+     },
+     "long_term_first": {
+      "tax_lots": [
+       {
+        "open_lot_id": "R",
+        "quantity": "10"
+       },
+       {
+        "open_lot_id": "G",
+        "quantity": "10"
+       }
+      ]
+     },
+     "losses_first": {
+      "tax_lots": [
+       {
+        "open_lot_id": "G",
+        "quantity": "10"
+       },
+       {
+        "open_lot_id": "R",
+        "quantity": "10"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "an open_date timestamp is its US Eastern date: 2025-12-04T00:30:00Z is 2025-12-03 19:30 ET, long-term on 2026-12-04",
+   "op": "compare",
+   "input": {
+    "symbol": "XYZ",
+    "sell_quantity": "1",
+    "price": "262.00",
+    "as_of": "2026-12-04",
+    "strategies": [
+     "fifo"
+    ],
+    "lots": [
+     {
+      "open_lot_id": "E",
+      "open_date": "2025-12-04T00:30:00Z",
+      "quantity_available": "1",
+      "cost_per_share": "200.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "strategies": {
+     "fifo": {
+      "realized_long_usd": "62.00",
+      "lots_detail": [
+       {
+        "acquired": "2025-12-03",
+        "term": "long"
+       }
+      ]
+     }
+    }
+   }
+  }
+ ]
+}

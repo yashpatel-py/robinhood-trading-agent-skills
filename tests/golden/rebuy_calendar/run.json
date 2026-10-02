@@ -1,0 +1,143 @@
+{
+ "script": "rebuy_calendar",
+ "about": "RFC 5545 rebuy calendar: a do-not-buy block and an OK-to-buy day per item (build spec B.2 workflow G).",
+ "cases": [
+  {
+   "name": "Dec 31 harvest: block 2026-12-31 up to 2027-01-31; OK to buy on 2027-01-31, first trading day 2027-02-01",
+   "op": "run",
+   "input": {
+    "items": [
+     {
+      "symbol": "TSLA",
+      "sale_date": "2026-12-31",
+      "do_not_buy_until": "2027-01-31",
+      "first_trading_day_after": "2027-02-01"
+     }
+    ],
+    "dtstamp": "2026-11-17T01:05:00Z"
+   },
+   "expected": {
+    "ok": true,
+    "events": 2,
+    "written_to": null,
+    "event_list": [
+     {
+      "kind": "do_not_buy",
+      "start": "2026-12-31",
+      "end_exclusive": "2027-01-31"
+     },
+     {
+      "kind": "ok_to_buy",
+      "date": "2027-01-31",
+      "first_trading_day": "2027-02-01"
+     }
+    ]
+   },
+   "ics_contains": [
+    "BEGIN:VCALENDAR\r\nVERSION:2.0\r\n",
+    "DTSTAMP:20261117T010500Z",
+    "DTSTART;VALUE=DATE:20261231",
+    "DTEND;VALUE=DATE:20270131",
+    "DTSTART;VALUE=DATE:20270131",
+    "DTEND;VALUE=DATE:20270201",
+    "SUMMARY:OK to buy TSLA again (wash-sale window over)",
+    "TRIGGER:PT9H",
+    "END:VCALENDAR\r\n"
+   ]
+  },
+  {
+   "name": "no sale date: only the OK-to-buy day; a local-offset dtstamp is converted to UTC",
+   "op": "run",
+   "input": {
+    "items": [
+     {
+      "symbol": "AMD",
+      "do_not_buy_until": "2026-12-04"
+     }
+    ],
+    "dtstamp": "2026-11-16T20:05:00-05:00",
+    "reminders": false
+   },
+   "expected": {
+    "ok": true,
+    "events": 1,
+    "event_list": [
+     {
+      "kind": "ok_to_buy",
+      "date": "2026-12-04",
+      "first_trading_day": "2026-12-04"
+     }
+    ]
+   },
+   "ics_contains": [
+    "DTSTAMP:20261117T010500Z",
+    "DTSTART;VALUE=DATE:20261204"
+   ],
+   "ics_not_contains": [
+    "VALARM"
+   ]
+  },
+  {
+   "name": "text is escaped (commas, semicolons, backslashes, newlines)",
+   "op": "run",
+   "input": {
+    "items": [
+     {
+      "symbol": "KO",
+      "do_not_buy_until": "2026-12-19",
+      "note": "a,b;c\\d\ne"
+     }
+    ],
+    "dtstamp": "2026-11-17T01:05:00Z"
+   },
+   "expected": {
+    "ok": true,
+    "events": 1
+   },
+   "ics_contains_unfolded": [
+    "a\\,b\\;c\\\\d\\ne"
+   ]
+  },
+  {
+   "name": "a sale date on or after the rebuy date is refused",
+   "op": "run",
+   "input": {
+    "items": [
+     {
+      "symbol": "KO",
+      "sale_date": "2026-12-19",
+      "do_not_buy_until": "2026-12-19"
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_DATE"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a symbol that is not a ticker is refused",
+   "op": "run",
+   "input": {
+    "items": [
+     {
+      "symbol": "not a ticker",
+      "do_not_buy_until": "2026-12-19"
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_VALUE"
+     }
+    ]
+   }
+  }
+ ]
+}

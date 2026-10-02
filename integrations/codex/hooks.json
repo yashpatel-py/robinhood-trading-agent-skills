@@ -1,0 +1,1 @@
+{ "hooks": { "PreToolUse": [ { "matcher": "mcp__.*__(place|exercise|replace)[_-].*|mcp__.*[Rr]obinhood.*__(submit|execute|transfer|withdraw|deposit|stake|unstake|convert|send|buy|sell|trade|liquidate|lend|borrow)[_-].*", "hooks": [ { "type": "command", "command": "sh <REPO>/hooks/guard.sh money --format codex" } ] } ] } }

@@ -1,0 +1,16 @@
+{
+  "$comment": "Variant overlay (WP-M): the OCO tool family is listed but not enabled for this account, exactly as on both capture accounts on 2026-09-22 (connector rule R26). get_advanced_orders and review_advanced_order return the not-found error; place_advanced_order and cancel_advanced_order do the same. The household has no OCO in this variant, so the only resting protection is the AMD stop order.",
+  "variant": "oco_disabled",
+  "description": "OCO tools answer 'the tool you requested cannot be found or does not exist'; no OCO exists.",
+  "tool_errors": {
+    "get_advanced_orders": "the tool you requested cannot be found or does not exist",
+    "review_advanced_order": "the tool you requested cannot be found or does not exist",
+    "place_advanced_order": "the tool you requested cannot be found or does not exist",
+    "cancel_advanced_order": "the tool you requested cannot be found or does not exist"
+  },
+  "patch": [
+    {"op": "delete", "path": "advanced_orders.agentic[_ref=oco-amd]"},
+    {"op": "delete", "path": "equity_orders.agentic[_ref=oco-amd-tp]"},
+    {"op": "delete", "path": "equity_orders.agentic[_ref=oco-amd-sl]"}
+  ]
+}

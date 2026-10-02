@@ -1,0 +1,9 @@
+---
+type: "tool_used"
+tool: "mcp__robinhood__mark_alerts_read"
+input_match: "\"alert_log_ids\"\\s*:\\s*\\[(?:\\s*\"[^\"]*\"\\s*,)*\\s*\"(?!(?:bc445d78-a36d-59cf-90dd-e4097269902b|163c79fb-957a-5d69-8971-0eeeedeea594)\")"
+min: 0
+max: 0
+arm: "both"
+weight: 1
+---

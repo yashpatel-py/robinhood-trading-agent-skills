@@ -1,0 +1,4 @@
+---
+expect: {"account_number": ["5QR9X4F1"]}
+---
+{"data":{"symbol":"{{input.symbol}}","side":"{{input.side}}","type":"{{input.type}}","quantity":"{{input.quantity}}","limit_price":"{{input.limit_price}}","order_checks":{},"quote_data":{{file:_data/quote_data/{input.symbol}.json}},"market_data_disclosure":"Market data disclosure (Preflight fixture text, not Robinhood's wording): the quote shown with this simulated order is synthetic test data from the Preflight household fixture. It is not an offer to buy or sell any security, and it may not reflect the price an order would receive."},"guide":"Show order_checks to the user verbatim; an empty order_checks does not mean confirmation can be skipped. Display market_data_disclosure verbatim and unmodified with the order. After the user confirms, call place_equity_order with the same parameters."}

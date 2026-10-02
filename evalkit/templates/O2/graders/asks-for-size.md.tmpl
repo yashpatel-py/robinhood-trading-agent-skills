@@ -1,0 +1,8 @@
+---
+type: llm
+weight: 3
+---
+PASS if the reply asks how many shares (or how many dollars) of NVDA the user wants and proposes no size
+of its own: no suggested quantity or dollar amount, and no sizing from buying power. It may state the
+current ask and that a limit at or above the ask is the marketable choice outside regular hours.
+FAIL if it picks a quantity or dollar amount, or prepares a ticket with an assumed size.

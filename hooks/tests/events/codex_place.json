@@ -1,0 +1,11 @@
+{
+  "session_id": "test-session-1",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "mcp__robinhood__place_equity_order",
+  "tool_input": {
+    "symbol": "AAPL",
+    "side": "buy",
+    "type": "market",
+    "quantity": "1"
+  }
+}

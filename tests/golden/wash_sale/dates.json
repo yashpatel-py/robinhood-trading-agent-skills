@@ -1,0 +1,827 @@
+{
+ "script": "wash_sale",
+ "about": "Date arithmetic: the 61-day calendar window on the TRADE date, do-not-buy-until = D + 31, and the first NYSE trading day on or after it. Weekends and holidays never stretch the window; settlement dates never move it. Build spec B.7.9 golden dates plus boundary cases.",
+ "cases": [
+  {
+   "name": "spec: sale 2026-12-31 -> do-not-buy-until 2027-01-31 (Sunday) -> first trading day 2027-02-01",
+   "op": "window",
+   "input": {
+    "date": "2026-12-31",
+    "as_of": "2026-12-31"
+   },
+   "expected": {
+    "ok": true,
+    "tax_year": 2026,
+    "window": {
+     "start": "2026-12-01",
+     "end": "2027-01-30",
+     "days": 61
+    },
+    "do_not_buy_until": "2027-01-31",
+    "first_trading_day_after": "2027-02-01"
+   }
+  },
+  {
+   "name": "spec: sale 2026-12-01 -> 2027-01-01 (holiday) -> 2027-01-04",
+   "op": "window",
+   "input": {
+    "date": "2026-12-01",
+    "as_of": "2026-12-01"
+   },
+   "expected": {
+    "ok": true,
+    "window": {
+     "start": "2026-11-01",
+     "end": "2026-12-31"
+    },
+    "do_not_buy_until": "2027-01-01",
+    "first_trading_day_after": "2027-01-04"
+   }
+  },
+  {
+   "name": "spec: sale 2026-09-22 -> 2026-10-23 (a Friday, no shift)",
+   "op": "window",
+   "input": {
+    "date": "2026-09-22",
+    "as_of": "2026-09-22"
+   },
+   "expected": {
+    "ok": true,
+    "window": {
+     "start": "2026-08-23",
+     "end": "2026-10-22"
+    },
+    "do_not_buy_until": "2026-10-23",
+    "first_trading_day_after": "2026-10-23"
+   }
+  },
+  {
+   "name": "run: sale 2026-12-31 gives the same dates and tax year 2026 (settles 2027-01-04; trade date decides)",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-12-31",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-12-31",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": []
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear",
+    "tax_year": 2026,
+    "window": {
+     "start": "2026-12-01",
+     "end": "2027-01-30"
+    },
+    "do_not_buy_until": "2027-01-31",
+    "first_trading_day_after": "2027-02-01"
+   }
+  },
+  {
+   "name": "window op: created_at_gte is midnight ET (EDT) 90 days before the window start, in UTC",
+   "op": "window",
+   "input": {
+    "date": "2026-11-16",
+    "as_of": "2026-11-16",
+    "gtc_lookback_days": 90
+   },
+   "expected": {
+    "ok": true,
+    "lookback_start": "2026-07-19",
+    "created_at_gte": "2026-07-19T04:00:00Z",
+    "recurring_created_at_gte": "2026-08-08T04:00:00Z",
+    "drip_created_at_gte": "2025-10-12T04:00:00Z",
+    "pnl_span": "3month",
+    "do_not_buy_until": "2026-12-17",
+    "first_trading_day_after": "2026-12-17",
+    "future_part_of_window": {
+     "from": "2026-11-17",
+     "to": "2026-12-16"
+    }
+   }
+  },
+  {
+   "name": "window op: created_at_gte in winter uses EST (UTC-5)",
+   "op": "window",
+   "input": {
+    "date": "2027-03-01",
+    "as_of": "2027-03-01",
+    "gtc_lookback_days": 10,
+    "mode": "planned_buy"
+   },
+   "expected": {
+    "ok": true,
+    "window": {
+     "start": "2027-01-30"
+    },
+    "lookback_start": "2027-01-20",
+    "created_at_gte": "2027-01-20T05:00:00Z"
+   }
+  },
+  {
+   "name": "window op, sale mode: loss sales from D-60 and buys from D-90 are read even with a 10-day GTC lookback (Treas. Reg. 1.1091-1(e))",
+   "op": "window",
+   "input": {
+    "date": "2027-03-01",
+    "as_of": "2027-03-01",
+    "gtc_lookback_days": 10,
+    "mode": "sale"
+   },
+   "expected": {
+    "ok": true,
+    "mode": "sale",
+    "loss_sales_from": "2026-12-31",
+    "lookback_start": "2026-12-01",
+    "created_at_gte": "2026-12-01T05:00:00Z"
+   }
+  },
+  {
+   "name": "window op: trade history span ytd when 3month cannot reach the window's loss sales",
+   "op": "window",
+   "input": {
+    "date": "2026-08-01",
+    "as_of": "2026-11-16",
+    "mode": "planned_buy"
+   },
+   "expected": {
+    "ok": true,
+    "pnl_span": "ytd",
+    "loss_sales_from": "2026-07-02"
+   }
+  },
+  {
+   "name": "window op, sale mode (the default): the trade history must reach D-60",
+   "op": "window",
+   "input": {
+    "date": "2026-08-01",
+    "as_of": "2026-11-16"
+   },
+   "expected": {
+    "ok": true,
+    "mode": "sale",
+    "pnl_span": "ytd",
+    "loss_sales_from": "2026-06-02"
+   }
+  },
+  {
+   "name": "window op, sale mode: 3month still reaches D-60 for a sale today",
+   "op": "window",
+   "input": {
+    "date": "2026-11-16",
+    "as_of": "2026-11-16",
+    "mode": "sale"
+   },
+   "expected": {
+    "ok": true,
+    "pnl_span": "3month",
+    "loss_sales_from": "2026-09-17"
+   }
+  },
+  {
+   "name": "window op: trade history span all when the loss window starts last year",
+   "op": "window",
+   "input": {
+    "date": "2026-01-10",
+    "as_of": "2026-11-16"
+   },
+   "expected": {
+    "ok": true,
+    "pnl_span": "all"
+   }
+  },
+  {
+   "name": "boundary: a buy on D-30 is inside the window (both ends included)",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-20",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-20",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-10-21",
+      "shares": "1",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "washed_shares": "1",
+    "conflicts": [
+     {
+      "date": "2026-10-21",
+      "direction": "before"
+     }
+    ]
+   }
+  },
+  {
+   "name": "boundary: a buy on D-31 is outside",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-20",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-20",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-10-20",
+      "shares": "1",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear",
+    "washed_shares": "0",
+    "ignored_outside_window": 1
+   }
+  },
+  {
+   "name": "boundary: a buy on D+30 (Sunday 2026-12-20 would be the window end; Friday 12-18 is inside)",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-12-30",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-20",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-12-18",
+      "shares": "1",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "window": {
+     "end": "2026-12-20"
+    },
+    "conflicts": [
+     {
+      "date": "2026-12-18",
+      "direction": "after"
+     }
+    ]
+   }
+  },
+  {
+   "name": "weekend does not stretch the window: the window ends Sunday 2026-12-20, a Monday 2026-12-21 buy is clean",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-12-30",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-20",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-12-21",
+      "shares": "1",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear",
+    "window": {
+     "end": "2026-12-20"
+    },
+    "do_not_buy_until": "2026-12-21",
+    "first_trading_day_after": "2026-12-21"
+   }
+  },
+  {
+   "name": "holidays do not shift the window: sale 2026-11-25 (day before Thanksgiving) ends 2026-12-25; first trading day after is Monday 12-28",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-12-30",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-25",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-12-24",
+      "shares": "1",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "window": {
+     "start": "2026-10-26",
+     "end": "2026-12-25"
+    },
+    "do_not_buy_until": "2026-12-26",
+    "first_trading_day_after": "2026-12-28"
+   }
+  },
+  {
+   "name": "trade date, not settlement: a 2026-12-31 sale (settles 2027-01-04) is washed by a buy on 2026-12-02",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-12-31",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-12-31",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-12-02",
+      "shares": "1",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "conflicts": [
+     {
+      "date": "2026-12-02",
+      "direction": "before"
+     }
+    ]
+   }
+  },
+  {
+   "name": "trade date, not settlement: a buy on 2027-02-02 is clean (a settlement-based window would wrongly reach 2027-02-03)",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2027-02-10",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-12-31",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2027-02-02",
+      "shares": "1",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear",
+    "washed_shares": "0"
+   }
+  },
+  {
+   "name": "UTC after midnight is still the prior ET trade date: 2026-12-17T00:30:00Z is 2026-12-16 19:30 ET, inside a window ending 12-16",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-12-20",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "timestamp": "2026-12-17T00:30:00Z",
+      "shares": "2"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "conflicts": [
+     {
+      "date": "2026-12-16",
+      "washed_shares": "2"
+     }
+    ]
+   }
+  },
+  {
+   "name": "overnight session: 21:30 ET on 12-16 may be trade date 12-17; one candidate outside the window -> possible, never clear",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-12-20",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "timestamp": "2026-12-17T02:30:00Z",
+      "shares": "2"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "possible",
+    "washed_shares": "0",
+    "possible": [
+     {
+      "kind": "buy",
+      "date": "2026-12-16"
+     }
+    ]
+   }
+  },
+  {
+   "name": "same-day buy counts (direction same_day)",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-16",
+      "shares": "3",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "conflicts": [
+     {
+      "direction": "same_day",
+      "washed_shares": "3",
+      "disallowed_loss_usd": "30.00"
+     }
+    ]
+   }
+  }
+ ]
+}

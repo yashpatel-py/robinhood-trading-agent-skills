@@ -1,0 +1,7 @@
+{
+  "$comment": "Variant overlay (WP-M): get_option_quotes returns no Greeks and no open interest, so the options screener must stop with DELTA_OI_UNAVAILABLE (case X3). The live capture on 2026-09-22 did return these fields; this variant covers the day they are missing.",
+  "variant": "no_greeks",
+  "description": "Option quotes without delta, gamma, theta, vega, rho and open_interest.",
+  "option_quote_drop_fields": ["delta", "gamma", "theta", "vega", "rho", "open_interest"],
+  "patch": []
+}

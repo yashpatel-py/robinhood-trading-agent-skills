@@ -1,0 +1,25 @@
+# connector/drift-allow.txt
+#
+# Identifiers that match the tool-name pattern in tools/check_drift.py (check 1) but are not
+# Robinhood tools: response fields, script operations, config keys, ledger fields and test names.
+# One entry per line, written as `identifier  # reason`. The reason is required.
+#
+# Never list a live tool here, and never list a known-absent tool (get_market_hours,
+# replace_option_order, get_crypto_tax_lots, get_quotes): absent tools must be written about as
+# absent, and check_drift rejects them in this file.
+
+add_days  # rh_time.py operation (calendar-day arithmetic), not a connector tool
+get_accounts_cache  # example non-tool identifier named in the build spec (section G.2)
+get_new_thing  # synthetic unknown tool used by the hook test for the classify layer (H7b)
+mark_price  # get_option_quotes response field (connector/FIELDS.md), not a tool
+place_params  # order_lint.py output field: the review parameters minus review-only keys
+place_tool  # order_lint.py output field: the place_* twin of the reviewed tool
+place_twin  # connector/tool-classes.json field on simulate tools
+review_age_s  # audit_verify.py output field: seconds between a review and its place
+review_ask  # report-card slippage input: the ask price captured at review time
+review_bid  # report-card slippage input: the bid price captured at review time
+review_ok  # review-ledger field written by hooks/audit_log.py
+review_ttl_seconds  # plugin userConfig key for confirm mode (review freshness window)
+review_twin  # connector/tool-classes.json field on money tools
+transfer_funds  # synthetic money-like tool name in the guard tests and the Codex smoke test (integrations/codex/README.md), not a Robinhood tool
+update_group  # alert_spec.py output field: the indicator group update_alert may change condition_type within

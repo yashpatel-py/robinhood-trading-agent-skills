@@ -1,0 +1,4 @@
+---
+expect: {"account_number": ["5QR9X4F1"]}
+---
+{"data":{"symbol":"{{input.symbol}}","side":"{{input.side}}","quantity":"{{input.quantity}}","take_profit_limit_price":"{{input.take_profit_limit_price}}","stop_loss_stop_price":"{{input.stop_loss_stop_price}}","time_in_force":"{{input.time_in_force}}","market_hours":"regular_hours","order_checks":{},"quote_data":{{file:_data/quote_data/{input.symbol}.json}},"market_data_disclosure":"Market data disclosure (Preflight fixture text, not Robinhood's wording): the quote shown with this simulated order is synthetic test data from the Preflight household fixture. It is not an offer to buy or sell any security, and it may not reflect the price an order would receive."},"guide":"Show order_checks verbatim and display market_data_disclosure with the order. After the user confirms, call place_advanced_order with the same parameters."}

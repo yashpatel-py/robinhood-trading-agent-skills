@@ -1,0 +1,20 @@
+{"query": "am I going to wash-sale myself if I sell TSLA", "should_trigger": true, "split": "train"}
+{"query": "which lots should I sell to minimize tax on half my NVDA", "should_trigger": true, "split": "train"}
+{"query": "when can I buy AMD back after selling at a loss", "should_trigger": true, "split": "train"}
+{"query": "tax-loss harvesting candidates in my Robinhood accounts", "should_trigger": true, "split": "validation"}
+{"query": "what are my realized gains YTD", "should_trigger": true, "split": "validation"}
+{"query": "run my harvest scan", "should_trigger": true, "split": "train"}
+{"query": "my roth buys VOO every month, does that mess up selling VOO at a loss in my regular account?", "should_trigger": true, "split": "train"}
+{"query": "is my 2025 NVDA lot long term yet or is it still short term", "should_trigger": true, "split": "validation"}
+{"query": "sell my PLTR losers in the agentic account, but only the lots that are down", "should_trigger": true, "split": "train"}
+{"query": "how much short term vs long term gain would I realize selling 20 TSLA", "should_trigger": true, "split": "validation"}
+{"query": "I dumped KO at a loss last week, is it ok to buy it back in my IRA", "should_trigger": true, "split": "train"}
+{"query": "make me a calendar of the dates I can rebuy the stocks I harvested", "should_trigger": true, "split": "validation"}
+{"query": "what's a wash sale", "should_trigger": false, "split": "train"}
+{"query": "file my taxes", "should_trigger": false, "split": "train"}
+{"query": "is VOO substantially identical to IVV", "should_trigger": false, "split": "validation"}
+{"query": "harvest losses in my Fidelity account", "should_trigger": false, "split": "train"}
+{"query": "whats my buying power rn", "should_trigger": false, "split": "train", "expect_skill": "robinhood-trading"}
+{"query": "explain how capital gains tax brackets work", "should_trigger": false, "split": "validation"}
+{"query": "what did my agent do this week", "should_trigger": false, "split": "train", "expect_skill": "robinhood-agent-report-card"}
+{"query": "put a stop on my AMD at 142", "should_trigger": false, "split": "validation"}

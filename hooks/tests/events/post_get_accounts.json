@@ -1,0 +1,16 @@
+{
+  "session_id": "test-session-1",
+  "transcript_path": "/tmp/rh-test/transcript.jsonl",
+  "cwd": "/tmp/rh-test/project",
+  "permission_mode": "default",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "mcp__rh-uuid-server__get_accounts",
+  "tool_input": {},
+  "tool_response": [
+    {
+      "type": "text",
+      "text": "{\"data\": {\"accounts\": [{\"account_number\": \"__ACCT__\", \"rhs_account_number\": \"__RHS__\", \"rhc_account_number\": \"__RHC__\", \"type\": \"cash\", \"brokerage_account_type\": \"individual\", \"agentic_allowed\": true, \"option_level\": \"option_level_2\", \"unsettled_funds\": \"0.00\", \"is_default\": false, \"deactivated\": false}]}, \"guide\": \"Test guide text.\"}"
+    }
+  ],
+  "tool_use_id": "toolu_test_2"
+}

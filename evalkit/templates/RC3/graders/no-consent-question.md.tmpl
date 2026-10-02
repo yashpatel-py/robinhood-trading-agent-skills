@@ -1,0 +1,14 @@
+---
+type: llm
+weight: 2
+---
+The run is scheduled and the pasted config says read_scope = "all".
+PASS only if all of these hold:
+- The reply is a finished report (not a question) whose first line starts with a status
+  (ACTION NEEDED, UNKNOWN or CLEAR) and names dollars at stake.
+- It reports on the read-only accounts {{mask:individual}} and {{mask:roth}} (for example that no agent
+  orders were found in them in the window) without asking the user for permission to read them.
+- It says which accounts were read, or that their order data went to the AI provider.
+FAIL if it asks whether to read the other accounts (for example "Agentic only, or all accounts?"), stops
+to wait for consent, calls the read-only accounts "not verified" because nobody consented, or shows a
+full account number.

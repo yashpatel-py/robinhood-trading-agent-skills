@@ -1,0 +1,161 @@
+# robinhood-skills:config
+# (Keep the line above only if you paste this block into a claude.ai or ChatGPT project instead of
+# saving a file; in a file it is just a comment.)
+#
+# Options screener criteria for robinhood-options-screener.
+# Preflight for Robinhood Agentic Trading. Unofficial; not affiliated with Robinhood Markets, Inc.
+#
+# Save your copy OUTSIDE the skill folder (skill folders are replaced on update), at one of:
+#   ~/.config/robinhood-skills/config.toml      (or $XDG_CONFIG_HOME/robinhood-skills/config.toml)
+#   ./.robinhood/config.toml                    (per project)
+#   any path named by $ROBINHOOD_SKILLS_CONFIG
+# If your config already has other sections ([policy], [tax], [options.exits], ...), add these two
+# tables to it; a table may appear only once per file.
+#
+# Every value here must be set by you. Nothing in this file may be filled in by an agent.
+#
+# That rule exists because these numbers *are* the strategy. A delta band, a DTE window, and a stop
+# level fully determine what gets traded and what gets closed. Choosing them is making an investment
+# decision, which depends on risk tolerance, capital, taxes, and horizon that a model cannot assess.
+# An agent that quietly picks a default here has issued investment advice while appearing to follow
+# instructions, which is worse than refusing.
+#
+# If a value below still reads "UNSET" when the screener runs, the run stops and names it. It is never
+# guessed, inferred from what "looks reasonable", or copied from a different parameter. An agent may
+# write a value only when you state it explicitly in the conversation, and only after showing you the
+# change and getting a yes. It never loosens a value to make a run return results.
+#
+# Format: numbers are written as quoted strings ("250.00", "30"); lists as ["AMD", "PLTR"].
+# "OFF" is accepted only where a comment says so.
+#
+# Not here, on purpose:
+#   - which account: the screener always uses your Agentic account, the one account an agent can
+#     trade, read fresh from get_accounts on every run.
+#   - a day-trade budget: FINRA eliminated the pattern-day-trader rule on 2026-06-04. If a review
+#     returns a day-trading check anyway, it is shown to you verbatim.
+#   - how often to run: each invocation is one pass; scheduling belongs to your agent (a loop,
+#     routine or scheduled task), not to this file.
+
+[options.criteria]
+
+# ---- Capital and risk ------------------------------------------------------------------------
+max_position_pct = "UNSET"           # max % of the Agentic account's total value in one entry
+                                     # (cost at the natural price x contracts_per_entry)
+max_concurrent = "UNSET"             # max open option positions at once, counted from
+                                     # get_option_positions with nonzero=true (closed rows don't
+                                     # count). Each open contract line counts once, so a debit
+                                     # spread counts as 2.
+max_cost_per_contract_usd = "UNSET"  # $ ceiling per contract = premium x 100, in dollars.
+                                     # A $2.35 option costs $235.00 per contract; for a spread,
+                                     # net debit x 100 per spread. Checked at the natural price
+                                     # (buy at the ask, sell at the bid), never at the mid.
+reserve_cash_usd = "UNSET"           # $ of buying power never deployed; a candidate that would
+                                     # leave less than this is rejected
+
+# ---- Universe: which underlyings are eligible -------------------------------------------------
+price_min = "UNSET"                  # underlying share price floor
+price_max = "UNSET"                  # underlying share price ceiling
+min_avg_volume = "UNSET"             # average daily share volume; liquidity floor. Liquidity in
+                                     # the underlying is a prerequisite for liquidity in its
+                                     # options: a thin stock's chain would fail the spread gate
+                                     # anyway, so screening it out here saves the chain fetch.
+                                     # The lookback is the scanner filter's own; the report names it.
+symbols_allowlist = []               # optional: only these tickers (empty = no restriction)
+symbols_blocklist = []               # optional: never these tickers. Applied after the scan too,
+                                     # so it can't be silently dropped by a changed scan.
+
+# ---- Contract selection -----------------------------------------------------------------------
+structure = "UNSET"                  # long_call | long_put | debit_call_spread | debit_put_spread
+                                     #
+                                     # Long calls and long puts need options level 2 on any
+                                     # account type. Debit spreads need options level 3 on a
+                                     # margin or limited-margin account, and are not available
+                                     # on retirement accounts through these tools. With small
+                                     # capital these four are the realistic set: covered calls
+                                     # need 100 shares and cash-secured puts need strike x 100 in
+                                     # cash, so both are out below a few thousand dollars. CREDIT
+                                     # spreads are level 3 too, but they post collateral of up to
+                                     # the width x 100 (a $5-wide credit spread can tie up $500),
+                                     # so they are out of reach at this size regardless of
+                                     # approval level.
+                                     #
+                                     # A debit spread buys one strike and sells a further one, so
+                                     # the short leg's credit offsets the cost. The same
+                                     # directional view can cost a fraction of the outright long
+                                     # option, which is what puts higher-priced underlyings within
+                                     # reach. The tradeoffs are real: gain is capped at the width,
+                                     # and you cross two bid-ask spreads instead of one, which is
+                                     # meaningful when the net debit is under a dollar.
+spread_width_min = "UNSET"           # spreads only: min distance between strikes, in $.
+                                     # Write "OFF" for long_call / long_put.
+spread_width_max = "UNSET"           # spreads only: max distance. Width x 100 is the ceiling on
+                                     # what the spread can ever be worth. "OFF" for single legs.
+dte_min = "UNSET"                    # min days to expiration (calendar days from today, ET)
+dte_max = "UNSET"                    # max days to expiration
+delta_min = "UNSET"                  # |delta| floor, written as a decimal between 0 and 1 (not a
+delta_max = "UNSET"                  # percent). Roughly the market's implied odds the contract
+                                     # finishes in the money; also how much the option moves per
+                                     # $1 of underlying. Applied to the leg you buy. A contract
+                                     # whose quote has no delta is rejected, never assumed.
+max_spread_pct = "UNSET"             # (ask - bid) / mid, as %. This is your round-trip cost before
+                                     # the trade does anything: a 0.45/0.55 quote is 20% wide.
+                                     # Every leg must pass, the one you sell included.
+min_open_interest = "UNSET"          # contracts outstanding; thin strikes are hard to exit. Every
+                                     # leg must pass: a clean long leg paired with an illiquid
+                                     # short leg is an unexitable position. A quote with no open
+                                     # interest is rejected, never assumed.
+iv_rank_min = "UNSET"                # optional: implied-volatility RANK floor, 0-100. Write "OFF"
+iv_rank_max = "UNSET"                # to disable either one. IV rank is not IV percentile; they
+                                     # are different metrics. Option quotes don't return IV rank,
+                                     # so if you set one, the run finds a verified IV-rank scanner
+                                     # filter or datapoint and applies it, or stops and says so.
+                                     # It is never silently skipped.
+
+# ---- Event handling ---------------------------------------------------------------------------
+earnings_policy = "UNSET"            # avoid | allow | require
+                                     # Earnings inside the holding window is the single largest
+                                     # source of overnight gap risk, in both directions. Dates come
+                                     # from get_earnings_results per symbol; a date the company
+                                     # has not verified counts as a possible hit under "avoid".
+earnings_buffer_days = "UNSET"       # days around the holding window (today through expiration)
+                                     # in which a report still counts
+
+# ---- Session and presentation -----------------------------------------------------------------
+scan_sessions = "UNSET"              # "regular_hours_only" is the only supported value until the
+                                     # non-regular session windows are verified. Option quotes
+                                     # outside regular hours are wide and often stale, so outside
+                                     # the regular session the screener reports but prepares no
+                                     # order tickets.
+sort_by = "required_move_pct"        # the order candidates are listed in; a disclosed sort, not a
+                                     # recommendation and not a financial threshold. One of:
+                                     # required_move_pct | cost_usd | dte | spread_pct | account_pct
+
+[options.entry]
+entry_price_rule = "UNSET"           # ask_each_time | natural | mid
+                                     # How the limit price for a simulated entry is set. The agent
+                                     # never picks an option price on its own.
+                                     #   ask_each_time: you are asked for the limit every time.
+                                     #   natural: the worst-case price (the ask; for a spread,
+                                     #     long ask - short bid). Most likely to fill; pays the
+                                     #     whole bid-ask spread.
+                                     #   mid: halfway between bid and ask, rounded to the allowed
+                                     #     price increment. Cheaper when it fills; may not fill.
+                                     # Cost, account % and the capital checks always use the
+                                     # natural price, whichever rule you pick.
+contracts_per_entry = "UNSET"        # whole number of contracts (spreads: whole spreads) per
+                                     # simulated entry. Never sized from buying power.
+
+# ---- Exits: required before any entry is proposed ----------------------------------------------
+# An entry without a predefined exit is an open-ended bet. The screener will not surface a
+# candidate unless all four of these are set. They live in [options.exits], a table shared with
+# robinhood-options-monitor (which watches positions you hold). If your config does not have an
+# [options.exits] table yet, remove the leading "# " from the block below and set the values.
+# Keep exactly one [options.exits] table per file.
+#
+# [options.exits]
+# profit_target_pct = "UNSET"        # close at +X% on premium paid
+# stop_loss_pct = "UNSET"            # close at -X% on premium paid (above 0; 100 or more = total loss)
+# time_stop_dte = "UNSET"            # close when DTE falls to this, regardless of P&L: theta
+#                                    # decay accelerates into expiry. A contract already at or
+#                                    # inside this DTE is rejected by the screener.
+# max_hold_days = "UNSET"            # hard calendar cap on days held

@@ -1,0 +1,3111 @@
+{
+ "script": "wash_sale",
+ "about": "Sale mode: matching, partial washes, permanence, exclusions and the status that is never clear with incomplete coverage (build spec B.7.9).",
+ "cases": [
+  {
+   "name": "spec T1: Roth buy 2026-11-06 washes 5 of 20 TSLA -> $390.00 permanent; earliest clean sale 2026-12-07",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "symbol": "TSLA",
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "262.00",
+     "lots_sold": [
+      {
+       "lot_id": "L7",
+       "acquired": "2026-06-02",
+       "shares": "20",
+       "cost_per_share": "340.00"
+      }
+     ]
+    },
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "buys": [
+     {
+      "account_last4": "P0Z9",
+      "date": "2026-11-06",
+      "shares": "5",
+      "source": "order",
+      "placed_agent": "user",
+      "order_state": "filled",
+      "fill_status": "filled",
+      "order_id_short": "9e2"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "window": {
+     "start": "2026-10-17",
+     "end": "2026-12-16"
+    },
+    "loss_shares": "20",
+    "loss_per_share": {
+     "L7": "78.00"
+    },
+    "washed_shares": "5",
+    "clean_shares": "15",
+    "partial_wash": true,
+    "disallowed_total_usd": "390.00",
+    "permanent_total_usd": "390.00",
+    "allowed_loss_usd": "1170.00",
+    "earliest_clean_sale_date": "2026-12-07",
+    "do_not_buy_until": "2026-12-17",
+    "first_trading_day_after": "2026-12-17",
+    "conflicts": [
+     {
+      "account_last4": "P0Z9",
+      "account_type": "retirement",
+      "date": "2026-11-06",
+      "shares": "5",
+      "washed_shares": "5",
+      "disallowed_loss_usd": "390.00",
+      "permanent": true,
+      "direction": "before",
+      "source": "order"
+     }
+    ],
+    "status_line": "CONFLICT: Dollars at stake: $390.00 of TSLA loss permanently disallowed if sold before 2026-12-07"
+   }
+  },
+  {
+   "name": "spec: an IRA buy 12 days before the sale is permanent",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-18",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-18",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "P0Z9",
+      "date": "2026-11-06",
+      "shares": "4",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "permanent_total_usd": "40.00",
+    "disallowed_total_usd": "40.00",
+    "conflicts": [
+     {
+      "permanent": true,
+      "account_type": "retirement"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a taxable replacement is deferred, not permanent",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-18",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-18",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-06",
+      "shares": "4",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "permanent_total_usd": "0.00",
+    "disallowed_total_usd": "40.00",
+    "conflicts": [
+     {
+      "permanent": false
+     }
+    ]
+   }
+  },
+  {
+   "name": "spec: a lot that is part of the sale is not a replacement",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "N",
+       "acquired": "2026-11-10",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-10",
+      "shares": "10",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear",
+    "washed_shares": "0",
+    "excluded_as_shares_sold": [
+     {
+      "lot_id": "N",
+      "shares": "10",
+      "date": "2026-11-10"
+     }
+    ]
+   }
+  },
+  {
+   "name": "leftover shares of the same-day purchase as a sold lot are possible (same block), not clear",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "N",
+       "acquired": "2026-11-10",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-10",
+      "shares": "15",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "possible",
+    "possible": [
+     {
+      "kind": "buy",
+      "shares": "5"
+     }
+    ],
+    "possible_max_additional_disallowed_usd": "50.00"
+   }
+  },
+  {
+   "name": "spec: one account failed -> unknown",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "failed",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": []
+   },
+   "expected": {
+    "ok": true,
+    "status": "unknown",
+    "unknowns": [
+     {
+      "kind": "account_not_fully_read",
+      "account_last4": "P0Z9",
+      "read_status": "failed"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a partially read account -> unknown",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "partial",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": []
+   },
+   "expected": {
+    "ok": true,
+    "status": "unknown"
+   }
+  },
+  {
+   "name": "spec: an excluded account -> clear_in_scope",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "not_in_scope",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": []
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear_in_scope",
+    "not_evaluated": [
+     "other brokers"
+    ]
+   }
+  },
+  {
+   "name": "every account read, nothing in the window -> clear",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": []
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear",
+    "disallowed_total_usd": "0.00",
+    "dollars_at_stake": [
+     "none found"
+    ]
+   }
+  },
+  {
+   "name": "status precedence: a conflict with a failed account is still conflict, with the unknown listed",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "failed",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-10",
+      "shares": "1",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "unknowns": [
+     {
+      "kind": "account_not_fully_read"
+     }
+    ]
+   }
+  },
+  {
+   "name": "gain lots are not washed; only loss shares are matched",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "G",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "50.00"
+      },
+      {
+       "lot_id": "L",
+       "acquired": "2025-02-03",
+       "shares": "10",
+       "cost_per_share": "95.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-10",
+      "shares": "30",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "loss_shares": "10",
+    "washed_shares": "10",
+    "clean_shares": "0",
+    "partial_wash": false,
+    "disallowed_total_usd": "50.00"
+   }
+  },
+  {
+   "name": "earliest buy matched first; lots in the order sold; the clean sale date uses the latest in-window buy even if unmatched",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "20",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-10",
+      "shares": "5",
+      "source": "order",
+      "fill_status": "filled"
+     },
+     {
+      "account_last4": "X4F1",
+      "date": "2026-10-20",
+      "shares": "20",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "washed_shares": "20",
+    "conflicts": [
+     {
+      "date": "2026-10-20",
+      "washed_shares": "20"
+     }
+    ],
+    "in_window_unmatched": [
+     {
+      "date": "2026-11-10"
+     }
+    ],
+    "earliest_clean_sale_date": "2026-12-11"
+   }
+  },
+  {
+   "name": "several loss lots in one sale: replacement shares go to the earliest-acquired lot first (Treas. Reg. 1.1091-1(b)-(c)): A takes 10, B takes 5 -> $250.00",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      },
+      {
+       "lot_id": "B",
+       "acquired": "2025-02-03",
+       "shares": "10",
+       "cost_per_share": "120.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-01",
+      "shares": "15",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "disallowed_total_usd": "250.00",
+    "disallowed_low_usd": "250.00",
+    "matching_order": "acquired_earliest_first",
+    "per_lot": {
+     "A": {
+      "washed_shares": "10",
+      "clean_shares": "0",
+      "disallowed_usd": "100.00"
+     },
+     "B": {
+      "washed_shares": "5",
+      "clean_shares": "5",
+      "disallowed_usd": "150.00"
+     }
+    },
+    "matching_note": "several loss lots in one sale: replacement shares are matched to the lots sold in the order they were acquired, earliest first (Treas. Reg. 1.1091-1(b)-(c))"
+   }
+  },
+  {
+   "name": "several loss lots, one without an acquisition date: the order cannot be applied, so largest loss first (the maximum) with the smallest-first figure next to it",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      },
+      {
+       "lot_id": "B",
+       "acquired": "2025-02-03",
+       "shares": "10",
+       "cost_per_share": "120.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-01",
+      "shares": "15",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "disallowed_total_usd": "350.00",
+    "disallowed_low_usd": "250.00",
+    "matching_order": "largest_loss_first",
+    "per_lot": {
+     "A": {
+      "washed_shares": "5",
+      "disallowed_usd": "50.00"
+     },
+     "B": {
+      "washed_shares": "10",
+      "disallowed_usd": "300.00"
+     }
+    },
+    "matching_note": "several loss lots in one sale, and the acquisition date of A is missing, so the order the regulations use (earliest acquired first, Treas. Reg. 1.1091-1(b)-(c)) cannot be applied: washed shares are attached to the largest loss per share first (the most that can be disallowed); attached smallest-first it would be $250.00. Pass each lot's acquisition date for the exact figure"
+   }
+  },
+  {
+   "name": "T1 with both TSLA lots sold: the 5 Roth shares match L1, acquired first (Treas. Reg. 1.1091-1(b)-(c)) -> $90.00 permanent, $1,830.00 allowed",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "symbol": "TSLA",
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "262.00",
+     "lots_sold": [
+      {
+       "lot_id": "L1",
+       "acquired": "2025-03-10",
+       "shares": "20",
+       "cost_per_share": "280.00"
+      },
+      {
+       "lot_id": "L7",
+       "acquired": "2026-06-02",
+       "shares": "20",
+       "cost_per_share": "340.00"
+      }
+     ]
+    },
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "buys": [
+     {
+      "account_last4": "P0Z9",
+      "date": "2026-11-06",
+      "shares": "5",
+      "source": "order",
+      "placed_agent": "user",
+      "order_state": "filled",
+      "fill_status": "filled",
+      "order_id_short": "9e2"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "loss_shares": "40",
+    "washed_shares": "5",
+    "clean_shares": "35",
+    "disallowed_total_usd": "90.00",
+    "permanent_total_usd": "90.00",
+    "disallowed_low_usd": "90.00",
+    "loss_usd_total": "1920.00",
+    "allowed_loss_usd": "1830.00",
+    "earliest_clean_sale_date": "2026-12-07",
+    "per_lot": {
+     "L1": {
+      "washed_shares": "5",
+      "disallowed_usd": "90.00"
+     },
+     "L7": {
+      "washed_shares": "0"
+     }
+    },
+    "status_line": "CONFLICT: Dollars at stake: $90.00 of TSLA loss permanently disallowed if sold before 2026-12-07"
+   }
+  },
+  {
+   "name": "T1 with both TSLA lots listed newest first: the listing order does not matter, still $90.00",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "symbol": "TSLA",
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "262.00",
+     "lots_sold": [
+      {
+       "lot_id": "L7",
+       "acquired": "2026-06-02",
+       "shares": "20",
+       "cost_per_share": "340.00"
+      },
+      {
+       "lot_id": "L1",
+       "acquired": "2025-03-10",
+       "shares": "20",
+       "cost_per_share": "280.00"
+      }
+     ]
+    },
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "buys": [
+     {
+      "account_last4": "P0Z9",
+      "date": "2026-11-06",
+      "shares": "5",
+      "source": "order",
+      "placed_agent": "user",
+      "order_state": "filled",
+      "fill_status": "filled",
+      "order_id_short": "9e2"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "disallowed_total_usd": "90.00",
+    "per_lot": {
+     "L1": {
+      "washed_shares": "5"
+     },
+     "L7": {
+      "washed_shares": "0"
+     }
+    }
+   }
+  },
+  {
+   "name": "a single loss lot has no matching note",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "symbol": "TSLA",
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "262.00",
+     "lots_sold": [
+      {
+       "lot_id": "L7",
+       "acquired": "2026-06-02",
+       "shares": "20",
+       "cost_per_share": "340.00"
+      }
+     ]
+    },
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "buys": [
+     {
+      "account_last4": "P0Z9",
+      "date": "2026-11-06",
+      "shares": "5",
+      "source": "order",
+      "placed_agent": "user",
+      "order_state": "filled",
+      "fill_status": "filled",
+      "order_id_short": "9e2"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "disallowed_low_usd": "390.00",
+    "matching_note": null
+   }
+  },
+  {
+   "name": "a sale inside a retirement account is not applicable (IRA losses are not deductible)",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "P0Z9",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-10",
+      "shares": "5",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "not_applicable"
+   }
+  },
+  {
+   "name": "basis pending on the lot sold -> unknown, never a zero-cost loss",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "P",
+       "acquired": "2026-11-16",
+       "shares": "3",
+       "cost_per_share": null
+      }
+     ]
+    },
+    "buys": []
+   },
+   "expected": {
+    "ok": true,
+    "status": "unknown",
+    "unknowns": [
+     {
+      "kind": "basis_pending",
+      "lot_id": "P"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a past sale given as shares + realized_usd",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "AMD",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-03",
+     "account_last4": "M7Q5",
+     "shares": "10",
+     "realized_usd": "-412.00"
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-10",
+      "shares": "3",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "disallowed_total_usd": "123.60",
+    "earliest_clean_sale_date": null,
+    "earliest_clean_sale_note": "the sale date is in the past; there is no later sale date to move to"
+   }
+  },
+  {
+   "name": "a buy with unknown fill status is possible",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-10",
+      "shares": "2",
+      "source": "order",
+      "fill_status": "unknown"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "possible",
+    "possible": [
+     {
+      "kind": "buy",
+      "fill_status": "unknown"
+     }
+    ]
+   }
+  },
+  {
+   "name": "an option order on the same stock inside the window is possible (not evaluated)",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [],
+    "option_buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-12",
+      "contracts": "1",
+      "description": "XYZ 2026-12-18 100C bought to open"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "possible",
+    "possible": [
+     {
+      "kind": "option",
+      "date": "2026-11-12"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a declared related ticker bought inside the window is possible",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [],
+    "declared_related": [
+     "ABC"
+    ],
+    "related_buys": [
+     {
+      "symbol": "ABC",
+      "account_last4": "X4F1",
+      "date": "2026-11-12",
+      "shares": "2"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "possible",
+    "possible": [
+     {
+      "kind": "declared_related",
+      "symbol": "ABC",
+      "shares": "2"
+     }
+    ],
+    "possible_max_additional_disallowed_usd": "20.00"
+   }
+  },
+  {
+   "name": "recurring: monthly buys (the Nov 1 buy moved to Mon Nov 2) project a 2026-12-01 buy as possible; no clean date while it continues",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "symbol": "VOO",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "540.00",
+     "lots_sold": [
+      {
+       "lot_id": "V2",
+       "acquired": "2026-07-15",
+       "shares": "5",
+       "cost_per_share": "560.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-02",
+      "shares": "1",
+      "source": "order",
+      "fill_status": "filled",
+      "placed_agent": "recurring"
+     },
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-10-01",
+      "shares": "1",
+      "source": "order",
+      "fill_status": "filled",
+      "placed_agent": "recurring"
+     }
+    ],
+    "recurring": [
+     {
+      "account_last4": "M7Q5",
+      "dates": [
+       "2026-09-01",
+       "2026-10-01",
+       "2026-11-02"
+      ],
+      "shares_each": "1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "disallowed_total_usd": "20.00",
+    "recurring_blocks_clean_date": true,
+    "possible": [
+     {
+      "kind": "recurring_projected",
+      "date": "2026-12-01",
+      "why": "inferred from history; the connector cannot see your schedule"
+     }
+    ],
+    "dollars_at_stake": [
+     "••••M7Q5 2026-11-02 recurring buy: $20.00 disallowed"
+    ]
+   }
+  },
+  {
+   "name": "recurring with a single past buy: cadence unknown -> possible",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [],
+    "recurring": [
+     {
+      "account_last4": "M7Q5",
+      "dates": [
+       "2026-11-02"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "possible",
+    "possible": [
+     {
+      "kind": "recurring_unknown_cadence"
+     }
+    ]
+   }
+  },
+  {
+   "name": "DRIP: a quarterly payer whose last payable date passed is projected forward",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [],
+    "drip": [
+     {
+      "account_last4": "M7Q5",
+      "payable_date": "2026-10-01",
+      "ex_dividend_date": "2026-09-15",
+      "distribution_frequency": "quarterly"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear"
+   }
+  },
+  {
+   "name": "DRIP: payable date inside the window -> possible",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [],
+    "drip": [
+     {
+      "account_last4": "M7Q5",
+      "payable_date": "2026-12-15",
+      "ex_dividend_date": "2026-11-18"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "possible",
+    "possible": [
+     {
+      "kind": "drip_projected",
+      "date": "2026-12-15"
+     }
+    ]
+   }
+  },
+  {
+   "name": "DRIP: payment date unknown -> possible",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [],
+    "drip": [
+     {
+      "account_last4": "M7Q5"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "possible",
+    "possible": [
+     {
+      "kind": "drip_unknown_date"
+     }
+    ]
+   }
+  },
+  {
+   "name": "crypto is refused with the dated note",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "ETH",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [],
+    "asset_class": "crypto"
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "CRYPTO_NOT_SUBJECT",
+      "field": "symbol"
+     }
+    ],
+    "rules_as_of": "2026-09-22",
+    "reverify_by": "2026-11-01"
+   }
+  },
+  {
+   "name": "a -USD pair is crypto",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "BTC-USD",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": []
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "CRYPTO_NOT_SUBJECT"
+     }
+    ]
+   }
+  },
+  {
+   "name": "BTC without asset_class is ambiguous (also an ETF ticker)",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "BTC",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": []
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "AMBIGUOUS_ASSET_CLASS",
+      "field": "asset_class"
+     }
+    ]
+   }
+  },
+  {
+   "name": "BTC as an equity ticker is swept",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "BTC",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [],
+    "asset_class": "equity"
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear"
+   }
+  },
+  {
+   "name": "a buy in an account not listed is an input error",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "ZZZZ",
+      "date": "2026-11-10",
+      "shares": "1",
+      "source": "order",
+      "fill_status": "filled"
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "UNKNOWN_ACCOUNT"
+     }
+    ]
+   }
+  },
+  {
+   "name": "no accounts listed is refused (a check with no accounts can never be clear)",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "XYZ",
+    "as_of": "2026-11-16",
+    "accounts": [],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "A",
+       "acquired": "2025-01-02",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": []
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "MISSING_FIELD",
+      "field": "accounts"
+     }
+    ]
+   }
+  },
+  {
+   "name": "the earliest-acquired lot has the smaller loss: OLD ($3.00/sh, 2025) takes the 5 Roth shares -> $15.00, not $390.00",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "TSLA",
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "262.00",
+     "lots_sold": [
+      {
+       "lot_id": "NEW",
+       "acquired": "2026-06-02",
+       "shares": "10",
+       "cost_per_share": "340.00"
+      },
+      {
+       "lot_id": "OLD",
+       "acquired": "2025-01-10",
+       "shares": "10",
+       "cost_per_share": "265.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "P0Z9",
+      "date": "2026-11-06",
+      "shares": "5"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "disallowed_total_usd": "15.00",
+    "permanent_total_usd": "15.00",
+    "allowed_loss_usd": "795.00",
+    "per_lot": {
+     "OLD": {
+      "washed_shares": "5"
+     },
+     "NEW": {
+      "washed_shares": "0"
+     }
+    },
+    "status_line": "CONFLICT: Dollars at stake: $15.00 of TSLA loss permanently disallowed if sold before 2026-12-07"
+   }
+  },
+  {
+   "name": "a past sale given as shares + realized_usd with no acquisition date: its own purchase 8 days earlier is possible, never a definite conflict",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "XYZ",
+    "sale": {
+     "date": "2026-11-10",
+     "account_last4": "X4F1",
+     "shares": "10",
+     "realized_usd": "-50.00"
+    },
+    "per_account": [
+     {
+      "account_last4": "X4F1",
+      "orders": [
+       {
+        "id": "b1aaaaaa",
+        "symbol": "XYZ",
+        "side": "buy",
+        "state": "filled",
+        "cumulative_quantity": "10",
+        "average_price": "100.00",
+        "created_at": "2026-11-02T15:00:00Z",
+        "last_transaction_at": "2026-11-02T15:00:05Z"
+       },
+       {
+        "id": "s1bbbbbb",
+        "symbol": "XYZ",
+        "side": "sell",
+        "state": "filled",
+        "cumulative_quantity": "10",
+        "average_price": "95.00",
+        "created_at": "2026-11-10T15:00:00Z",
+        "last_transaction_at": "2026-11-10T15:00:05Z"
+       }
+      ],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "M7Q5",
+      "orders": []
+     },
+     {
+      "account_last4": "P0Z9",
+      "orders": []
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "possible",
+    "conflicts": [],
+    "possible": [
+     {
+      "kind": "buy",
+      "date": "2026-11-02",
+      "shares": "10",
+      "account_last4": "X4F1",
+      "why": "may be the purchase of the shares sold (their acquisition date was not given); if it is not, these shares are a replacement"
+     }
+    ],
+    "possible_max_additional_disallowed_usd": "50.00"
+   }
+  },
+  {
+   "name": "the same past sale with acquired given: its own purchase is excluded -> clear",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "XYZ",
+    "sale": {
+     "date": "2026-11-10",
+     "account_last4": "X4F1",
+     "shares": "10",
+     "realized_usd": "-50.00",
+     "acquired": "2026-11-02"
+    },
+    "per_account": [
+     {
+      "account_last4": "X4F1",
+      "orders": [
+       {
+        "id": "b1aaaaaa",
+        "symbol": "XYZ",
+        "side": "buy",
+        "state": "filled",
+        "cumulative_quantity": "10",
+        "average_price": "100.00",
+        "created_at": "2026-11-02T15:00:00Z",
+        "last_transaction_at": "2026-11-02T15:00:05Z"
+       },
+       {
+        "id": "s1bbbbbb",
+        "symbol": "XYZ",
+        "side": "sell",
+        "state": "filled",
+        "cumulative_quantity": "10",
+        "average_price": "95.00",
+        "created_at": "2026-11-10T15:00:00Z",
+        "last_transaction_at": "2026-11-10T15:00:05Z"
+       }
+      ],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "M7Q5",
+      "orders": []
+     },
+     {
+      "account_last4": "P0Z9",
+      "orders": []
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear",
+    "excluded_as_shares_sold": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-02",
+      "shares": "10"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a past sale with no acquisition date and a same-account buy after it: the later buy is a definite replacement",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "XYZ",
+    "sale": {
+     "date": "2026-11-10",
+     "account_last4": "X4F1",
+     "shares": "10",
+     "realized_usd": "-50.00"
+    },
+    "per_account": [
+     {
+      "account_last4": "X4F1",
+      "orders": [
+       {
+        "id": "b1aaaaaa",
+        "symbol": "XYZ",
+        "side": "buy",
+        "state": "filled",
+        "cumulative_quantity": "10",
+        "average_price": "100.00",
+        "created_at": "2026-11-02T15:00:00Z",
+        "last_transaction_at": "2026-11-02T15:00:05Z"
+       },
+       {
+        "id": "s1bbbbbb",
+        "symbol": "XYZ",
+        "side": "sell",
+        "state": "filled",
+        "cumulative_quantity": "10",
+        "average_price": "95.00",
+        "created_at": "2026-11-10T15:00:00Z",
+        "last_transaction_at": "2026-11-10T15:00:05Z"
+       },
+       {
+        "id": "b2cccccc",
+        "symbol": "XYZ",
+        "side": "buy",
+        "state": "filled",
+        "cumulative_quantity": "4",
+        "average_price": "96.00",
+        "created_at": "2026-11-12T15:00:00Z",
+        "last_transaction_at": "2026-11-12T15:00:05Z"
+       }
+      ],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "M7Q5",
+      "orders": []
+     },
+     {
+      "account_last4": "P0Z9",
+      "orders": []
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "disallowed_total_usd": "20.00",
+    "conflicts": [
+     {
+      "date": "2026-11-12",
+      "washed_shares": "4",
+      "direction": "after"
+     }
+    ],
+    "possible": [
+     {
+      "kind": "buy",
+      "date": "2026-11-02"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a past sale's shares from two buys (acquired_lots): both purchases are excluded",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "XYZ",
+    "sale": {
+     "date": "2026-11-10",
+     "account_last4": "X4F1",
+     "shares": "10",
+     "realized_usd": "-50.00",
+     "acquired_lots": [
+      {
+       "acquired": "2026-11-02",
+       "shares": "6"
+      },
+      {
+       "acquired": "2026-11-03",
+       "shares": "4"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-02",
+      "shares": "6"
+     },
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-03",
+      "shares": "4"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear",
+    "excluded_as_shares_sold": [
+     {
+      "lot_id": "sale-1",
+      "shares": "6"
+     },
+     {
+      "lot_id": "sale-2",
+      "shares": "4"
+     }
+    ]
+   }
+  },
+  {
+   "name": "Treas. Reg. 1.1091-1(e): a buy that already washed an earlier loss sale cannot wash this one -> clear, with the reason",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "XYZ",
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "X4F1",
+     "price_per_share": "78.00",
+     "lots_sold": [
+      {
+       "lot_id": "B",
+       "acquired": "2025-05-01",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-05",
+      "shares": "10"
+     }
+    ],
+    "realized_losses": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-02",
+      "shares": "10",
+      "realized_usd": "-150.00",
+      "classification": "equity_sale"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear",
+    "disallowed_total_usd": "0.00",
+    "earlier_loss_sales": {
+     "checked": true,
+     "from": "2026-09-17",
+     "washed_by_earlier_loss": [
+      {
+       "date": "2026-11-02",
+       "buys_used": [
+        {
+         "account_last4": "M7Q5",
+         "date": "2026-11-05",
+         "shares": "10"
+        }
+       ]
+      }
+     ],
+     "buys_already_used": [
+      {
+       "date": "2026-11-05",
+       "shares": "10"
+      }
+     ]
+    },
+    "status_line": "CLEAR: Dollars at stake: none found for XYZ in any of your Robinhood accounts; the in-window buy(s) already washed an earlier loss sale, so they cannot wash this one"
+   }
+  },
+  {
+   "name": "an unconfirmed earlier loss row does not free the buy: conflict stays, with the figure if it was a share sale",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "XYZ",
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "X4F1",
+     "price_per_share": "78.00",
+     "lots_sold": [
+      {
+       "lot_id": "B",
+       "acquired": "2025-05-01",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-05",
+      "shares": "10"
+     }
+    ],
+    "realized_losses": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-02",
+      "shares": "10",
+      "realized_usd": "-150.00",
+      "classification": "unclassified"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "disallowed_total_usd": "220.00",
+    "disallowed_if_unconfirmed_earlier_losses_are_share_sales_usd": "0.00",
+    "earlier_loss_sales": {
+     "not_applied": [
+      {
+       "date": "2026-11-02"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "earlier loss sales not checked: the figure is labeled the maximum in the notes",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "XYZ",
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "X4F1",
+     "price_per_share": "78.00",
+     "lots_sold": [
+      {
+       "lot_id": "B",
+       "acquired": "2025-05-01",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-05",
+      "shares": "10"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "disallowed_total_usd": "220.00",
+    "earlier_loss_sales": {
+     "checked": false
+    }
+   }
+  },
+  {
+   "name": "a loss sold 57 days earlier takes its replacement shares earliest first: 4 from a buy before this window, 6 from the shared buy; 4 are left to wash this sale",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "XYZ",
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "X4F1",
+     "price_per_share": "78.00",
+     "lots_sold": [
+      {
+       "lot_id": "B",
+       "acquired": "2025-05-01",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-08-25",
+      "shares": "4"
+     },
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-10-18",
+      "shares": "10"
+     }
+    ],
+    "realized_losses": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-09-20",
+      "shares": "10",
+      "realized_usd": "-100.00",
+      "classification": "equity_sale"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "washed_shares": "4",
+    "disallowed_total_usd": "88.00",
+    "earlier_loss_sales": {
+     "washed_by_earlier_loss": [
+      {
+       "date": "2026-09-20",
+       "buys_used": [
+        {
+         "date": "2026-08-25",
+         "shares": "4"
+        },
+        {
+         "date": "2026-10-18",
+         "shares": "6"
+        }
+       ]
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "an earlier loss whose purchase date is unknown, with a same-account buy before it, uses no buy (the figure stays the maximum)",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "XYZ",
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "X4F1",
+     "price_per_share": "78.00",
+     "lots_sold": [
+      {
+       "lot_id": "B",
+       "acquired": "2025-05-01",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-10-25",
+      "shares": "10"
+     }
+    ],
+    "realized_losses": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-02",
+      "shares": "10",
+      "realized_usd": "-150.00",
+      "classification": "equity_sale"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "disallowed_total_usd": "220.00",
+    "earlier_loss_sales": {
+     "not_applied": [
+      {
+       "date": "2026-11-02"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "a loss sold in the Roth uses up no buy (not deductible, not washed)",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "XYZ",
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "X4F1",
+     "price_per_share": "78.00",
+     "lots_sold": [
+      {
+       "lot_id": "B",
+       "acquired": "2025-05-01",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-05",
+      "shares": "10"
+     }
+    ],
+    "realized_losses": [
+     {
+      "account_last4": "P0Z9",
+      "date": "2026-11-02",
+      "shares": "10",
+      "realized_usd": "-150.00",
+      "classification": "equity_sale"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "disallowed_total_usd": "220.00"
+   }
+  },
+  {
+   "name": "harvest scan, one combined sweep: lots sold the same day in two accounts share the 5 Roth shares; the earliest-acquired lot takes them -> $190.00, not $580.00",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "TSLA",
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "262.00",
+     "lots_sold": [
+      {
+       "lot_id": "L7",
+       "acquired": "2026-06-02",
+       "shares": "20",
+       "cost_per_share": "340.00"
+      },
+      {
+       "lot_id": "A9",
+       "account_last4": "X4F1",
+       "acquired": "2026-03-02",
+       "shares": "10",
+       "cost_per_share": "300.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "P0Z9",
+      "date": "2026-11-06",
+      "shares": "5"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "disallowed_total_usd": "190.00",
+    "permanent_total_usd": "190.00",
+    "per_lot": {
+     "A9": {
+      "washed_shares": "5",
+      "disallowed_usd": "190.00"
+     },
+     "L7": {
+      "washed_shares": "0"
+     }
+    }
+   }
+  },
+  {
+   "name": "combined sweep: a lot's own purchase is excluded only in its own account",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "XYZ",
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "N",
+       "account_last4": "X4F1",
+       "acquired": "2026-11-10",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-10",
+      "shares": "10"
+     },
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-10",
+      "shares": "3"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "washed_shares": "3",
+    "excluded_as_shares_sold": [
+     {
+      "account_last4": "X4F1",
+      "lot_id": "N",
+      "shares": "10"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a lot sold in the Roth inside a combined sweep is not washed",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "XYZ",
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "90.00",
+     "lots_sold": [
+      {
+       "lot_id": "R",
+       "account_last4": "P0Z9",
+       "acquired": "2025-11-10",
+       "shares": "10",
+       "cost_per_share": "100.00"
+      }
+     ]
+    },
+    "buys": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-10",
+      "shares": "3"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear",
+    "loss_shares": "0",
+    "washed_shares": "0"
+   }
+  }
+ ]
+}

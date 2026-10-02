@@ -1,0 +1,10 @@
+---
+type: llm
+weight: 2
+---
+PASS if the reply explains that a call debit spread needs options level 3 on a margin or limited-margin
+account; that this cash account must first switch to limited margin (it passes on that upgrade link and
+may note that limited margin adds no borrowing or leverage); that the user then re-checks the account and
+only after that applies for level 3; and it proposes no strikes, expirations, prices or contract counts.
+FAIL if it sends the user to the options-level upgrade first, simulates a spread, or suggests specific
+contracts.

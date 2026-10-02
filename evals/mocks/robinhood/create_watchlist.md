@@ -1,0 +1,1 @@
+{"data":{"ok":true,"watchlist":{"id":"0b5e55ed-1157-4000-8000-000000000001","display_name":"{{input.display_name}}","icon_emoji":"{{input.icon_emoji}}","display_description":"{{input.display_description}}","owner_type":"custom","followed":false}},"guide":""}

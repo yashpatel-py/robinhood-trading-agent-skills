@@ -1,0 +1,29 @@
+{
+  "name": "yashpatel-py",
+  "owner": { "name": "Yash Patel", "url": "https://github.com/yashpatel-py" },
+  "description": "Unofficial skills and guardrails for Robinhood Agentic Trading (MCP). Not affiliated with Robinhood Markets, Inc.",
+  "plugins": [
+    {
+      "name": "robinhood-trading",
+      "source": "./",
+      "displayName": "Preflight for Robinhood Agentic Trading (unofficial)",
+      "description": "Unofficial. Six skills for Robinhood's agentic-trading MCP: checked order tickets, cross-account wash-sale checks, exit protection with native alerts, an options monitor (exits, expiration, assignment), an agent report card and a config-driven options screener. Simulates orders by default; a fail-closed PreToolUse hook blocks placement, and opt-in confirm mode asks you to approve each reviewed order.",
+      "version": "2.0.0",
+      "author": { "name": "Yash Patel", "url": "https://github.com/yashpatel-py" },
+      "homepage": "https://github.com/yashpatel-py/robinhood-trading-agent-skills",
+      "repository": "https://github.com/yashpatel-py/robinhood-trading-agent-skills",
+      "license": "MIT",
+      "keywords": ["robinhood", "agentic-trading", "mcp", "wash-sale", "tax-loss-harvesting", "stop-loss", "oco", "price-alerts", "options", "guardrails", "audit-log"],
+      "category": "finance"
+    },
+    {
+      "name": "unofficial-rh-connector",
+      "source": "./plugins/unofficial-rh-connector",
+      "displayName": "Robinhood MCP endpoint config (unofficial helper)",
+      "description": "Unofficial helper that adds Robinhood's official Trading MCP endpoint (OAuth in a desktop browser). Install it instead of claude mcp add, never as well: two server entries expose the same tools twice. This repo's evals don't use it; leave it off any machine that runs them.",
+      "version": "2.0.0",
+      "license": "MIT",
+      "category": "finance"
+    }
+  ]
+}

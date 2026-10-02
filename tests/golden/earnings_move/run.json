@@ -1,0 +1,837 @@
+{
+ "script": "earnings_move",
+ "about": "Hand-computed goldens for earnings_move.py: implied move = call mid + put mid; past moves from closes or daily bars (pm: report-date close -> next close; am: prior close -> report-date close). The fixture household's NVDA numbers: $25.80 / 11.3%.",
+ "cases": [
+  {
+   "name": "spec: NVDA straddle 12.10 + 13.70 = $25.80 = 11.3% of 228.10",
+   "why": "(12.00+12.20)/2 + (13.60+13.80)/2 = 25.80; 25.80/228.10 = 11.3108%",
+   "input": {
+    "symbol": "NVDA",
+    "spot": "228.10",
+    "report": {
+     "date": "2026-11-18",
+     "timing": "pm",
+     "verified": false
+    },
+    "straddle": {
+     "expiration": "2026-11-20",
+     "strike": "230",
+     "call": {
+      "bid": "12.00",
+      "ask": "12.20"
+     },
+     "put": {
+      "bid": "13.60",
+      "ask": "13.80"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "implied_move_usd": "25.80",
+    "implied_move_pct": 11.3,
+    "implied_move_pct_raw": "11.3108",
+    "straddle": {
+     "call_mid": "12.10",
+     "put_mid": "13.70"
+    },
+    "n": 0,
+    "exceeded_implied": "0 of 0",
+    "median_abs_move_pct": null,
+    "label": "evidence, not a forecast",
+    "implied_range": {
+     "low": "202.30",
+     "high": "253.90",
+     "through": "2026-11-20"
+    }
+   }
+  },
+  {
+   "name": "fixture household: 8 trailing after-close reports, median |move| 5.5%, none beyond the 11.3% implied",
+   "why": "moves -5.9, +6.7, -5.2, +6.0, -4.1, +4.6, -8.4, +1.4; middle |moves| 5.171 and 5.906 -> 5.539",
+   "input": {
+    "symbol": "NVDA",
+    "spot": "228.10",
+    "report": {
+     "date": "2026-11-18",
+     "timing": "pm",
+     "verified": false
+    },
+    "straddle": {
+     "expiration": "2026-11-20",
+     "strike": "230",
+     "call": {
+      "bid": "12.00",
+      "ask": "12.20"
+     },
+     "put": {
+      "bid": "13.60",
+      "ask": "13.80"
+     }
+    },
+    "past": [
+     {
+      "date": "2026-08-26",
+      "timing": "pm",
+      "close_before": "196.40",
+      "close_after": "184.80"
+     },
+     {
+      "date": "2026-05-27",
+      "timing": "pm",
+      "close_before": "171.20",
+      "close_after": "182.60"
+     },
+     {
+      "date": "2026-02-25",
+      "timing": "pm",
+      "close_before": "148.90",
+      "close_after": "141.20"
+     },
+     {
+      "date": "2025-11-19",
+      "timing": "pm",
+      "close_before": "146.10",
+      "close_after": "154.80"
+     },
+     {
+      "date": "2025-08-27",
+      "timing": "pm",
+      "close_before": "131.60",
+      "close_after": "126.20"
+     },
+     {
+      "date": "2025-05-28",
+      "timing": "pm",
+      "close_before": "124.40",
+      "close_after": "130.10"
+     },
+     {
+      "date": "2025-02-26",
+      "timing": "pm",
+      "close_before": "118.30",
+      "close_after": "108.40"
+     },
+     {
+      "date": "2024-11-20",
+      "timing": "pm",
+      "close_before": "112.60",
+      "close_after": "114.20"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "implied_move_usd": "25.80",
+    "implied_move_pct": 11.3,
+    "n": 8,
+    "past_moves_pct": [
+     -5.9,
+     6.7,
+     -5.2,
+     6.0,
+     -4.1,
+     4.6,
+     -8.4,
+     1.4
+    ],
+    "median_abs_move_pct": 5.5,
+    "exceeded_implied": "0 of 8"
+   }
+  },
+  {
+   "name": "after-close report read from bars: report-date close -> next session's close",
+   "why": "180.00 -> 171.00 = -5.0%",
+   "input": {
+    "symbol": "NVDA",
+    "spot": "228.10",
+    "report": {
+     "date": "2026-11-18",
+     "timing": "pm",
+     "verified": false
+    },
+    "straddle": {
+     "expiration": "2026-11-20",
+     "strike": "230",
+     "call": {
+      "bid": "12.00",
+      "ask": "12.20"
+     },
+     "put": {
+      "bid": "13.60",
+      "ask": "13.80"
+     }
+    },
+    "past": [
+     {
+      "date": "2026-08-26",
+      "timing": "pm"
+     }
+    ],
+    "bars": [
+     {
+      "date": "2026-08-25T00:00:00Z",
+      "close": "178.00",
+      "interpolated": false
+     },
+     {
+      "date": "2026-08-26T00:00:00Z",
+      "close": "180.00",
+      "interpolated": false
+     },
+     {
+      "date": "2026-08-27T00:00:00Z",
+      "close": "171.00",
+      "interpolated": false
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "n": 1,
+    "past_moves": [
+     {
+      "date": "2026-08-26",
+      "timing": "pm",
+      "close_before": "180.00",
+      "close_after": "171.00",
+      "move_pct": -5.0
+     }
+    ]
+   }
+  },
+  {
+   "name": "before-open report read from bars: prior close -> report-date close",
+   "why": "178.00 -> 180.00 = +1.1%",
+   "input": {
+    "symbol": "NVDA",
+    "spot": "228.10",
+    "report": {
+     "date": "2026-11-18",
+     "timing": "pm",
+     "verified": false
+    },
+    "straddle": {
+     "expiration": "2026-11-20",
+     "strike": "230",
+     "call": {
+      "bid": "12.00",
+      "ask": "12.20"
+     },
+     "put": {
+      "bid": "13.60",
+      "ask": "13.80"
+     }
+    },
+    "past": [
+     {
+      "date": "2026-08-26",
+      "timing": "BMO"
+     }
+    ],
+    "bars": [
+     {
+      "date": "2026-08-25",
+      "close": "178.00"
+     },
+     {
+      "date": "2026-08-26",
+      "close": "180.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "past_moves": [
+     {
+      "timing": "am",
+      "close_before": "178.00",
+      "close_after": "180.00",
+      "move_pct": 1.1
+     }
+    ]
+   }
+  },
+  {
+   "name": "interpolated, missing and unknown-timing quarters are skipped with reasons, never estimated",
+   "why": "interpolated next bar; no bar on the date; timing unknown; a date not before the upcoming report",
+   "input": {
+    "symbol": "NVDA",
+    "spot": "228.10",
+    "report": {
+     "date": "2026-11-18",
+     "timing": "pm",
+     "verified": false
+    },
+    "straddle": {
+     "expiration": "2026-11-20",
+     "strike": "230",
+     "call": {
+      "bid": "12.00",
+      "ask": "12.20"
+     },
+     "put": {
+      "bid": "13.60",
+      "ask": "13.80"
+     }
+    },
+    "past": [
+     {
+      "date": "2026-08-26",
+      "timing": "pm"
+     },
+     {
+      "date": "2026-05-27",
+      "timing": "pm"
+     },
+     {
+      "date": "2026-02-25",
+      "timing": ""
+     },
+     {
+      "date": "2026-11-18",
+      "timing": "pm"
+     }
+    ],
+    "bars": [
+     {
+      "date": "2026-08-26",
+      "close": "180.00"
+     },
+     {
+      "date": "2026-08-27",
+      "close": "180.00",
+      "interpolated": true
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "n": 0,
+    "past_moves": [],
+    "skipped": [
+     {
+      "date": "2026-08-26",
+      "reason": "the next trading day's bar is interpolated"
+     },
+     {
+      "date": "2026-05-27",
+      "reason": "no daily bar on the report date 2026-05-27"
+     },
+     {
+      "date": "2026-02-25",
+      "reason": "timing unknown: cannot tell which closes bracket the report"
+     },
+     {
+      "date": "2026-11-18",
+      "reason": "not before the upcoming report"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a missing bar after an after-close report is never bridged into a week-long 'reaction'",
+   "why": "bars 08-26 -> 09-02 skip 08-27..09-01; the old read took 09-02 and reported -16.7%",
+   "input": {
+    "symbol": "NVDA",
+    "spot": "228.10",
+    "report": {
+     "date": "2026-11-18",
+     "timing": "pm",
+     "verified": false
+    },
+    "straddle": {
+     "expiration": "2026-11-20",
+     "strike": "230",
+     "call": {
+      "bid": "12.00",
+      "ask": "12.20"
+     },
+     "put": {
+      "bid": "13.60",
+      "ask": "13.80"
+     }
+    },
+    "past": [
+     {
+      "date": "2026-08-26",
+      "timing": "pm"
+     }
+    ],
+    "bars": [
+     {
+      "date": "2026-08-25",
+      "close": "178.00"
+     },
+     {
+      "date": "2026-08-26",
+      "close": "180.00"
+     },
+     {
+      "date": "2026-09-02",
+      "close": "150.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "n": 0,
+    "past_moves": [],
+    "median_abs_move_pct": null,
+    "exceeded_implied": "0 of 0",
+    "skipped": [
+     {
+      "date": "2026-08-26",
+      "reason": "the bars 2026-08-26 -> 2026-09-02 are not adjacent trading days (a daily bar is missing): a multi-day move is not an earnings reaction"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a missing bar before a before-open report is skipped the same way",
+   "why": "prior bar 05-20 is a week before the 05-27 report",
+   "input": {
+    "symbol": "NVDA",
+    "spot": "228.10",
+    "report": {
+     "date": "2026-11-18",
+     "timing": "pm",
+     "verified": false
+    },
+    "straddle": {
+     "expiration": "2026-11-20",
+     "strike": "230",
+     "call": {
+      "bid": "12.00",
+      "ask": "12.20"
+     },
+     "put": {
+      "bid": "13.60",
+      "ask": "13.80"
+     }
+    },
+    "past": [
+     {
+      "date": "2026-05-27",
+      "timing": "am"
+     }
+    ],
+    "bars": [
+     {
+      "date": "2026-05-20",
+      "close": "120.00"
+     },
+     {
+      "date": "2026-05-27",
+      "close": "130.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "n": 0,
+    "past_moves": [],
+    "skipped": [
+     {
+      "date": "2026-05-27",
+      "reason": "the bars 2026-05-20 -> 2026-05-27 are not adjacent trading days (a daily bar is missing): a multi-day move is not an earnings reaction"
+     }
+    ]
+   }
+  },
+  {
+   "name": "exchange holidays and weekends are not gaps: Good Friday, Thanksgiving, a Monday holiday",
+   "why": "Thu 04-02 -> Mon 04-06 (Good Friday 04-03); Wed 11-26 -> Fri 11-28 (Thanksgiving 2025, weekday fallback); Fri 01-16 -> Tue 01-20 (MLK day)",
+   "input": {
+    "symbol": "NVDA",
+    "spot": "228.10",
+    "report": {
+     "date": "2026-11-18",
+     "timing": "pm",
+     "verified": false
+    },
+    "straddle": {
+     "expiration": "2026-11-20",
+     "strike": "230",
+     "call": {
+      "bid": "12.00",
+      "ask": "12.20"
+     },
+     "put": {
+      "bid": "13.60",
+      "ask": "13.80"
+     }
+    },
+    "past": [
+     {
+      "date": "2026-04-02",
+      "timing": "pm"
+     },
+     {
+      "date": "2025-11-26",
+      "timing": "pm"
+     },
+     {
+      "date": "2026-01-20",
+      "timing": "am"
+     }
+    ],
+    "bars": [
+     {
+      "date": "2025-11-26",
+      "close": "100.00"
+     },
+     {
+      "date": "2025-11-28",
+      "close": "104.00"
+     },
+     {
+      "date": "2026-01-16",
+      "close": "110.00"
+     },
+     {
+      "date": "2026-01-20",
+      "close": "99.00"
+     },
+     {
+      "date": "2026-04-02",
+      "close": "120.00"
+     },
+     {
+      "date": "2026-04-06",
+      "close": "126.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "n": 3,
+    "skipped": [],
+    "past_moves_pct": [
+     5.0,
+     4.0,
+     -10.0
+    ],
+    "past_moves": [
+     {
+      "source": "bars 2026-04-02 -> 2026-04-06"
+     },
+     {
+      "source": "bars 2025-11-26 -> 2025-11-28"
+     },
+     {
+      "source": "bars 2026-01-16 -> 2026-01-20"
+     }
+    ]
+   }
+  },
+  {
+   "name": "exceeded counts only moves strictly larger than the implied move; odd-n median",
+   "why": "implied 10.00/100 = 10.0%; moves +10.0 (equal, not counted), -12.0, +3.0; median of 3.0, 10.0, 12.0 = 10.0",
+   "input": {
+    "symbol": "XYZ",
+    "spot": "100",
+    "report": {
+     "date": "2026-11-18",
+     "timing": "am",
+     "verified": true
+    },
+    "straddle": {
+     "expiration": "2026-11-18",
+     "strike": "100",
+     "call": {
+      "bid": "5.00",
+      "ask": "5.00"
+     },
+     "put": {
+      "bid": "5.00",
+      "ask": "5.00"
+     }
+    },
+    "past": [
+     {
+      "date": "2026-08-18",
+      "timing": "am",
+      "close_before": "100",
+      "close_after": "110"
+     },
+     {
+      "date": "2026-05-18",
+      "timing": "am",
+      "close_before": "100",
+      "close_after": "88"
+     },
+     {
+      "date": "2026-02-18",
+      "timing": "am",
+      "close_before": "100",
+      "close_after": "103"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "implied_move_pct": 10.0,
+    "exceeded_implied": "1 of 3",
+    "median_abs_move_pct": 10.0,
+    "report": {
+     "verified": true,
+     "timing": "am"
+    },
+    "n": 3
+   }
+  },
+  {
+   "name": "held_expirations: which positions the report falls inside",
+   "why": "pm report 11-18: 11-20 inside; 11-18 expires before the reaction; 11-13 before",
+   "input": {
+    "symbol": "NVDA",
+    "spot": "228.10",
+    "report": {
+     "date": "2026-11-18",
+     "timing": "pm",
+     "verified": false
+    },
+    "straddle": {
+     "expiration": "2026-11-20",
+     "strike": "230",
+     "call": {
+      "bid": "12.00",
+      "ask": "12.20"
+     },
+     "put": {
+      "bid": "13.60",
+      "ask": "13.80"
+     }
+    },
+    "held_expirations": [
+     {
+      "label": "NVDA 11-20 230C",
+      "expiration": "2026-11-20"
+     },
+     {
+      "label": "NVDA 11-18 230C",
+      "expiration": "2026-11-18"
+     },
+     {
+      "label": "NVDA 11-13 230C",
+      "expiration": "2026-11-13"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "held_inside_report": [
+     {
+      "label": "NVDA 11-20 230C",
+      "inside": "yes"
+     }
+    ]
+   }
+  },
+  {
+   "name": "notes: unverified date, straddle gap, wide spread, no bid, far strike",
+   "why": "each weakens the estimate and must be said",
+   "input": {
+    "symbol": "ABC",
+    "spot": "50",
+    "report": {
+     "date": "2026-11-18",
+     "timing": "pm"
+    },
+    "straddle": {
+     "expiration": "2026-11-27",
+     "strike": "55",
+     "call": {
+      "bid": "0",
+      "ask": "0.40"
+     },
+     "put": {
+      "bid": "4.00",
+      "ask": "6.00"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "implied_move_usd": "5.20",
+    "n": 0
+   }
+  },
+  {
+   "name": "error: a straddle expiring on an after-close report date misses the reaction",
+   "input": {
+    "symbol": "NVDA",
+    "spot": "228.10",
+    "report": {
+     "date": "2026-11-18",
+     "timing": "pm",
+     "verified": false
+    },
+    "straddle": {
+     "expiration": "2026-11-18",
+     "strike": "230",
+     "call": {
+      "bid": "12.00",
+      "ask": "12.20"
+     },
+     "put": {
+      "bid": "13.60",
+      "ask": "13.80"
+     }
+    }
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "STRADDLE_EXPIRES_BEFORE_REPORT",
+      "field": "straddle.expiration"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: a straddle expiring before the report",
+   "input": {
+    "symbol": "NVDA",
+    "spot": "228.10",
+    "report": {
+     "date": "2026-11-18",
+     "timing": "pm",
+     "verified": false
+    },
+    "straddle": {
+     "expiration": "2026-11-13",
+     "strike": "230",
+     "call": {
+      "bid": "12.00",
+      "ask": "12.20"
+     },
+     "put": {
+      "bid": "13.60",
+      "ask": "13.80"
+     }
+    }
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "STRADDLE_EXPIRES_BEFORE_REPORT",
+      "field": "straddle.expiration"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: a crossed quote is rejected",
+   "input": {
+    "symbol": "NVDA",
+    "spot": "228.10",
+    "report": {
+     "date": "2026-11-18",
+     "timing": "pm",
+     "verified": false
+    },
+    "straddle": {
+     "expiration": "2026-11-20",
+     "strike": "230",
+     "call": {
+      "bid": "12.30",
+      "ask": "12.20"
+     },
+     "put": {
+      "bid": "13.60",
+      "ask": "13.80"
+     }
+    }
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "CROSSED_QUOTE",
+      "field": "straddle.call"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: spot must be positive",
+   "input": {
+    "symbol": "NVDA",
+    "spot": "0",
+    "report": {
+     "date": "2026-11-18",
+     "timing": "pm",
+     "verified": false
+    },
+    "straddle": {
+     "expiration": "2026-11-20",
+     "strike": "230",
+     "call": {
+      "bid": "12.00",
+      "ask": "12.20"
+     },
+     "put": {
+      "bid": "13.60",
+      "ask": "13.80"
+     }
+    }
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_VALUE",
+      "field": "spot"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: duplicate bars are rejected",
+   "input": {
+    "symbol": "NVDA",
+    "spot": "228.10",
+    "report": {
+     "date": "2026-11-18",
+     "timing": "pm",
+     "verified": false
+    },
+    "straddle": {
+     "expiration": "2026-11-20",
+     "strike": "230",
+     "call": {
+      "bid": "12.00",
+      "ask": "12.20"
+     },
+     "put": {
+      "bid": "13.60",
+      "ask": "13.80"
+     }
+    },
+    "bars": [
+     {
+      "date": "2026-08-26",
+      "close": "1"
+     },
+     {
+      "date": "2026-08-26",
+      "close": "2"
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "DUPLICATE_BAR",
+      "field": "bars[1].date"
+     }
+    ]
+   }
+  }
+ ]
+}

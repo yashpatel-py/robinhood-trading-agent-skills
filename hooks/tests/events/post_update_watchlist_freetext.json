@@ -1,0 +1,19 @@
+{
+  "session_id": "test-session-1",
+  "transcript_path": "/tmp/rh-test/transcript.jsonl",
+  "cwd": "/tmp/rh-test/project",
+  "permission_mode": "default",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "mcp__rh-uuid-server__update_watchlist",
+  "tool_input": {
+    "list_id": "list-test-1",
+    "display_description": "ideas for account __ACCT__ this week"
+  },
+  "tool_response": [
+    {
+      "type": "text",
+      "text": "{\"data\": {\"list_id\": \"list-test-1\", \"display_name\": \"Ideas\"}, \"guide\": \"Test guide text.\"}"
+    }
+  ],
+  "tool_use_id": "toolu_test_2"
+}

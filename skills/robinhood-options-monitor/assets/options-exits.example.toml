@@ -1,0 +1,39 @@
+# robinhood-skills:config — [options.exits] and [options.monitor] (robinhood-options-monitor)
+# Unofficial; not affiliated with Robinhood Markets, Inc.
+#
+# Copy these sections into your config file (~/.config/robinhood-skills/config.toml, ./.robinhood/config.toml,
+# or the path in $ROBINHOOD_SKILLS_CONFIG), or paste them under a "# robinhood-skills:config" heading in your
+# project instructions. Values are strings. Leave a value "UNSET" and the monitor skips that rule and says so.
+#
+# Every number below is yours to choose. These thresholds ARE the exit strategy: a profit target, a stop and a
+# holding period decide when a position gets closed, and choosing them depends on your risk tolerance, taxes
+# and horizon, which an agent cannot know. The agent never fills one in, never "suggests a reasonable default",
+# and never loosens one; it writes a value here only after you state it and approve the change.
+
+[options.exits]
+# Close when the position is up this percent on the premium you paid (longs) or has captured this percent of
+# the premium you collected (shorts). Example of the format: "50" means +50%.
+profit_target_pct = "UNSET"
+
+# Close when the position is down this percent on the premium (longs lose at most 100%; a short can lose more
+# than the premium it collected, so a short's stop can fire past -100%).
+stop_loss_pct = "UNSET"
+
+# Close when days to expiration fall to this number, whatever the P&L: time decay speeds up into expiration,
+# and assignment and pin risk live in the last few days.
+time_stop_dte = "UNSET"
+
+# Hard cap on calendar days held. Needs the opening fill from your order history; if it cannot be found, this
+# rule is skipped for that position rather than guessed.
+max_hold_days = "UNSET"
+
+# Only used when you ask for a closing order to be simulated: how to price the limit.
+#   "bid" = the natural side (sell to close at the bid, buy to close at the ask): fills most readily.
+#   "mid" = the midpoint, rounded to the contract's tick toward the natural side: better price, less certain to fill.
+# UNSET = you give the limit price each time (the closing spec shows bid, ask and mid for reference).
+exit_price_rule = "UNSET"
+
+[options.monitor]
+# The expiration and assignment radar looks this many calendar days ahead. Not a financial threshold, so it
+# ships with a value; change it freely.
+radar_days = "7"

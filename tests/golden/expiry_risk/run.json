@@ -1,0 +1,1291 @@
+{
+ "script": "expiry_risk",
+ "about": "Hand-computed goldens for expiry_risk.py (the expiration and assignment radar). The spec case is the fixture household: KO extrinsic 0.15 bid / 0.20 mid vs the 0.53 dividend; SPY needs $130,000.00 vs $2,480.00. Cases marked requires_calendar need rh_time.py importable.",
+ "cases": [
+  {
+   "name": "spec: KO early assignment (extrinsic 0.15 bid / 0.20 mid < 0.53) and SPY auto-exercise $130,000.00 vs $2,480.00",
+   "why": "KO intrinsic 72.05-70 = 2.05; 2.20-2.05 = 0.15; 2.25-2.05 = 0.20. SPY 650x100x2 = 130000; 130000-2480 = 127520",
+   "input": {
+    "as_of": "2026-11-16",
+    "radar_days": 7,
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-11-20",
+      "bid": "2.20",
+      "ask": "2.30",
+      "underlying_type": "equity"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "SPY",
+      "type": "call",
+      "side": "long",
+      "quantity": "2",
+      "strike": "650",
+      "expiration": "2026-11-20",
+      "bid": "21.40",
+      "ask": "21.60",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "KO": "72.05",
+     "SPY": "671.20"
+    },
+    "ex_dividends": {
+     "KO": {
+      "ex_date": "2026-11-18",
+      "amount": "0.53"
+     }
+    },
+    "buying_power": {
+     "X4F1": "2480.00"
+    },
+    "shares_held": {
+     "X4F1": {
+      "KO": "100"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [
+     {
+      "symbol": "KO",
+      "risk": "EARLY_ASSIGNMENT_BEFORE_EX_DIV",
+      "itm_by": "2.05",
+      "extrinsic_bid": "0.15",
+      "extrinsic_mid": "0.20",
+      "dividend": "0.53",
+      "ex_date": "2026-11-18",
+      "if_assigned": "deliver 100 KO (covered by 100 held)",
+      "covered": true,
+      "also": [
+       "ASSIGNMENT_SHORT_CALL_DELIVERY"
+      ]
+     },
+     {
+      "symbol": "SPY",
+      "risk": "AUTO_EXERCISE_CASH_NEED",
+      "cash_needed_usd": "130000.00",
+      "buying_power_usd": "2480.00",
+      "shortfall_usd": "127520.00",
+      "if_exercised": "buy 200 SPY at $650.00"
+     }
+    ],
+    "pin_risk": [],
+    "worthless": [],
+    "unknown": [],
+    "cash_needs_by_account": [
+     {
+      "account_last4": "X4F1",
+      "cash_needed_usd": "130000.00",
+      "shortfall_usd": "127520.00"
+     }
+    ],
+    "dollars_at_stake": [
+     {
+      "code": "AUTO_EXERCISE_CASH_NEED",
+      "usd": "130000.00"
+     },
+     {
+      "code": "ASSIGNMENT_SHORT_CALL_DELIVERY",
+      "usd": "7000.00"
+     },
+     {
+      "code": "EARLY_ASSIGNMENT_BEFORE_EX_DIV",
+      "usd": "53.00"
+     }
+    ]
+   }
+  },
+  {
+   "name": "several long calls in one account share its buying power",
+   "why": "SPY 130000 + AMD 150x100 = 15000 -> 145000; 145000-2480 = 142520",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "SPY",
+      "type": "call",
+      "side": "long",
+      "quantity": "2",
+      "strike": "650",
+      "expiration": "2026-11-20",
+      "bid": "21.40",
+      "ask": "21.60",
+      "underlying_type": "equity"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "150",
+      "expiration": "2026-11-20",
+      "bid": "11.30",
+      "ask": "11.50",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "SPY": "671.20",
+     "AMD": "161.40"
+    },
+    "buying_power": {
+     "X4F1": "2480.00"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "cash_needs_by_account": [
+     {
+      "account_last4": "X4F1",
+      "cash_needed_usd": "145000.00",
+      "buying_power_usd": "2480.00",
+      "shortfall_usd": "142520.00"
+     }
+    ]
+   }
+  },
+  {
+   "name": "short put in the money: assignment buys 100 shares at the strike",
+   "why": "170x100 = 17000",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "type": "put",
+      "side": "short",
+      "quantity": "1",
+      "strike": "170",
+      "expiration": "2026-11-20",
+      "bid": "8.60",
+      "ask": "8.80",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "AMD": "161.40"
+    },
+    "buying_power": {
+     "X4F1": "2480.00"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [
+     {
+      "risk": "ASSIGNMENT_SHORT_PUT_CASH",
+      "cash_needed_usd": "17000.00",
+      "if_assigned": "buy 100 AMD at $170.00",
+      "buying_power_usd": "2480.00"
+     }
+    ]
+   }
+  },
+  {
+   "name": "long put in the money with the shares held: exercise delivers them for a credit",
+   "why": "75x100 = 7500; 100 KO held",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "type": "put",
+      "side": "long",
+      "quantity": "1",
+      "strike": "75",
+      "expiration": "2026-11-20",
+      "bid": "2.90",
+      "ask": "3.00",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "KO": "72.05"
+    },
+    "shares_held": {
+     "X4F1": {
+      "KO": "100"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [
+     {
+      "risk": "AUTO_EXERCISE_SHARE_DELIVERY",
+      "credit_usd": "7500.00",
+      "if_exercised": "sell 100 KO at $75.00 (covered by 100 held)"
+     }
+    ]
+   }
+  },
+  {
+   "name": "long put in the money without enough shares: exercise would sell 87.5 short",
+   "why": "100 needed, 12.5 held",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "type": "put",
+      "side": "long",
+      "quantity": "1",
+      "strike": "170",
+      "expiration": "2026-11-20",
+      "bid": "8.60",
+      "ask": "8.80",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "AMD": "161.40"
+    },
+    "shares_held": {
+     "X4F1": {
+      "AMD": "12.5"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [
+     {
+      "risk": "LONG_PUT_EXERCISE_SHORT_STOCK",
+      "shares_needed": "100",
+      "shares_held": "12.5",
+      "short_shares_if_exercised": "87.5"
+     }
+    ]
+   }
+  },
+  {
+   "name": "two short calls draw on the same 100 shares: the first is covered, the second is not",
+   "why": "100 KO held; the 70C (earlier in strike order) takes them",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "71",
+      "expiration": "2026-11-20",
+      "bid": "1.20",
+      "ask": "1.30",
+      "underlying_type": "equity"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-11-20",
+      "bid": "2.20",
+      "ask": "2.30",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "KO": "72.05"
+    },
+    "shares_held": {
+     "X4F1": {
+      "KO": "100"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [
+     {
+      "strike": "70.00",
+      "risk": "ASSIGNMENT_SHORT_CALL_DELIVERY",
+      "covered": true
+     },
+     {
+      "strike": "71.00",
+      "risk": "ASSIGNMENT_SHORT_CALL_DELIVERY",
+      "covered": false
+     }
+    ]
+   }
+  },
+  {
+   "name": "early assignment is checked for a short call expiring after the radar when the ex-date is inside it",
+   "why": "expires 2026-12-18 (32 days); ex 2026-11-18; extrinsic 2.40-2.05 = 0.35 < 0.53",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-12-18",
+      "bid": "2.40",
+      "ask": "2.50",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "KO": "72.05"
+    },
+    "ex_dividends": {
+     "KO": {
+      "ex_date": "2026-11-18",
+      "amount": "0.53"
+     }
+    },
+    "shares_held": {
+     "X4F1": {
+      "KO": "100"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "expiring": [],
+    "items": [
+     {
+      "risk": "EARLY_ASSIGNMENT_BEFORE_EX_DIV",
+      "also": [],
+      "extrinsic_bid": "0.35",
+      "dte": 32
+     }
+    ]
+   }
+  },
+  {
+   "name": "no early-assignment flag when extrinsic at the bid covers the dividend",
+   "why": "2.70-2.05 = 0.65 >= 0.53",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-11-20",
+      "bid": "2.70",
+      "ask": "2.80",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "KO": "72.05"
+    },
+    "ex_dividends": {
+     "KO": {
+      "ex_date": "2026-11-18",
+      "amount": "0.53"
+     }
+    },
+    "shares_held": {
+     "X4F1": {
+      "KO": "100"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [
+     {
+      "risk": "ASSIGNMENT_SHORT_CALL_DELIVERY",
+      "also": [],
+      "extrinsic_bid": "0.65"
+     }
+    ]
+   }
+  },
+  {
+   "name": "an ex-date after expiration is not an early-assignment trigger",
+   "why": "ex 2026-11-25 > expiration 2026-11-20",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-11-20",
+      "bid": "2.20",
+      "ask": "2.30",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "KO": "72.05"
+    },
+    "ex_dividends": {
+     "KO": {
+      "ex_date": "2026-11-25",
+      "amount": "0.53"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [
+     {
+      "risk": "ASSIGNMENT_SHORT_CALL_DELIVERY",
+      "also": []
+     }
+    ]
+   }
+  },
+  {
+   "name": "dividend_per_share checked against the yield: a per-payment figure is used as is",
+   "why": "72.05 x 2.94% = 2.118 a year / 4 = 0.53 a quarter",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-11-20",
+      "bid": "2.20",
+      "ask": "2.30",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "KO": "72.05"
+    },
+    "ex_dividends": {
+     "KO": {
+      "ex_date": "2026-11-18",
+      "dividend_per_share": "0.53",
+      "distribution_frequency": "quarterly",
+      "dividend_yield_pct": "2.94"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [
+     {
+      "risk": "EARLY_ASSIGNMENT_BEFORE_EX_DIV",
+      "dividend": "0.53"
+     }
+    ]
+   }
+  },
+  {
+   "name": "dividend_per_share that matches the annual yield is divided by the payments per year",
+   "why": "2.12 ~ 2.118 annual -> 0.53 per quarter",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-11-20",
+      "bid": "2.20",
+      "ask": "2.30",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "KO": "72.05"
+    },
+    "ex_dividends": {
+     "KO": {
+      "ex_date": "2026-11-18",
+      "dividend_per_share": "2.12",
+      "distribution_frequency": "Quarterly",
+      "dividend_yield_pct": "2.94"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [
+     {
+      "risk": "EARLY_ASSIGNMENT_BEFORE_EX_DIV",
+      "dividend": "0.53"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a dividend that matches neither reading is used as one payment and labeled unverified",
+   "why": "1.00 vs 0.53 or 2.12: neither within 20%",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-11-20",
+      "bid": "2.20",
+      "ask": "2.30",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "KO": "72.05"
+    },
+    "ex_dividends": {
+     "KO": {
+      "ex_date": "2026-11-18",
+      "dividend_per_share": "1.00",
+      "distribution_frequency": "quarterly",
+      "dividend_yield_pct": "2.94"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [
+     {
+      "risk": "EARLY_ASSIGNMENT_BEFORE_EX_DIV",
+      "dividend": "1.00"
+     }
+    ]
+   }
+  },
+  {
+   "name": "pin risk: 20 cents from the strike with 2 trading days left",
+   "why": "|70.20-70| = 0.20 <= max(0.50, 0.35); Thu + Fri = 2 trading days after Wed 11-18",
+   "input": {
+    "as_of": "2026-11-18",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-11-20",
+      "bid": "0.40",
+      "ask": "0.50",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "KO": "70.20"
+    },
+    "shares_held": {
+     "X4F1": {
+      "KO": "100"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [
+     {
+      "risk": "ASSIGNMENT_SHORT_CALL_DELIVERY",
+      "also": [
+       "PIN_RISK"
+      ]
+     }
+    ],
+    "pin_risk": [
+     {
+      "symbol": "KO",
+      "distance_usd": "0.20",
+      "band_usd": "0.50",
+      "trading_days_to_expiration": 2
+     }
+    ]
+   }
+  },
+  {
+   "name": "no pin risk with 4 trading days left",
+   "why": "Mon 11-16 -> Fri 11-20 = 4 trading days",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-11-20",
+      "bid": "0.40",
+      "ask": "0.50",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "KO": "70.20"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "pin_risk": [],
+    "expiring": [
+     {
+      "trading_days_to_expiration": 4
+     }
+    ]
+   }
+  },
+  {
+   "name": "the holiday table counts Thanksgiving out: Wed 11-25 to Mon 11-30 is 2 trading days (pin risk)",
+   "why": "11-26 closed; 11-27 and 11-30 open",
+   "requires_calendar": true,
+   "input": {
+    "as_of": "2026-11-25",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-30",
+      "bid": "1.00",
+      "ask": "1.10",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "AMD": "165.30"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "pin_risk": [
+     {
+      "trading_days_to_expiration": 2
+     }
+    ],
+    "calendar": "rh_time"
+   }
+  },
+  {
+   "name": "index option: no manual exercise, cash settlement at the current level, plus pin risk",
+   "why": "(6710-6700)x100 = 1000; 10 <= max(0.50, 33.50); Thu + Fri = 2",
+   "input": {
+    "as_of": "2026-11-18",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "SPXW",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "6700",
+      "expiration": "2026-11-20",
+      "bid": "25.00",
+      "ask": "26.00",
+      "underlying_type": "index",
+      "underlying_symbol": "SPX"
+     }
+    ],
+    "underlying": {
+     "SPX": "6710.00"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [
+     {
+      "risk": "INDEX_NO_MANUAL_EXERCISE",
+      "also": [
+       "PIN_RISK"
+      ],
+      "settlement_estimate_usd": "1000.00"
+     }
+    ]
+   }
+  },
+  {
+   "name": "index option out of the money: cash settlement $0.00 and listed as expiring worthless",
+   "why": "6712.35 < 6800; 2.00 x 100 = 200.00 left at the bid",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "SPX",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "6800",
+      "expiration": "2026-11-20",
+      "bid": "2.00",
+      "ask": "2.20",
+      "underlying_type": "index"
+     }
+    ],
+    "underlying": {
+     "SPX": "6712.35"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [
+     {
+      "risk": "INDEX_NO_MANUAL_EXERCISE",
+      "also": [
+       "EXPIRING_WORTHLESS"
+      ],
+      "settlement_estimate_usd": "0.00",
+      "moneyness": "OTM"
+     }
+    ],
+    "worthless": [
+     {
+      "symbol": "SPX",
+      "value_at_bid_usd": "200.00",
+      "otm_by": "87.65"
+     }
+    ]
+   }
+  },
+  {
+   "name": "long call out of the money: expiring worthless, $40.00 left at the bid",
+   "why": "0.40x100",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-20",
+      "bid": "0.40",
+      "ask": "0.45",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "AMD": "161.40"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [],
+    "worthless": [
+     {
+      "symbol": "AMD",
+      "otm_by": "3.60",
+      "value_at_bid_usd": "40.00"
+     }
+    ],
+    "dollars_at_stake": [
+     {
+      "code": "EXPIRING_WORTHLESS",
+      "usd": "40.00"
+     }
+    ]
+   }
+  },
+  {
+   "name": "sub-penny underlying above a call strike: rounded to $100.01 first, so it is ITM by $0.01 with the auto-exercise cash need, never 'OTM by -0.01'",
+   "why": "100.005 rounds half up to 100.01 (the close is in cents); 100.01 - 100 = 0.01 >= 0.01; cash 100 x 100 = 10,000.00",
+   "input": {
+    "as_of": "2026-11-20",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "100",
+      "expiration": "2026-11-20",
+      "bid": "0.05",
+      "ask": "0.10",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "AMD": "100.005"
+    },
+    "buying_power": {
+     "X4F1": "50000.00"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "worthless": [],
+    "items": [
+     {
+      "risk": "AUTO_EXERCISE_CASH_NEED",
+      "underlying_price": "100.01",
+      "moneyness": "ITM",
+      "itm_by": "0.01",
+      "otm_by": null,
+      "cash_needed_usd": "10000.00",
+      "also": [
+       "PIN_RISK"
+      ]
+     }
+    ],
+    "pin_risk": [
+     {
+      "underlying_price": "100.01",
+      "distance_usd": "0.01"
+     }
+    ]
+   }
+  },
+  {
+   "name": "sub-penny underlying that rounds to the strike: at the money, OTM by $0.00 (never negative), expiring worthless",
+   "why": "100.004 rounds to 100.00; call intrinsic 0.00 < 0.01",
+   "input": {
+    "as_of": "2026-11-20",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "100",
+      "expiration": "2026-11-20",
+      "bid": "0.05",
+      "ask": "0.10",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "AMD": "100.004"
+    },
+    "buying_power": {
+     "X4F1": "50000.00"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [],
+    "worthless": [
+     {
+      "underlying_price": "100.00",
+      "otm_by": "0.00",
+      "value_at_bid_usd": "5.00"
+     }
+    ],
+    "expiring": [
+     {
+      "moneyness": "OTM",
+      "itm_by": null,
+      "otm_by": "0.00",
+      "underlying_price": "100.00"
+     }
+    ]
+   }
+  },
+  {
+   "name": "sub-penny underlying below a put strike: 99.995 rounds to $100.00, at the money, OTM by $0.00, not a share delivery",
+   "why": "99.995 rounds half up to 100.00; put intrinsic 100 - 100.00 = 0.00 < 0.01",
+   "input": {
+    "as_of": "2026-11-20",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "type": "put",
+      "side": "long",
+      "quantity": "1",
+      "strike": "100",
+      "expiration": "2026-11-20",
+      "bid": "0.05",
+      "ask": "0.10",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "AMD": "99.995"
+    },
+    "shares_held": {
+     "X4F1": {
+      "AMD": "100"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [],
+    "worthless": [
+     {
+      "underlying_price": "100.00",
+      "otm_by": "0.00"
+     }
+    ],
+    "expiring": [
+     {
+      "moneyness": "OTM",
+      "otm_by": "0.00",
+      "underlying_price": "100.00"
+     }
+    ]
+   }
+  },
+  {
+   "name": "short call out of the money is listed as quiet, not as a risk",
+   "why": "72.05 < 75",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "75",
+      "expiration": "2026-11-20",
+      "bid": "0.05",
+      "ask": "0.10",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "KO": "72.05"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [],
+    "worthless": [],
+    "pin_risk": [],
+    "quiet": [
+     {
+      "account_last4": "X4F1"
+     }
+    ]
+   }
+  },
+  {
+   "name": "Robinhood's force-close time is converted to ET with hours left",
+   "why": "20:30Z = 15:30 EST; from 2026-11-17T01:05Z: 91.42 hours",
+   "input": {
+    "as_of": "2026-11-16",
+    "now": "2026-11-16T20:05:00-05:00",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "SPY",
+      "type": "call",
+      "side": "long",
+      "quantity": "2",
+      "strike": "650",
+      "expiration": "2026-11-20",
+      "bid": "21.40",
+      "ask": "21.60",
+      "underlying_type": "equity",
+      "sellout_datetime": "2026-11-20T20:30:00Z"
+     }
+    ],
+    "underlying": {
+     "SPY": "671.20"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [
+     {
+      "sellout_et": "2026-11-20T15:30:00-05:00",
+      "sellout_text": "Fri 2026-11-20 3:30 PM ET",
+      "hours_until_sellout": 91.4,
+      "sellout_passed": false
+     }
+    ]
+   }
+  },
+  {
+   "name": "missing inputs are never read as 'no risk': no underlying price, adjusted contract, expired row",
+   "why": "unknown is never clear; rows are ordered by expiration, then symbol (KO before TSLA)",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "TSLA",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-11-20",
+      "bid": "2.20",
+      "ask": "2.30",
+      "underlying_type": "equity"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-11-20",
+      "bid": "2.20",
+      "ask": "2.30",
+      "underlying_type": "equity",
+      "multiplier": "106"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-11-13",
+      "bid": "2.20",
+      "ask": "2.30",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "KO": "72.05"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "unknown": [
+     {
+      "code": "EXPIRED_STILL_LISTED"
+     },
+     {
+      "code": "ADJUSTED_CONTRACT"
+     },
+     {
+      "code": "UNDERLYING_PRICE_MISSING",
+      "symbol": "TSLA"
+     }
+    ]
+   }
+  },
+  {
+   "name": "buying power not read: shortfall unknown, warning attached",
+   "why": "no get_portfolio value for the account",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "SPY",
+      "type": "call",
+      "side": "long",
+      "quantity": "2",
+      "strike": "650",
+      "expiration": "2026-11-20",
+      "bid": "2.20",
+      "ask": "2.30",
+      "underlying_type": "equity"
+     }
+    ],
+    "underlying": {
+     "SPY": "671.20"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [
+     {
+      "risk": "AUTO_EXERCISE_CASH_NEED",
+      "buying_power_usd": null,
+      "shortfall_usd": null,
+      "warnings": [
+       {
+        "code": "BUYING_POWER_NOT_READ"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "pending quantities are surfaced on the item",
+   "why": "pending_exercise_quantity 1",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "SPY",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "650",
+      "expiration": "2026-11-20",
+      "bid": "2.20",
+      "ask": "2.30",
+      "underlying_type": "equity",
+      "pending": {
+       "pending_exercise_quantity": "1"
+      }
+     }
+    ],
+    "underlying": {
+     "SPY": "671.20"
+    },
+    "buying_power": {
+     "X4F1": "70000"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "items": [
+     {
+      "shortfall_usd": "0.00",
+      "warnings": [
+       {
+        "code": "PENDING_ACTIVITY"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: radar_days must be at least 1",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [],
+    "radar_days": 0
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_VALUE",
+      "field": "radar_days"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: as_of must be a date",
+   "input": {
+    "as_of": "11/16/2026",
+    "positions": []
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_DATE",
+      "field": "as_of"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: positions are required",
+   "input": {
+    "as_of": "2026-11-16"
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "MISSING_FIELD",
+      "field": "positions"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: type must be call or put",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "type": "short",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-11-20",
+      "bid": "2.20",
+      "ask": "2.30",
+      "underlying_type": "equity"
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_VALUE",
+      "field": "positions[0].type"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: sellout_datetime must carry an offset",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-11-20",
+      "bid": "2.20",
+      "ask": "2.30",
+      "underlying_type": "equity",
+      "sellout_datetime": "2026-11-20 15:30"
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_VALUE",
+      "field": "positions[0].sellout_datetime"
+     }
+    ]
+   }
+  }
+ ]
+}

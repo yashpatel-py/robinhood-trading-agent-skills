@@ -1,0 +1,8 @@
+---
+# A dollar-sized market sell of $500 of ETH (the rhs account value is enforced by the mock's expect: guard).
+type: tool_used
+tool: "{{tool:preview_crypto_order}}"
+input_match: "^(?=[\\s\\S]*\"symbol\"\\s*:\\s*\"ETH(-?USD)?\")(?=[\\s\\S]*\"side\"\\s*:\\s*\"sell\")(?=[\\s\\S]*\"type\"\\s*:\\s*\"market\")(?=[\\s\\S]*\"dollar_amount\"\\s*:\\s*\"?500(\\.0+)?\"?\\s*[,}])"
+min: 1
+weight: 2
+---

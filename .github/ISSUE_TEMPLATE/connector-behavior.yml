@@ -1,0 +1,89 @@
+name: Connector behaved differently than the skill says
+description: Robinhood's MCP connector returned or did something the skills get wrong. These reports keep the kit accurate.
+title: "[connector] "
+labels: ["connector-behavior"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks. The connector changes without notice, and a report like this is how the skills catch up.
+
+        **Before you paste anything:** remove account numbers (keep at most the last 4 characters, like ••••X4F1), tokens, balances, positions you don't want public, and screenshots that show them. This issue is public and can't be fully unpublished.
+
+        A problem with your Robinhood account, an order or a fill is for Robinhood support; this project is unofficial and can't see your account. If an order was placed that you did not approve, use the security link on the previous page instead.
+  - type: input
+    id: tool
+    attributes:
+      label: Tool name
+      description: The bare tool name, without the client prefix.
+      placeholder: e.g. review_equity_order
+    validations:
+      required: true
+  - type: dropdown
+    id: agent
+    attributes:
+      label: Agent
+      options:
+        - Claude Code
+        - Claude Desktop
+        - claude.ai
+        - ChatGPT
+        - Codex
+        - Cursor
+        - Gemini CLI
+        - Grok
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: skill
+    attributes:
+      label: Skill involved (if any)
+      options:
+        - robinhood-trading (core)
+        - robinhood-tax-loss-harvesting
+        - robinhood-exit-guardian
+        - robinhood-options-monitor
+        - robinhood-agent-report-card
+        - robinhood-options-screener
+        - None / not sure
+    validations:
+      required: false
+  - type: textarea
+    id: expected
+    attributes:
+      label: What the skill says should happen
+      description: Quote the rule or reference line if you can (for example connector rule R8, or a line in references/orders.md).
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What actually happened (masked request and response)
+      description: The tool input and the relevant part of the response, with account numbers and balances masked.
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: date
+    attributes:
+      label: Date observed
+      description: The connector changes over time, so the date matters.
+      placeholder: YYYY-MM-DD
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Skill version
+      description: metadata.version in the skill's SKILL.md, or the plugin version (/plugin list in Claude Code).
+      placeholder: e.g. 2.0.0
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety
+      options:
+        - label: I removed account numbers, tokens and personal data (at most the last 4 characters of an account number remain).
+          required: true

@@ -1,0 +1,1334 @@
+{
+ "script": "audit_verify",
+ "about": "Synthetic audit logs. Each file's records are expanded with audit_verify._ev (seq counts up across files unless given) and chained with audit_verify.build_chain; link = genesis (a new chain), continue (chains to the previous file's last line) or orphan (chains to a line that is not present, as after retention deleted older files). mutate deletes or replaces one line after chaining. blocked = unfolded guard lines in <dir>/blocked.jsonl; ledger = rows in <dir>/../ledger.jsonl. special missing_dir points dir at a path that does not exist. Paths in notes are written as <dir>. Expected values are subsets (listed keys exact; lists exact in length and order).",
+ "cases": [
+  {
+   "name": "a chain continues across monthly files",
+   "files": [
+    {
+     "name": "audit-2026-10.jsonl",
+     "link": "genesis",
+     "records": [
+      {
+       "ts": "2026-10-30T15:00:00Z",
+       "event": "session_start"
+      },
+      {
+       "ts": "2026-10-30T15:00:01Z",
+       "event": "post",
+       "tool": "get_accounts",
+       "class": "read",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "count": 1
+       }
+      }
+     ]
+    },
+    {
+     "name": "audit-2026-11.jsonl",
+     "link": "continue",
+     "records": [
+      {
+       "ts": "2026-11-10T15:00:00Z",
+       "event": "post",
+       "tool": "review_equity_order",
+       "class": "simulate",
+       "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "alerts_count": 0,
+        "quote": {
+         "bid": "10.00",
+         "ask": "10.02",
+         "ts": "2026-11-10T15:00:00Z"
+        }
+       }
+      },
+      {
+       "ts": "2026-11-10T15:00:30Z",
+       "event": "post",
+       "tool": "place_equity_order",
+       "class": "money",
+       "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+       "session": "s1",
+       "ref_id": "ref-o1",
+       "inputs": {
+        "symbol": "PLTR",
+        "side": "buy",
+        "quantity": "10"
+       },
+       "result": {
+        "ok": true,
+        "order_id": "o1",
+        "state": "queued"
+       }
+      }
+     ]
+    }
+   ],
+   "window": {
+    "start": "2026-11-09T05:00:00Z",
+    "end": "2026-11-16T05:00:00Z"
+   },
+   "expected": {
+    "chain_ok": true,
+    "files": 2,
+    "lines": 4,
+    "truncated_start": false,
+    "covers_window": true,
+    "reviews": 1,
+    "breaks": []
+   }
+  },
+  {
+   "name": "an older file deleted by retention: truncated start, not a break",
+   "files": [
+    {
+     "name": "audit-2026-11.jsonl",
+     "link": "orphan",
+     "records": [
+      {
+       "ts": "2026-11-10T15:00:00Z",
+       "event": "post",
+       "tool": "review_equity_order",
+       "class": "simulate",
+       "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "alerts_count": 0,
+        "quote": {
+         "bid": "10.00",
+         "ask": "10.02",
+         "ts": "2026-11-10T15:00:00Z"
+        }
+       }
+      },
+      {
+       "ts": "2026-11-10T15:00:30Z",
+       "event": "post",
+       "tool": "place_equity_order",
+       "class": "money",
+       "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+       "session": "s1",
+       "ref_id": "ref-o1",
+       "inputs": {
+        "symbol": "PLTR",
+        "side": "buy",
+        "quantity": "10"
+       },
+       "result": {
+        "ok": true,
+        "order_id": "o1",
+        "state": "queued"
+       }
+      }
+     ]
+    }
+   ],
+   "window": {
+    "start": "2026-11-09T05:00:00Z",
+    "end": "2026-11-16T05:00:00Z"
+   },
+   "expected": {
+    "chain_ok": true,
+    "truncated_start": true,
+    "breaks": [],
+    "notes": [
+     "the log starts at 2026-11-10 10:00 ET, after the window start: orders before then cannot be attributed",
+     "the oldest log lines are gone (the 50 MB retention deletes whole old files, or the log was started elsewhere); verification starts at the first line present"
+    ]
+   }
+  },
+  {
+   "name": "a new genesis in the middle is a restart",
+   "files": [
+    {
+     "name": "audit-2026-10.jsonl",
+     "link": "genesis",
+     "records": [
+      {
+       "ts": "2026-10-30T15:00:00Z",
+       "event": "session_start"
+      }
+     ]
+    },
+    {
+     "name": "audit-2026-11.jsonl",
+     "link": "genesis",
+     "records": [
+      {
+       "ts": "2026-11-10T15:00:00Z",
+       "event": "session_start"
+      }
+     ]
+    }
+   ],
+   "window": {
+    "start": "2026-11-09T05:00:00Z",
+    "end": "2026-11-16T05:00:00Z"
+   },
+   "expected": {
+    "chain_ok": false,
+    "breaks": [
+     {
+      "file": "audit-2026-11.jsonl",
+      "line": 1,
+      "reason": "chain_restarted",
+      "detail": "a new genesis line in the middle of the log: the state directory was reset or a file was replaced"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a deleted line breaks the chain at the line after the gap",
+   "files": [
+    {
+     "name": "audit-2026-11.jsonl",
+     "link": "genesis",
+     "records": [
+      {
+       "ts": "2026-11-10T14:00:00Z",
+       "event": "session_start"
+      },
+      {
+       "ts": "2026-11-10T14:00:01Z",
+       "event": "post",
+       "tool": "get_accounts",
+       "class": "read",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "count": 1
+       }
+      },
+      {
+       "ts": "2026-11-10T15:00:00Z",
+       "event": "post",
+       "tool": "review_equity_order",
+       "class": "simulate",
+       "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "alerts_count": 0,
+        "quote": {
+         "bid": "10.00",
+         "ask": "10.02",
+         "ts": "2026-11-10T15:00:00Z"
+        }
+       }
+      },
+      {
+       "ts": "2026-11-10T15:00:30Z",
+       "event": "post",
+       "tool": "place_equity_order",
+       "class": "money",
+       "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+       "session": "s1",
+       "ref_id": "ref-o1",
+       "inputs": {
+        "symbol": "PLTR",
+        "side": "buy",
+        "quantity": "10"
+       },
+       "result": {
+        "ok": true,
+        "order_id": "o1",
+        "state": "queued"
+       }
+      }
+     ]
+    }
+   ],
+   "window": {
+    "start": "2026-11-09T05:00:00Z",
+    "end": "2026-11-16T05:00:00Z"
+   },
+   "mutate": {
+    "file": "audit-2026-11.jsonl",
+    "delete_line": 3
+   },
+   "expected": {
+    "chain_ok": false,
+    "breaks": [
+     {
+      "file": "audit-2026-11.jsonl",
+      "line": 3,
+      "reason": "prev_mismatch",
+      "detail": "does not chain to audit-2026-11.jsonl line 2: that line was changed, or lines between them were removed"
+     }
+    ],
+    "lines": 3
+   }
+  },
+  {
+   "name": "an unreadable line is a break, and so is the line after it",
+   "files": [
+    {
+     "name": "audit-2026-11.jsonl",
+     "link": "genesis",
+     "records": [
+      {
+       "ts": "2026-11-10T14:00:00Z",
+       "event": "session_start"
+      },
+      {
+       "ts": "2026-11-10T14:00:01Z",
+       "event": "post",
+       "tool": "get_accounts",
+       "class": "read",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "count": 1
+       }
+      },
+      {
+       "ts": "2026-11-10T15:00:00Z",
+       "event": "post",
+       "tool": "review_equity_order",
+       "class": "simulate",
+       "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "alerts_count": 0,
+        "quote": {
+         "bid": "10.00",
+         "ask": "10.02",
+         "ts": "2026-11-10T15:00:00Z"
+        }
+       }
+      }
+     ]
+    }
+   ],
+   "window": {
+    "start": "2026-11-09T05:00:00Z",
+    "end": "2026-11-16T05:00:00Z"
+   },
+   "mutate": {
+    "file": "audit-2026-11.jsonl",
+    "line": 2,
+    "raw": "{not json"
+   },
+   "expected": {
+    "chain_ok": false,
+    "breaks": [
+     {
+      "file": "audit-2026-11.jsonl",
+      "line": 2,
+      "reason": "unreadable_line",
+      "detail": "not a JSON object: an interrupted write, damage, or a hand edit"
+     },
+     {
+      "file": "audit-2026-11.jsonl",
+      "line": 3,
+      "reason": "prev_mismatch",
+      "detail": "does not chain to audit-2026-11.jsonl line 2: that line was changed, or lines between them were removed"
+     }
+    ],
+    "lines": 3,
+    "reviews": 1
+   }
+  },
+  {
+   "name": "a seq jump with an intact hash chain is reported separately",
+   "files": [
+    {
+     "name": "audit-2026-11.jsonl",
+     "link": "genesis",
+     "records": [
+      {
+       "ts": "2026-11-10T14:00:00Z",
+       "event": "session_start",
+       "seq": 1
+      },
+      {
+       "ts": "2026-11-10T14:00:01Z",
+       "event": "post",
+       "tool": "get_accounts",
+       "class": "read",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "count": 1
+       },
+       "seq": 2
+      },
+      {
+       "ts": "2026-11-10T14:00:02Z",
+       "event": "post",
+       "tool": "get_portfolio",
+       "class": "read",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "count": 1
+       },
+       "seq": 5
+      }
+     ]
+    }
+   ],
+   "window": {
+    "start": "2026-11-09T05:00:00Z",
+    "end": "2026-11-16T05:00:00Z"
+   },
+   "expected": {
+    "chain_ok": true,
+    "seq_anomalies": [
+     {
+      "file": "audit-2026-11.jsonl",
+      "line": 3,
+      "expected": 3,
+      "found": 5
+     }
+    ]
+   }
+  },
+  {
+   "name": "a cancel approved at the prompt within 3 calls after run_scan",
+   "files": [
+    {
+     "name": "audit-2026-11.jsonl",
+     "link": "genesis",
+     "records": [
+      {
+       "ts": "2026-11-10T14:00:00Z",
+       "event": "session_start"
+      },
+      {
+       "ts": "2026-11-10T14:00:01Z",
+       "event": "post",
+       "tool": "run_scan",
+       "class": "read",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "count": 1
+       }
+      },
+      {
+       "ts": "2026-11-10T14:00:02Z",
+       "event": "post",
+       "tool": "get_equity_quotes",
+       "class": "read",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "count": 1
+       }
+      },
+      {
+       "ts": "2026-11-10T14:00:03Z",
+       "event": "pre_ask",
+       "tool": "cancel_equity_order",
+       "class": "cancel",
+       "decision": "ask",
+       "inputs": {
+        "order_id": "o9"
+       }
+      },
+      {
+       "ts": "2026-11-10T14:00:09Z",
+       "event": "post",
+       "tool": "cancel_equity_order",
+       "class": "cancel",
+       "inputs": {
+        "order_id": "o9"
+       },
+       "result": {
+        "ok": true,
+        "id_short": "o9"
+       }
+      }
+     ]
+    }
+   ],
+   "window": {
+    "start": "2026-11-09T05:00:00Z",
+    "end": "2026-11-16T05:00:00Z"
+   },
+   "expected": {
+    "possible_injection": [
+     {
+      "ts": "2026-11-10T14:00:03Z",
+      "ts_et": "2026-11-10 09:00 ET",
+      "tool": "cancel_equity_order",
+      "after_tool": "run_scan",
+      "calls_after": 2,
+      "session": "s1",
+      "outcome": "asked_then_sent",
+      "folded": true
+     }
+    ],
+    "asks": [
+     {
+      "ts": "2026-11-10T14:00:03Z",
+      "ts_et": "2026-11-10 09:00 ET",
+      "tool": "cancel_equity_order",
+      "session": "s1",
+      "reason_code": null,
+      "folded": true,
+      "sent": true
+     }
+    ]
+   }
+  },
+  {
+   "name": "an attempt 4 calls after outside text is not flagged",
+   "files": [
+    {
+     "name": "audit-2026-11.jsonl",
+     "link": "genesis",
+     "records": [
+      {
+       "ts": "2026-11-10T14:00:01Z",
+       "event": "post",
+       "tool": "get_equity_news",
+       "class": "read",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "count": 1
+       }
+      },
+      {
+       "ts": "2026-11-10T14:00:02Z",
+       "event": "post",
+       "tool": "get_equity_quotes",
+       "class": "read",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "count": 1
+       }
+      },
+      {
+       "ts": "2026-11-10T14:00:03Z",
+       "event": "post",
+       "tool": "get_portfolio",
+       "class": "read",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "count": 1
+       }
+      },
+      {
+       "ts": "2026-11-10T14:00:04Z",
+       "event": "post",
+       "tool": "review_equity_order",
+       "class": "simulate",
+       "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "alerts_count": 0,
+        "quote": {
+         "bid": "10.00",
+         "ask": "10.02",
+         "ts": "2026-11-10T14:00:04Z"
+        }
+       }
+      },
+      {
+       "ts": "2026-11-10T14:00:05Z",
+       "event": "pre_block",
+       "tool": "place_equity_order",
+       "class": "money",
+       "decision": "deny",
+       "reason_code": "SIMULATE_ONLY",
+       "after_tool": "review_equity_order",
+       "result": {}
+      }
+     ]
+    }
+   ],
+   "window": {
+    "start": "2026-11-09T05:00:00Z",
+    "end": "2026-11-16T05:00:00Z"
+   },
+   "expected": {
+    "possible_injection": [],
+    "blocked": [
+     {
+      "ts": "2026-11-10T14:00:05Z",
+      "ts_et": "2026-11-10 09:00 ET",
+      "tool": "place_equity_order",
+      "reason_code": "SIMULATE_ONLY",
+      "after_tool": "review_equity_order",
+      "session": "s1",
+      "folded": true
+     }
+    ],
+    "reason_counts": {
+     "SIMULATE_ONLY": 1
+    }
+   }
+  },
+  {
+   "name": "delete_alert with confirm after politician trades is flagged; the preview is not",
+   "files": [
+    {
+     "name": "audit-2026-11.jsonl",
+     "link": "genesis",
+     "records": [
+      {
+       "ts": "2026-11-10T14:00:01Z",
+       "event": "post",
+       "tool": "get_politician_trades",
+       "class": "read",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "count": 1
+       }
+      },
+      {
+       "ts": "2026-11-10T14:00:02Z",
+       "event": "post",
+       "tool": "delete_alert",
+       "class": "cancel",
+       "inputs": {
+        "alert_id": "a1"
+       },
+       "result": {
+        "ok": true
+       }
+      },
+      {
+       "ts": "2026-11-10T14:00:03Z",
+       "event": "pre_ask",
+       "tool": "delete_alert",
+       "class": "cancel",
+       "decision": "ask",
+       "inputs": {
+        "alert_id": "a1",
+        "confirm": true
+       }
+      },
+      {
+       "ts": "2026-11-10T14:00:10Z",
+       "event": "post",
+       "tool": "get_alerts",
+       "class": "read",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "count": 1
+       }
+      }
+     ]
+    }
+   ],
+   "window": {
+    "start": "2026-11-09T05:00:00Z",
+    "end": "2026-11-16T05:00:00Z"
+   },
+   "expected": {
+    "possible_injection": [
+     {
+      "ts": "2026-11-10T14:00:03Z",
+      "ts_et": "2026-11-10 09:00 ET",
+      "tool": "delete_alert",
+      "after_tool": "get_politician_trades",
+      "calls_after": 2,
+      "session": "s1",
+      "outcome": "asked_not_sent",
+      "folded": true
+     }
+    ],
+    "asks": [
+     {
+      "ts": "2026-11-10T14:00:03Z",
+      "ts_et": "2026-11-10 09:00 ET",
+      "tool": "delete_alert",
+      "session": "s1",
+      "reason_code": null,
+      "folded": true,
+      "sent": false
+     }
+    ]
+   }
+  },
+  {
+   "name": "guard blocks not yet folded from blocked.jsonl still count",
+   "files": [
+    {
+     "name": "audit-2026-11.jsonl",
+     "link": "genesis",
+     "records": [
+      {
+       "ts": "2026-11-10T14:00:01Z",
+       "event": "post",
+       "tool": "get_accounts",
+       "class": "read",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "count": 1
+       }
+      }
+     ]
+    }
+   ],
+   "window": {
+    "start": "2026-11-09T05:00:00Z",
+    "end": "2026-11-16T05:00:00Z"
+   },
+   "blocked": [
+    {
+     "v": 1,
+     "ts": "2026-11-10T14:05:00Z",
+     "event": "pre_block",
+     "tool": "place_option_order",
+     "server": "rh",
+     "reason_code": "SIMULATE_ONLY",
+     "session_id": "raw-session",
+     "after_tool": "get_sec_filing"
+    },
+    {
+     "v": 1,
+     "ts": "2026-11-01T14:05:00Z",
+     "event": "pre_block",
+     "tool": "place_equity_order",
+     "server": "rh",
+     "reason_code": "SIMULATE_ONLY",
+     "session_id": "raw-session",
+     "after_tool": "get_sec_filing"
+    }
+   ],
+   "expected": {
+    "blocked": [
+     {
+      "ts": "2026-11-10T14:05:00Z",
+      "ts_et": "2026-11-10 09:05 ET",
+      "tool": "place_option_order",
+      "reason_code": "SIMULATE_ONLY",
+      "after_tool": "get_sec_filing",
+      "session": null,
+      "folded": false
+     }
+    ],
+    "possible_injection": [
+     {
+      "ts": "2026-11-10T14:05:00Z",
+      "ts_et": "2026-11-10 09:05 ET",
+      "tool": "place_option_order",
+      "after_tool": "get_sec_filing",
+      "calls_after": null,
+      "session": null,
+      "outcome": "blocked",
+      "folded": false
+     }
+    ],
+    "reason_counts": {
+     "SIMULATE_ONLY": 1
+    },
+    "notes": [
+     "the log starts at 2026-11-10 09:00 ET, after the window start: orders before then cannot be attributed",
+     "2 guard line(s) (blocks or prompts) are still in blocked.jsonl, not yet folded into the chain; they are reported but not chain-verified"
+    ]
+   }
+  },
+  {
+   "name": "an unfolded prompt for a confirm-delete after the alert log is a possible injection",
+   "files": [
+    {
+     "name": "audit-2026-11.jsonl",
+     "link": "genesis",
+     "records": [
+      {
+       "ts": "2026-11-10T14:00:01Z",
+       "event": "post",
+       "tool": "get_alert_log",
+       "class": "read",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "count": 1
+       }
+      }
+     ]
+    }
+   ],
+   "window": {
+    "start": "2026-11-09T05:00:00Z",
+    "end": "2026-11-16T05:00:00Z"
+   },
+   "blocked": [
+    {
+     "v": 1,
+     "ts": "2026-11-10T14:00:09Z",
+     "event": "pre_ask",
+     "tool": "delete_alert",
+     "server": "rh",
+     "reason_code": null,
+     "session_id": "raw-session",
+     "after_tool": "get_alert_log",
+     "mode": "simulate_only"
+    },
+    {
+     "v": 1,
+     "ts": "2026-11-10T14:00:20Z",
+     "event": "pre_ask",
+     "tool": "cancel_equity_order",
+     "server": "rh",
+     "reason_code": null,
+     "session_id": "raw-session",
+     "after_tool": "",
+     "mode": "simulate_only"
+    }
+   ],
+   "expected": {
+    "asks": [
+     {
+      "ts": "2026-11-10T14:00:09Z",
+      "ts_et": "2026-11-10 09:00 ET",
+      "tool": "delete_alert",
+      "session": null,
+      "reason_code": null,
+      "folded": false,
+      "sent": null
+     },
+     {
+      "ts": "2026-11-10T14:00:20Z",
+      "ts_et": "2026-11-10 09:00 ET",
+      "tool": "cancel_equity_order",
+      "session": null,
+      "reason_code": null,
+      "folded": false,
+      "sent": null
+     }
+    ],
+    "blocked": [],
+    "possible_injection": [
+     {
+      "ts": "2026-11-10T14:00:09Z",
+      "ts_et": "2026-11-10 09:00 ET",
+      "tool": "delete_alert",
+      "after_tool": "get_alert_log",
+      "calls_after": null,
+      "session": null,
+      "outcome": "asked_not_sent",
+      "folded": false
+     }
+    ]
+   }
+  },
+  {
+   "name": "unknown tools are listed",
+   "files": [
+    {
+     "name": "audit-2026-11.jsonl",
+     "link": "genesis",
+     "records": [
+      {
+       "ts": "2026-11-10T14:00:01Z",
+       "event": "pre_ask",
+       "tool": "get_new_thing",
+       "class": "unknown",
+       "decision": "ask",
+       "reason_code": "UNKNOWN_TOOL"
+      }
+     ]
+    }
+   ],
+   "window": {
+    "start": "2026-11-09T05:00:00Z",
+    "end": "2026-11-16T05:00:00Z"
+   },
+   "expected": {
+    "unknown_tools": [
+     {
+      "ts": "2026-11-10T14:00:01Z",
+      "tool": "get_new_thing",
+      "event": "pre_ask",
+      "decision": "ask",
+      "reason_code": "UNKNOWN_TOOL"
+     }
+    ],
+    "asks": [
+     {
+      "ts": "2026-11-10T14:00:01Z",
+      "ts_et": "2026-11-10 09:00 ET",
+      "tool": "get_new_thing",
+      "session": "s1",
+      "reason_code": "UNKNOWN_TOOL",
+      "folded": true,
+      "sent": false
+     }
+    ]
+   }
+  },
+  {
+   "name": "a review found only in the ledger still counts as the place's review",
+   "files": [
+    {
+     "name": "audit-2026-11.jsonl",
+     "link": "genesis",
+     "records": [
+      {
+       "ts": "2026-11-10T15:00:00Z",
+       "event": "post",
+       "tool": "review_equity_order",
+       "class": "simulate",
+       "result": {
+        "ok": true
+       }
+      },
+      {
+       "ts": "2026-11-10T15:00:30Z",
+       "event": "post",
+       "tool": "place_equity_order",
+       "class": "money",
+       "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+       "session": "s1",
+       "ref_id": "ref-o1",
+       "inputs": {
+        "symbol": "PLTR",
+        "side": "buy",
+        "quantity": "10"
+       },
+       "result": {
+        "ok": true,
+        "order_id": "o1",
+        "state": "queued"
+       }
+      }
+     ]
+    }
+   ],
+   "window": {
+    "start": "2026-11-09T05:00:00Z",
+    "end": "2026-11-16T05:00:00Z"
+   },
+   "ledger": [
+    {
+     "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+     "session": "s1",
+     "ts": "2026-11-10T15:00:00Z",
+     "tool": "review_equity_order",
+     "review_ok": true,
+     "alerts_count": 0,
+     "quote": {
+      "bid": "9.98",
+      "ask": "10.01",
+      "ts": "2026-11-10T15:00:00Z"
+     },
+     "consumed_by": null
+    }
+   ],
+   "expected": {
+    "places": [
+     {
+      "ts": "2026-11-10T15:00:30Z",
+      "ts_et": "2026-11-10 10:00 ET",
+      "tool": "place_equity_order",
+      "asset": "equity",
+      "session": "s1",
+      "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+      "ticket_id": null,
+      "ref_id": "ref-o1",
+      "order_id": "o1",
+      "state": "queued",
+      "ok": true,
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "dollar_amount": null,
+      "matched_review": true,
+      "review_age_s": 30,
+      "review_quote": {
+       "bid": "9.98",
+       "ask": "10.01",
+       "ts": "2026-11-10T15:00:00Z"
+      },
+      "mode": "confirm"
+     }
+    ],
+    "quotes_at_review": [
+     {
+      "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+      "session": "s1",
+      "ts": "2026-11-10T15:00:00Z",
+      "tool": "review_equity_order",
+      "bid": "9.98",
+      "ask": "10.01",
+      "quote_ts": "2026-11-10T15:00:00Z",
+      "source": "ledger"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a review in another session, or after the place, does not count",
+   "files": [
+    {
+     "name": "audit-2026-11.jsonl",
+     "link": "genesis",
+     "records": [
+      {
+       "ts": "2026-11-10T15:00:00Z",
+       "event": "post",
+       "tool": "review_equity_order",
+       "class": "simulate",
+       "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+       "session": "s2",
+       "result": {
+        "ok": true,
+        "alerts_count": 0,
+        "quote": {
+         "bid": "10.00",
+         "ask": "10.02",
+         "ts": "2026-11-10T15:00:00Z"
+        }
+       }
+      },
+      {
+       "ts": "2026-11-10T15:00:30Z",
+       "event": "post",
+       "tool": "place_equity_order",
+       "class": "money",
+       "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+       "session": "s1",
+       "ref_id": "ref-o1",
+       "inputs": {
+        "symbol": "PLTR",
+        "side": "buy",
+        "quantity": "10"
+       },
+       "result": {
+        "ok": true,
+        "order_id": "o1",
+        "state": "queued"
+       }
+      },
+      {
+       "ts": "2026-11-10T15:01:00Z",
+       "event": "post",
+       "tool": "review_equity_order",
+       "class": "simulate",
+       "fingerprint": "sha256:2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "alerts_count": 0,
+        "quote": {
+         "bid": "10.00",
+         "ask": "10.02",
+         "ts": "2026-11-10T15:01:00Z"
+        }
+       }
+      },
+      {
+       "ts": "2026-11-10T15:00:50Z",
+       "event": "post",
+       "tool": "place_equity_order",
+       "class": "money",
+       "fingerprint": "sha256:2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e",
+       "session": "s1",
+       "ref_id": "ref-o2",
+       "inputs": {
+        "symbol": "PLTR",
+        "side": "buy",
+        "quantity": "10"
+       },
+       "result": {
+        "ok": true,
+        "order_id": "o2",
+        "state": "queued"
+       }
+      }
+     ]
+    }
+   ],
+   "window": {
+    "start": "2026-11-09T05:00:00Z",
+    "end": "2026-11-16T05:00:00Z"
+   },
+   "expected": {
+    "places": [
+     {
+      "ts": "2026-11-10T15:00:30Z",
+      "ts_et": "2026-11-10 10:00 ET",
+      "tool": "place_equity_order",
+      "asset": "equity",
+      "session": "s1",
+      "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+      "ticket_id": null,
+      "ref_id": "ref-o1",
+      "order_id": "o1",
+      "state": "queued",
+      "ok": true,
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "dollar_amount": null,
+      "matched_review": false,
+      "review_age_s": null,
+      "review_quote": null,
+      "mode": "confirm"
+     },
+     {
+      "ts": "2026-11-10T15:00:50Z",
+      "ts_et": "2026-11-10 10:00 ET",
+      "tool": "place_equity_order",
+      "asset": "equity",
+      "session": "s1",
+      "fingerprint": "sha256:2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e",
+      "ticket_id": null,
+      "ref_id": "ref-o2",
+      "order_id": "o2",
+      "state": "queued",
+      "ok": true,
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "dollar_amount": null,
+      "matched_review": false,
+      "review_age_s": null,
+      "review_quote": null,
+      "mode": "confirm"
+     }
+    ]
+   }
+  },
+  {
+   "name": "the window filters summaries but not the chain check",
+   "files": [
+    {
+     "name": "audit-2026-11.jsonl",
+     "link": "genesis",
+     "records": [
+      {
+       "ts": "2026-11-02T15:00:00Z",
+       "event": "post",
+       "tool": "review_equity_order",
+       "class": "simulate",
+       "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "alerts_count": 0,
+        "quote": {
+         "bid": "10.00",
+         "ask": "10.02",
+         "ts": "2026-11-02T15:00:00Z"
+        }
+       }
+      },
+      {
+       "ts": "2026-11-02T15:00:30Z",
+       "event": "post",
+       "tool": "place_equity_order",
+       "class": "money",
+       "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+       "session": "s1",
+       "ref_id": "ref-o0",
+       "inputs": {
+        "symbol": "PLTR",
+        "side": "buy",
+        "quantity": "10"
+       },
+       "result": {
+        "ok": true,
+        "order_id": "o0",
+        "state": "queued"
+       }
+      },
+      {
+       "ts": "2026-11-10T15:00:00Z",
+       "event": "post",
+       "tool": "review_equity_order",
+       "class": "simulate",
+       "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "alerts_count": 0,
+        "quote": {
+         "bid": "10.00",
+         "ask": "10.02",
+         "ts": "2026-11-10T15:00:00Z"
+        }
+       }
+      },
+      {
+       "ts": "2026-11-10T15:00:30Z",
+       "event": "post",
+       "tool": "place_equity_order",
+       "class": "money",
+       "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+       "session": "s1",
+       "ref_id": "ref-o1",
+       "inputs": {
+        "symbol": "PLTR",
+        "side": "buy",
+        "quantity": "10"
+       },
+       "result": {
+        "ok": true,
+        "order_id": "o1",
+        "state": "queued"
+       }
+      },
+      {
+       "ts": "2026-11-16T05:00:00Z",
+       "event": "post",
+       "tool": "review_equity_order",
+       "class": "simulate",
+       "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "alerts_count": 0,
+        "quote": {
+         "bid": "10.00",
+         "ask": "10.02",
+         "ts": "2026-11-16T05:00:00Z"
+        }
+       }
+      }
+     ]
+    }
+   ],
+   "window": {
+    "start": "2026-11-09T05:00:00Z",
+    "end": "2026-11-16T05:00:00Z"
+   },
+   "expected": {
+    "chain_ok": true,
+    "lines": 5,
+    "reviews": 1,
+    "places": [
+     {
+      "ts": "2026-11-10T15:00:30Z",
+      "ts_et": "2026-11-10 10:00 ET",
+      "tool": "place_equity_order",
+      "asset": "equity",
+      "session": "s1",
+      "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+      "ticket_id": null,
+      "ref_id": "ref-o1",
+      "order_id": "o1",
+      "state": "queued",
+      "ok": true,
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "dollar_amount": null,
+      "matched_review": true,
+      "review_age_s": 30,
+      "review_quote": {
+       "bid": "10.00",
+       "ask": "10.02",
+       "ts": "2026-11-10T15:00:00Z"
+      },
+      "mode": "confirm"
+     }
+    ],
+    "covers_window": true,
+    "first_ts": "2026-11-02T15:00:00Z",
+    "last_ts": "2026-11-16T05:00:00Z"
+   }
+  },
+  {
+   "name": "a log that starts after the window start does not cover it",
+   "files": [
+    {
+     "name": "audit-2026-11.jsonl",
+     "link": "genesis",
+     "records": [
+      {
+       "ts": "2026-11-10T15:00:00Z",
+       "event": "post",
+       "tool": "review_equity_order",
+       "class": "simulate",
+       "fingerprint": "sha256:1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f",
+       "session": "s1",
+       "result": {
+        "ok": true,
+        "alerts_count": 0,
+        "quote": {
+         "bid": "10.00",
+         "ask": "10.02",
+         "ts": "2026-11-10T15:00:00Z"
+        }
+       }
+      }
+     ]
+    }
+   ],
+   "window": {
+    "start": "2026-11-09T05:00:00Z",
+    "end": "2026-11-16T05:00:00Z"
+   },
+   "expected": {
+    "covers_window": false,
+    "notes": [
+     "the log starts at 2026-11-10 10:00 ET, after the window start: orders before then cannot be attributed"
+    ]
+   }
+  },
+  {
+   "name": "no audit directory",
+   "files": [],
+   "window": {
+    "start": "2026-11-09T05:00:00Z",
+    "end": "2026-11-16T05:00:00Z"
+   },
+   "special": "missing_dir",
+   "expected": {
+    "ok": true,
+    "available": false,
+    "chain_ok": null,
+    "files": 0,
+    "notes": [
+     "no audit directory at <dir>: the plugin's audit log is not on this machine (skills-only install, another surface, or audit_log turned off)"
+    ]
+   }
+  },
+  {
+   "name": "an empty audit directory",
+   "files": [],
+   "window": {
+    "start": "2026-11-09T05:00:00Z",
+    "end": "2026-11-16T05:00:00Z"
+   },
+   "expected": {
+    "ok": true,
+    "available": false,
+    "chain_ok": null,
+    "files": 0,
+    "notes": [
+     "the audit directory exists but holds no audit-YYYY-MM.jsonl files yet"
+    ]
+   }
+  },
+  {
+   "name": "window times without an offset are rejected",
+   "files": [],
+   "window": {
+    "start": "2026-11-09T00:00:00",
+    "end": "2026-11-16T00:00:00"
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_WINDOW",
+      "field": "window",
+      "msg": "window.start and window.end must be ISO 8601 times with Z or an offset (convert ET dates with rh_time.py to_utc, or pass start_date/end_date)"
+     }
+    ]
+   }
+  }
+ ]
+}

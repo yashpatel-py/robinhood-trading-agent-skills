@@ -1,0 +1,16 @@
+{
+  "session_id": "test-session-1",
+  "transcript_path": "/tmp/rh-test/transcript.jsonl",
+  "cwd": "/tmp/rh-test/project",
+  "permission_mode": "default",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "__TOOL_NAME__",
+  "tool_input": {
+    "symbol": "AAPL",
+    "side": "buy",
+    "type": "limit",
+    "quantity": "1",
+    "limit_price": "1.00"
+  },
+  "tool_use_id": "toolu_test_1"
+}

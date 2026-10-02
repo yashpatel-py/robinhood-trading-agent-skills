@@ -1,0 +1,468 @@
+{
+ "script": "holding_period",
+ "about": "Holding period: starts the day after acquisition; long-term = more than one year, so from the day after the anniversary; a lot acquired on the last day of a month is long-term from the first day of the 13th month after it (Rev. Rul. 66-7), so Feb 28 before a leap year and Feb 29 both give Mar 1 (build spec B.7.11).",
+ "cases": [
+  {
+   "name": "spec: 2025-10-03 -> long-term from 2026-10-04 (a Sunday; first trading day 2026-10-05)",
+   "op": "run",
+   "input": {
+    "as_of": "2026-09-22",
+    "lots": [
+     {
+      "lot_id": "A",
+      "acquired": "2025-10-03",
+      "shares": "1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "lots": [
+     {
+      "term": "short",
+      "long_term_on": "2026-10-04",
+      "first_trading_day_long_term": "2026-10-05",
+      "days_until_long_term": 12,
+      "leap_day_ambiguous": false
+     }
+    ]
+   }
+  },
+  {
+   "name": "spec: 2025-12-03 -> long-term from 2026-12-04; NVDA 18 days on 2026-11-16",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "price": "228.10",
+    "lots": [
+     {
+      "lot_id": "N2",
+      "acquired": "2025-12-03",
+      "shares": "40",
+      "cost_per_share": "181.50",
+      "symbol": "NVDA"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "countdown": [
+     "N2"
+    ],
+    "countdown_gains": [
+     "N2"
+    ],
+    "lots": [
+     {
+      "term": "short",
+      "long_term_on": "2026-12-04",
+      "first_trading_day_long_term": "2026-12-04",
+      "days_until_long_term": 18,
+      "unrealized_usd": "1864.00",
+      "crosses_within_horizon": true
+     }
+    ],
+    "status_line": "NO ACTION: Dollars at stake: $1,864.00 of short-term gain in 1 lot(s) turns long-term within 45 days (next: NVDA on 2026-12-04, 18 days)"
+   }
+  },
+  {
+   "name": "spec: 2024-02-29 -> long-term from 2025-03-01 (last day of the month; Rev. Rul. 66-7)",
+   "op": "run",
+   "input": {
+    "as_of": "2025-02-28",
+    "lots": [
+     {
+      "lot_id": "F",
+      "acquired": "2024-02-29",
+      "shares": "1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "lots": [
+     {
+      "term": "short",
+      "long_term_on": "2025-03-01",
+      "days_until_long_term": 1,
+      "leap_day_ambiguous": false
+     }
+    ]
+   }
+  },
+  {
+   "name": "the anniversary itself is still short-term (exactly one year is not more than one year)",
+   "op": "run",
+   "input": {
+    "as_of": "2026-12-03",
+    "lots": [
+     {
+      "lot_id": "N2",
+      "acquired": "2025-12-03",
+      "shares": "1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "lots": [
+     {
+      "term": "short",
+      "days_until_long_term": 1
+     }
+    ]
+   }
+  },
+  {
+   "name": "the day after the anniversary is long-term",
+   "op": "run",
+   "input": {
+    "as_of": "2026-12-04",
+    "lots": [
+     {
+      "lot_id": "N2",
+      "acquired": "2025-12-03",
+      "shares": "1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "lots": [
+     {
+      "term": "long",
+      "days_until_long_term": 0,
+      "crosses_within_horizon": false
+     }
+    ]
+   }
+  },
+  {
+   "name": "a lot bought 2027-02-28 (last day of the month) turns long-term 2028-03-01, not 2028-02-29 (Rev. Rul. 66-7)",
+   "op": "run",
+   "input": {
+    "as_of": "2027-12-01",
+    "lots": [
+     {
+      "lot_id": "P",
+      "acquired": "2027-02-28",
+      "shares": "1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "lots": [
+     {
+      "term": "short",
+      "long_term_on": "2028-03-01",
+      "leap_day_ambiguous": false
+     }
+    ]
+   }
+  },
+  {
+   "name": "2024-02-29 sold on 2025-03-01 is long-term",
+   "op": "run",
+   "input": {
+    "as_of": "2025-03-01",
+    "lots": [
+     {
+      "lot_id": "F",
+      "acquired": "2024-02-29",
+      "shares": "1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "lots": [
+     {
+      "term": "long",
+      "long_term_on": "2025-03-01",
+      "days_until_long_term": 0,
+      "leap_day_ambiguous": false
+     }
+    ]
+   }
+  },
+  {
+   "name": "2027-02-28 sold on 2028-02-29 is still short-term (the leap day is not enough)",
+   "op": "run",
+   "input": {
+    "as_of": "2028-02-29",
+    "lots": [
+     {
+      "lot_id": "P",
+      "acquired": "2027-02-28",
+      "shares": "1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "lots": [
+     {
+      "term": "short",
+      "long_term_on": "2028-03-01",
+      "days_until_long_term": 1,
+      "leap_day_ambiguous": false
+     }
+    ]
+   }
+  },
+  {
+   "name": "2027-02-28 sold on 2028-03-01 is long-term",
+   "op": "run",
+   "input": {
+    "as_of": "2028-03-01",
+    "lots": [
+     {
+      "lot_id": "P",
+      "acquired": "2027-02-28",
+      "shares": "1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "lots": [
+     {
+      "term": "long",
+      "long_term_on": "2028-03-01",
+      "days_until_long_term": 0
+     }
+    ]
+   }
+  },
+  {
+   "name": "2028-02-29 -> long-term from 2029-03-01, not 2029-03-02",
+   "op": "run",
+   "input": {
+    "as_of": "2029-03-01",
+    "lots": [
+     {
+      "lot_id": "Q",
+      "acquired": "2028-02-29",
+      "shares": "1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "lots": [
+     {
+      "term": "long",
+      "long_term_on": "2029-03-01",
+      "leap_day_ambiguous": false
+     }
+    ]
+   }
+  },
+  {
+   "name": "2028-02-28 is not a month-end in a leap year: long-term from 2029-03-01 (the day after 2029-02-28)",
+   "op": "run",
+   "input": {
+    "as_of": "2029-02-28",
+    "lots": [
+     {
+      "lot_id": "R",
+      "acquired": "2028-02-28",
+      "shares": "1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "lots": [
+     {
+      "term": "short",
+      "long_term_on": "2029-03-01",
+      "days_until_long_term": 1
+     }
+    ]
+   }
+  },
+  {
+   "name": "2025-01-31 (month-end, 31-day month) -> long-term from 2026-02-01; both readings agree",
+   "op": "run",
+   "input": {
+    "as_of": "2026-01-31",
+    "lots": [
+     {
+      "lot_id": "J",
+      "acquired": "2025-01-31",
+      "shares": "1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "lots": [
+     {
+      "term": "short",
+      "long_term_on": "2026-02-01",
+      "days_until_long_term": 1
+     }
+    ]
+   }
+  },
+  {
+   "name": "horizon: 46 days out is outside a 45-day lookahead",
+   "op": "run",
+   "input": {
+    "as_of": "2026-10-19",
+    "horizon_days": 45,
+    "lots": [
+     {
+      "lot_id": "N2",
+      "acquired": "2025-12-03",
+      "shares": "1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "countdown": [],
+    "lots": [
+     {
+      "days_until_long_term": 46,
+      "crosses_within_horizon": false
+     }
+    ]
+   }
+  },
+  {
+   "name": "Robinhood's own term is compared; a disagreement is flagged and deferred to Robinhood's documents",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "lots": [
+     {
+      "lot_id": "N2",
+      "acquired": "2025-12-03",
+      "shares": "1",
+      "term": "long"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "lots": [
+     {
+      "term": "short",
+      "broker_term": "long",
+      "term_agrees": false
+     }
+    ]
+   }
+  },
+  {
+   "name": "basis pending: no unrealized figure",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "price": "10",
+    "lots": [
+     {
+      "lot_id": "P",
+      "acquired": "2026-11-16",
+      "shares": "1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "lots": [
+     {
+      "unrealized_usd": null,
+      "basis_pending": true
+     }
+    ]
+   }
+  },
+  {
+   "name": "an acquisition timestamp is read as its US Eastern date (22:30 ET on 12-03, not 12-04 UTC)",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "lots": [
+     {
+      "lot_id": "T",
+      "open_date": "2025-12-04T03:30:00Z",
+      "shares": "1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "lots": [
+     {
+      "acquired": "2025-12-03",
+      "long_term_on": "2026-12-04"
+     }
+    ]
+   }
+  },
+  {
+   "name": "per-symbol prices; gains listed before non-gains in the countdown",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "prices": {
+     "AAA": "50",
+     "BBB": "10"
+    },
+    "lots": [
+     {
+      "lot_id": "B1",
+      "acquired": "2025-11-20",
+      "shares": "1",
+      "cost_per_share": "20",
+      "symbol": "BBB"
+     },
+     {
+      "lot_id": "A1",
+      "acquired": "2025-12-20",
+      "shares": "2",
+      "cost_per_share": "40",
+      "symbol": "AAA"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "countdown": [
+     "A1",
+     "B1"
+    ],
+    "countdown_gains": [
+     "A1"
+    ],
+    "unrealized_short_usd": "10.00"
+   }
+  },
+  {
+   "name": "an acquisition after as_of is an input error",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "lots": [
+     {
+      "lot_id": "Z",
+      "acquired": "2026-11-17",
+      "shares": "1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_DATE"
+     }
+    ]
+   }
+  }
+ ]
+}

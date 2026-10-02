@@ -1,0 +1,68 @@
+# robinhood-skills:config
+# Preflight for Robinhood Agentic Trading: [policy] and [accounts], read by the core robinhood-trading skill
+# (and by the exit guardian and options screener). Unofficial; not affiliated with Robinhood Markets, Inc.
+#
+# How to use it
+#   Copy this file to ~/.config/robinhood-skills/config.toml (or ./.robinhood/config.toml in a project), or
+#   paste it into your project instructions starting with the "# robinhood-skills:config" line above.
+#   Replace "UNSET" only with values YOU choose. Every value here is your decision: the agent never fills
+#   one in, never loosens one, and writes a value only after you state it in the conversation and approve
+#   the exact change.
+#
+# What the values mean
+#   These are SOFT limits. The kit checks them before it simulates an order (policy_check.py) and states
+#   the result on the ticket. Robinhood does not enforce them, and nothing here can place an order: order
+#   mode is not in this file (it lives in the Claude Code plugin settings).
+#   "UNSET" means "not configured": that check is skipped and listed under "not configured" on the ticket.
+#
+# Grammar (kept small so every Python version reads it the same way)
+#   # comments, [section] headers, key = "string" | integer | true/false | ["A", "B"]
+#   Write decimals as strings ("500.00"), not bare numbers. No inline tables, no multi-line strings.
+
+[policy]
+# Which accounts the agent reads for portfolio, order, P&L and wash-sale questions.
+#   "ask": before reading beyond the Agentic account, the agent asks you once per session ("Agentic only,
+#     or all accounts?"). A scheduled run has no one to ask, so it reads the Agentic account plus any
+#     account its prompt names, and lists the rest as not read.
+#   "agentic_only": read only the Agentic account unless you name another one (wash-sale checks then
+#     cover that account only, and say so).
+#   "all": read every account get_accounts lists without asking (your data reaches the AI provider you use).
+# With no config file, or with this key removed, a question about "my" holdings that names no account
+# covers every account, each labeled; the agent says which accounts it read and asks only when your
+# request points at one account without naming it.
+read_scope = "ask"
+
+# Largest estimated cost of a single order, in USD, e.g. "500.00".
+max_order_usd = "UNSET"
+
+# Largest share of your whole household (every account read) one symbol may reach AFTER the order,
+# in percent, e.g. "10" for 10%.
+max_symbol_pct_household = "UNSET"
+
+# Only these symbols, or never these symbols. A list such as ["VOO", "VTI"], or "UNSET".
+symbol_allowlist = "UNSET"
+symbol_denylist = "UNSET"
+
+# Flag an order this many calendar days or fewer before the company's next earnings report, e.g. 3.
+# A report date the company has not verified counts as a hit.
+earnings_blackout_days = "UNSET"
+
+# Most orders the agent should simulate for you in one day, e.g. 5.
+max_orders_per_day = "UNSET"
+
+# Whether option and crypto orders are in scope for you at all: true or false.
+allow_options = "UNSET"
+allow_crypto = "UNSET"
+
+# Sessions you are willing to trade in, from: "regular_hours", "extended_hours", "all_day_hours",
+# "regular_curb_hours", "regular_curb_overnight_hours". Example: ["regular_hours"].
+allowed_sessions = "UNSET"
+
+# Most option contracts in one order (quantity x each leg's ratio), e.g. 2.
+max_option_contracts = "UNSET"
+
+[accounts]
+# Last 4 characters of your retirement accounts (IRA, Roth IRA), e.g. ["P0Z9"]. Robinhood's account list
+# does not label retirement accounts in a way this kit has verified, and it matters twice: multi-leg
+# options are unavailable there, and a buy in an IRA can permanently disallow a wash-sale loss.
+retirement = "UNSET"

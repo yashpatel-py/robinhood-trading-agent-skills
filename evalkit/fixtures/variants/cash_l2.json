@@ -1,0 +1,9 @@
+{
+  "$comment": "Variant overlay (WP-M): the Agentic account is a cash account with option_level_2, so spreads need the limited-margin route first (case O6).",
+  "variant": "cash_l2",
+  "description": "Agentic account type cash, option_level_2; everything else as base.",
+  "patch": [
+    {"op": "set", "path": "accounts[_id=agentic].type", "value": "cash"},
+    {"op": "set", "path": "accounts[_id=agentic].option_level", "value": "option_level_2"}
+  ]
+}

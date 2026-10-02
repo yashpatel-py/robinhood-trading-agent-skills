@@ -1,0 +1,2402 @@
+{
+ "script": "protection_audit",
+ "about": "protection_audit.py audit: statuses, gap codes, dollars at stake and first lines. Anchor: Mon 2026-11-16 20:05 ET (market closed) unless a case says otherwise.",
+ "cases": [
+  {
+   "name": "spec B.3 example: AMD 12.5 sh, GFD OCO 10 + GTC stop 5 -> partial, 10 covered",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "agentic": true,
+      "account_type": "taxable",
+      "asset_class": "equity",
+      "symbol": "AMD",
+      "quantity": "12.5",
+      "held_for_orders": "0",
+      "price": "161.40",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ],
+    "open_orders": [
+     {
+      "account_last4": "X4F1",
+      "asset_class": "equity",
+      "symbol": "AMD",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "confirmed",
+      "quantity": "5",
+      "stop_price": "140.00",
+      "time_in_force": "gtc"
+     }
+    ],
+    "advanced_orders": [
+     {
+      "account_last4": "X4F1",
+      "id_short": "a1f",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "10",
+      "take_profit_limit_price": "180.00",
+      "stop_loss_stop_price": "142.00",
+      "time_in_force": "gfd",
+      "active": true
+     }
+    ],
+    "alerts": [
+     {
+      "symbol": "NVDA",
+      "asset_class": "equity",
+      "condition_type": "price_below",
+      "threshold": "150",
+      "enabled": false
+     }
+    ],
+    "earnings": {
+     "NVDA": {
+      "date": "2026-11-18",
+      "timing": "pm",
+      "verified": false
+     }
+    }
+   },
+   "expect": {
+    "ok": true,
+    "first_line": "ACTION NEEDED: Dollars at stake: $403.50 uncovered in partial positions (AMD $403.50)",
+    "summary": {
+     "positions": 1,
+     "protected": 0,
+     "partial": 1,
+     "backstop_only": 0,
+     "unprotected": 0,
+     "unknown": 0,
+     "value_total_usd": "2017.50",
+     "value_partial_uncovered_usd": "403.50"
+    },
+    "positions": {
+     "AMD@X4F1": {
+      "status": "partial",
+      "covered_qty": "10",
+      "uncovered_qty": "2.5",
+      "uncovered_value_usd": "403.50",
+      "covering": [
+       "OCO ••a1f 10 sh GFD 180/142"
+      ],
+      "gaps": [
+       "UNCOVERED_SHARES",
+       "EXITS_EXCEED_POSITION",
+       "GFD_EXPIRES_TODAY",
+       "FRACTIONAL_REMAINDER",
+       "STOP_MARKET_GAP_RISK",
+       "NO_EXTENDED_HOURS_COVERAGE"
+      ],
+      "gap_text": {
+       "UNCOVERED_SHARES": "2.5 sh ($403.50) have no working exit",
+       "EXITS_EXCEED_POSITION": "stop 5 + OCO 10 = 15 sh of exits vs 12.5 held",
+       "GFD_EXPIRES_TODAY": "OCO is GFD: it expires at the close of its trading day and does not carry over",
+       "FRACTIONAL_REMAINDER": "0.5 sh can't be covered by a stop or OCO (whole shares only); only an alert can watch it",
+       "STOP_MARKET_GAP_RISK": "stop legs are stop-market: a gap can fill far below the stop",
+       "NO_EXTENDED_HOURS_COVERAGE": "stops and OCOs act in regular hours only (09:30–16:00 ET); pre-market, after-hours and overnight moves are not covered; the regular session is closed now, so nothing triggers before 09:30 ET Tue 2026-11-17"
+      },
+      "not_counted": [
+       {
+        "order": "stop 5 sh GTC 140",
+        "why": "bigger than the 2.5 sh left when it triggers, so it is assumed to be rejected"
+       }
+      ],
+      "can_add": [
+       "oco",
+       "stop_order",
+       "alert"
+      ],
+      "max_whole_shares": "12"
+     }
+    },
+    "table_rows": [
+     "| AMD 12.5 sh | Agentic ••••X4F1 | partial | OCO ••a1f 10 sh GFD 180/142 + stop 5 sh GTC 140 (not counted) | 2.5 sh uncovered · exits 15 vs 12.5 held · GFD expires at close · 0.5 sh fractional · stop-market gap risk · regular hours only |"
+    ]
+   }
+  },
+  {
+   "name": "eval household (G1): who has no protection",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "alerts": [
+     {
+      "symbol": "NVDA",
+      "asset_class": "equity",
+      "condition_type": "price_below",
+      "threshold": "150",
+      "enabled": false,
+      "alert_id": "al-nvda"
+     },
+     {
+      "symbol": "VOO",
+      "asset_class": "equity",
+      "condition_type": "price_below",
+      "threshold": "500",
+      "enabled": true,
+      "alert_id": "al-voo"
+     },
+     {
+      "symbol": "AMD",
+      "asset_class": "equity",
+      "condition_type": "price_above",
+      "threshold": "160",
+      "enabled": true,
+      "alert_id": "al-amd"
+     },
+     {
+      "symbol": "PLTR",
+      "asset_class": "equity",
+      "condition_type": "rsi_above",
+      "threshold": "70",
+      "enabled": true,
+      "alert_id": "al-pltr"
+     }
+    ],
+    "session": {
+     "in_regular_session": false,
+     "next_regular_open_et": "2026-11-17T09:30:00-05:00"
+    },
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     },
+     {
+      "account_last4": "M7Q5",
+      "label": "Individual",
+      "agentic": false,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "not_applicable",
+       "crypto_orders": "not_applicable"
+      }
+     },
+     {
+      "account_last4": "P0Z9",
+      "label": "Roth IRA",
+      "agentic": false,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "not_applicable",
+       "crypto_orders": "not_applicable"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "quantity": "12.5",
+      "price": "161.40",
+      "price_as_of": "2026-11-17T01:04:00Z",
+      "held_for_orders": "0",
+      "sellable": "12.5",
+      "held_for_collateral": "0"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "PLTR",
+      "quantity": "30",
+      "price": "31.20",
+      "price_as_of": "2026-11-17T01:04:00Z",
+      "held_for_orders": "0",
+      "sellable": "30",
+      "held_for_collateral": "0"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "quantity": "100",
+      "price": "72.05",
+      "price_as_of": "2026-11-17T01:04:00Z",
+      "held_for_orders": "0",
+      "sellable": "0",
+      "held_for_collateral": "100"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "ETH",
+      "quantity": "0.42",
+      "price": "3000.00",
+      "price_as_of": "2026-11-17T01:04:00Z",
+      "asset_class": "crypto"
+     },
+     {
+      "account_last4": "M7Q5",
+      "symbol": "NVDA",
+      "quantity": "140",
+      "price": "228.10",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     },
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "quantity": "40",
+      "price": "262.00",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     },
+     {
+      "account_last4": "M7Q5",
+      "symbol": "VOO",
+      "quantity": "12",
+      "price": "540.00",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     },
+     {
+      "account_last4": "M7Q5",
+      "symbol": "KO",
+      "quantity": "50",
+      "price": "72.05",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     },
+     {
+      "account_last4": "P0Z9",
+      "symbol": "TSLA",
+      "quantity": "5",
+      "price": "262.00",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     },
+     {
+      "account_last4": "P0Z9",
+      "symbol": "VTI",
+      "quantity": "100",
+      "price": "290.00",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ],
+    "open_orders": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "side": "sell",
+      "type": "limit",
+      "trigger": "immediate",
+      "state": "confirmed",
+      "quantity": "10",
+      "cumulative_quantity": "0",
+      "price": "180.00",
+      "time_in_force": "gfd",
+      "order_id": "leg-tp-17c9"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "side": "sell",
+      "type": "market",
+      "state": "confirmed",
+      "quantity": "10",
+      "stop_price": "142.00",
+      "time_in_force": "gfd",
+      "trigger": "stop",
+      "order_id": "leg-sl-ae24"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "side": "sell",
+      "type": "market",
+      "state": "confirmed",
+      "quantity": "5",
+      "stop_price": "140.00",
+      "time_in_force": "gtc",
+      "trigger": "stop",
+      "created_at": "2026-10-01T14:00:00Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset_class": "crypto",
+      "symbol": "ETH-USD",
+      "side": "sell",
+      "type": "stop_loss",
+      "state": "confirmed",
+      "quantity": "0.42",
+      "stop_price": "2600.00",
+      "time_in_force": "gfd"
+     }
+    ],
+    "advanced_orders": [
+     {
+      "account_last4": "X4F1",
+      "id_short": "a1f",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "10",
+      "take_profit_limit_price": "180.00",
+      "stop_loss_stop_price": "142.00",
+      "time_in_force": "gfd",
+      "active": true,
+      "leg_order_ids": [
+       "leg-tp-17c9",
+       "leg-sl-ae24"
+      ]
+     }
+    ],
+    "earnings": {
+     "NVDA": {
+      "date": "2026-11-18",
+      "timing": "pm",
+      "verified": false
+     }
+    }
+   },
+   "expect": {
+    "ok": true,
+    "first_line": "ACTION NEEDED: Dollars at stake: $84,467.50 unprotected (NVDA $31,934.00 · VTI $29,000.00 · TSLA ••••M7Q5 $10,480.00) · $6,480.00 alert-only (VOO $6,480.00) · $403.50 uncovered in partial positions (AMD $403.50)",
+    "scope_line": "Accounts read: Agentic ••••X4F1 · Individual ••••M7Q5 · Roth IRA ••••P0Z9 · Not read: none",
+    "summary": {
+     "positions": 10,
+     "protected": 1,
+     "partial": 1,
+     "backstop_only": 1,
+     "unprotected": 7,
+     "unknown": 0,
+     "value_unprotected_usd": "84467.50",
+     "value_backstop_only_usd": "6480.00",
+     "value_partial_uncovered_usd": "403.50",
+     "unpriced_positions": 0
+    },
+    "position_order": [
+     "NVDA@M7Q5",
+     "VTI@P0Z9",
+     "TSLA@M7Q5",
+     "KO@X4F1",
+     "KO@M7Q5",
+     "TSLA@P0Z9",
+     "PLTR@X4F1",
+     "VOO@M7Q5",
+     "AMD@X4F1",
+     "ETH@X4F1"
+    ],
+    "positions": {
+     "NVDA@M7Q5": {
+      "status": "unprotected",
+      "gaps": [
+       "NOT_AGENT_TRADABLE",
+       "ALERT_DISABLED"
+      ],
+      "alerts": [
+       "alert below $150.00 (off)"
+      ],
+      "can_add": [
+       "alert"
+      ],
+      "value_usd": "31934.00",
+      "gap_text": {
+       "ALERT_DISABLED": "alert below $150.00 is off, so it will not notify you"
+      }
+     },
+     "TSLA@M7Q5": {
+      "status": "unprotected",
+      "gaps": [
+       "NOT_AGENT_TRADABLE"
+      ],
+      "can_add": [
+       "alert"
+      ]
+     },
+     "KO@X4F1": {
+      "status": "unprotected",
+      "gaps": [
+       "COLLATERAL_SHARES"
+      ],
+      "can_add": [
+       "alert"
+      ],
+      "max_whole_shares": "0",
+      "sellable_now": "0",
+      "gap_text": {
+       "COLLATERAL_SHARES": "100 sh are collateral for a short option (for example a covered call): no stop or OCO can sell them while the option is open; the option side is robinhood-options-monitor's"
+      }
+     },
+     "KO@M7Q5": {
+      "status": "unprotected",
+      "gaps": [
+       "NOT_AGENT_TRADABLE"
+      ],
+      "value_usd": "3602.50"
+     },
+     "PLTR@X4F1": {
+      "status": "unprotected",
+      "gaps": [],
+      "can_add": [
+       "oco",
+       "stop_order",
+       "alert"
+      ],
+      "max_whole_shares": "30"
+     },
+     "VOO@M7Q5": {
+      "status": "backstop_only",
+      "gaps": [
+       "NOT_AGENT_TRADABLE",
+       "ALERT_NOTIFIES_ONLY"
+      ],
+      "gap_text": {
+       "ALERT_NOTIFIES_ONLY": "only an alert (alert below $500.00) watches this position: it notifies your phone; it does not sell"
+      }
+     },
+     "AMD@X4F1": {
+      "status": "partial",
+      "covered_qty": "10",
+      "uncovered_qty": "2.5",
+      "gaps": [
+       "UNCOVERED_SHARES",
+       "EXITS_EXCEED_POSITION",
+       "GFD_EXPIRES_TODAY",
+       "FRACTIONAL_REMAINDER",
+       "STOP_MARKET_GAP_RISK",
+       "NO_EXTENDED_HOURS_COVERAGE"
+      ]
+     },
+     "ETH@X4F1": {
+      "status": "protected",
+      "covered_qty": "0.42",
+      "asset_class": "crypto",
+      "covering": [
+       "stop order 0.42 ETH GFD 2,600"
+      ],
+      "gaps": [
+       "STOP_MARKET_GAP_RISK",
+       "CRYPTO_STOP_DAY_ONLY"
+      ],
+      "gap_text": {
+       "CRYPTO_STOP_DAY_ONLY": "the stop order 0.42 ETH is day-only (time in force gfd): it expires at the end of the day"
+      },
+      "can_add": [
+       "crypto_stop_order",
+       "alert"
+      ],
+      "max_whole_shares": null
+     }
+    },
+    "alert_cleanup": [
+     {
+      "symbol": "NVDA",
+      "alert_id": "al-nvda",
+      "issue": "disabled: re-enable with update_alert or leave it"
+     }
+    ],
+    "orphan_exits": [],
+    "footer_exact": true
+   }
+  },
+  {
+   "name": "R26: OCO tools not enabled -> stops and alerts only, OCO_UNREADABLE, no oco rung",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "not_enabled",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "quantity": "100",
+      "price": "72.05",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ],
+    "open_orders": []
+   },
+   "expect": {
+    "ok": true,
+    "first_line": "ACTION NEEDED: Dollars at stake: $7,205.00 unprotected (KO $7,205.00)",
+    "positions": {
+     "KO@X4F1": {
+      "status": "unprotected",
+      "gaps": [
+       "OCO_UNREADABLE"
+      ],
+      "can_add": [
+       "stop_order",
+       "alert"
+      ],
+      "gap_text": {
+       "OCO_UNREADABLE": "the OCO tools are not enabled for this account (the connector answered that the tool does not exist), so OCOs can't be read or simulated here; this status counts stops and alerts only"
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "OCO read failed -> unknown unless a stop already covers everything",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "failed",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "quantity": "100",
+      "price": "72.05",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "PLTR",
+      "quantity": "30",
+      "price": "31.20",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ],
+    "open_orders": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "PLTR",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "confirmed",
+      "quantity": "30",
+      "stop_price": "28.00",
+      "time_in_force": "gtc"
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "first_line": "UNKNOWN: Dollars at stake: $7,205.00 in positions whose exits could not be fully read (KO $7,205.00)",
+    "scope_line": "Accounts read: Agentic ••••X4F1 · Not read: none · Incomplete: Agentic ••••X4F1: advanced orders failed",
+    "positions": {
+     "KO@X4F1": {
+      "status": "unknown",
+      "gaps": [
+       "READ_INCOMPLETE"
+      ],
+      "can_add": [
+       "stop_order",
+       "alert"
+      ]
+     },
+     "PLTR@X4F1": {
+      "status": "protected",
+      "covering": [
+       "stop 30 sh GTC 28"
+      ],
+      "gaps": [
+       "STOP_MARKET_GAP_RISK",
+       "NO_EXTENDED_HOURS_COVERAGE"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "equity orders only partly read -> unknown (unknown is never clear)",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "partial",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "quantity": "100",
+      "price": "72.05",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ],
+    "open_orders": []
+   },
+   "expect": {
+    "ok": true,
+    "positions": {
+     "KO@X4F1": {
+      "status": "unknown",
+      "gaps": [
+       "READ_INCOMPLETE"
+      ],
+      "gap_text": {
+       "READ_INCOMPLETE": "not fully read: open equity orders (partial); a working exit or alert may exist that this check can't see"
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "every position has a working stop -> CLEAR with the gap count",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "PLTR",
+      "quantity": "30",
+      "price": "31.20",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ],
+    "open_orders": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "PLTR",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "confirmed",
+      "quantity": "30",
+      "stop_price": "28.00",
+      "time_in_force": "gtc"
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "first_line": "CLEAR: Dollars at stake: none found; every position read has a working stop or OCO · 2 gaps to review",
+    "summary": {
+     "protected": 1,
+     "positions": 1
+    }
+   }
+  },
+  {
+   "name": "no accounts list -> CLEAR is downgraded to UNKNOWN",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "PLTR",
+      "quantity": "30",
+      "price": "31.20",
+      "price_as_of": "2026-11-17T01:04:00Z",
+      "agentic": true
+     }
+    ],
+    "open_orders": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "PLTR",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "confirmed",
+      "quantity": "30",
+      "stop_price": "28.00",
+      "time_in_force": "gtc"
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "first_line": "UNKNOWN: Dollars at stake: none found in what was read; read completeness was not confirmed for every account",
+    "positions": {
+     "PLTR@X4F1": {
+      "status": "protected"
+     }
+    }
+   }
+  },
+  {
+   "name": "no positions -> NO ACTION",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [],
+    "open_orders": []
+   },
+   "expect": {
+    "ok": true,
+    "first_line": "NO ACTION: Dollars at stake: none found (no stock or crypto positions in the accounts read)",
+    "summary": {
+     "positions": 0
+    }
+   }
+  },
+  {
+   "name": "OCO legs listed as equity orders are counted once (by leg id)",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "quantity": "10",
+      "price": "161.40",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ],
+    "open_orders": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "confirmed",
+      "quantity": "10",
+      "stop_price": "142.00",
+      "time_in_force": "gtc",
+      "order_id": "leg-stop"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "side": "sell",
+      "type": "limit",
+      "state": "confirmed",
+      "quantity": "10",
+      "price": "180.00",
+      "time_in_force": "gtc",
+      "order_id": "leg-tp"
+     }
+    ],
+    "advanced_orders": [
+     {
+      "account_last4": "X4F1",
+      "id_short": "b2c",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "10",
+      "take_profit_limit_price": "180.00",
+      "stop_loss_stop_price": "142.00",
+      "time_in_force": "gtc",
+      "active": true,
+      "leg_order_ids": [
+       "leg-stop",
+       "leg-tp"
+      ]
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "positions": {
+     "AMD@X4F1": {
+      "status": "protected",
+      "covering": [
+       "OCO ••b2c 10 sh GTC 180/142"
+      ],
+      "gaps": [
+       "STOP_MARKET_GAP_RISK",
+       "NO_EXTENDED_HOURS_COVERAGE"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "OCO legs without ids are matched by shares and price, and counted once",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "quantity": "10",
+      "price": "161.40",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ],
+    "open_orders": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "confirmed",
+      "quantity": "10",
+      "stop_price": "142.00",
+      "time_in_force": "gtc"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "side": "sell",
+      "type": "limit",
+      "state": "queued",
+      "quantity": "10",
+      "price": "180.00",
+      "time_in_force": "gtc"
+     }
+    ],
+    "advanced_orders": [
+     {
+      "account_last4": "X4F1",
+      "id_short": "b2c",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "10",
+      "take_profit_limit_price": "180.00",
+      "stop_loss_stop_price": "142.00",
+      "time_in_force": "gtc",
+      "active": true
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "positions": {
+     "AMD@X4F1": {
+      "status": "protected",
+      "gaps": [
+       "STOP_MARKET_GAP_RISK",
+       "NO_EXTENDED_HOURS_COVERAGE"
+      ]
+     }
+    },
+    "notes_contain": [
+     "matched OCO ••b2c's stop leg",
+     "matched OCO ••b2c's take-profit leg"
+    ]
+   }
+  },
+  {
+   "name": "stop-limit, unknown TIF and a GTC stop near its 90-day lifetime",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "TSLA",
+      "quantity": "20",
+      "price": "262.00",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ],
+    "open_orders": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "TSLA",
+      "side": "sell",
+      "type": "limit",
+      "state": "confirmed",
+      "quantity": "10",
+      "stop_price": "240.00",
+      "time_in_force": null,
+      "trigger": "stop",
+      "price": "238.00"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "TSLA",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "confirmed",
+      "quantity": "10",
+      "stop_price": "235.00",
+      "time_in_force": "gtc",
+      "created_at": "2026-08-20T14:00:00Z"
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "positions": {
+     "TSLA@X4F1": {
+      "status": "protected",
+      "covering": [
+       "stop-limit 10 sh TIF? 240/238",
+       "stop 10 sh GTC 235"
+      ],
+      "gaps": [
+       "TIF_UNKNOWN",
+       "GTC_EXPIRING_SOON",
+       "STOP_MARKET_GAP_RISK",
+       "STOP_LIMIT_MAY_NOT_FILL",
+       "NO_EXTENDED_HOURS_COVERAGE"
+      ],
+      "gap_text": {
+       "GTC_EXPIRING_SOON": "stop 10 sh (GTC, created 2026-08-20) lapses around 2026-11-18 (90-day GTC lifetime, unverified)",
+       "TIF_UNKNOWN": "stop-limit 10 sh: time in force not in the order data; if it is GFD it expires at the close"
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "a falling price reaches the higher stop first; an exit bigger than what is left is not counted",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "quantity": "12",
+      "price": "72.05",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ],
+    "open_orders": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "confirmed",
+      "quantity": "10",
+      "stop_price": "60.00",
+      "time_in_force": "gtc"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "confirmed",
+      "quantity": "5",
+      "stop_price": "65.00",
+      "time_in_force": "gtc"
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "positions": {
+     "KO@X4F1": {
+      "status": "partial",
+      "covered_qty": "5",
+      "uncovered_qty": "7",
+      "covering": [
+       "stop 5 sh GTC 65"
+      ],
+      "not_counted": [
+       {
+        "order": "stop 10 sh GTC 60",
+        "why": "bigger than the 7 sh left when it triggers, so it is assumed to be rejected"
+       }
+      ],
+      "gap_text": {
+       "EXITS_EXCEED_POSITION": "stop 10 + stop 5 = 15 sh of exits vs 12 held"
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "earnings between the last open and the next one (market closed Monday night)",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "NVDA",
+      "quantity": "10",
+      "price": "228.10",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "quantity": "10",
+      "price": "161.40",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "quantity": "10",
+      "price": "72.05",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "PLTR",
+      "quantity": "10",
+      "price": "31.20",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ],
+    "open_orders": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "NVDA",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "confirmed",
+      "quantity": "10",
+      "stop_price": "200.00",
+      "time_in_force": "gtc"
+     }
+    ],
+    "earnings": {
+     "NVDA": {
+      "date": "2026-11-17",
+      "timing": "am",
+      "verified": false
+     },
+     "AMD": {
+      "date": "2026-11-16",
+      "timing": "pm",
+      "verified": true
+     },
+     "KO": {
+      "date": "2026-11-18",
+      "timing": "pm",
+      "verified": false
+     },
+     "PLTR": {
+      "date": "2026-11-13",
+      "timing": "pm",
+      "verified": false
+     }
+    }
+   },
+   "expect": {
+    "ok": true,
+    "positions": {
+     "NVDA@X4F1": {
+      "gaps": [
+       "STOP_MARKET_GAP_RISK",
+       "NO_EXTENDED_HOURS_COVERAGE",
+       "EARNINGS_BEFORE_NEXT_SESSION"
+      ],
+      "gap_text": {
+       "EARNINGS_BEFORE_NEXT_SESSION": "earnings (2026-11-17, am, date unverified by the company) are priced in at the next regular open: a stop can fill far below its price on the gap"
+      }
+     },
+     "AMD@X4F1": {
+      "gaps": [
+       "EARNINGS_BEFORE_NEXT_SESSION"
+      ],
+      "gap_text": {
+       "EARNINGS_BEFORE_NEXT_SESSION": "earnings (2026-11-16, pm) are priced in at the next regular open: no exit order is in place"
+      }
+     },
+     "KO@X4F1": {
+      "gaps": []
+     },
+     "PLTR@X4F1": {
+      "gaps": []
+     }
+    }
+   }
+  },
+  {
+   "name": "earnings during the regular session: this morning's report is already priced in; tonight's is not",
+   "input": {
+    "now": "2026-11-17T16:02:00Z",
+    "session_regular_open": true,
+    "next_regular_open_et": "2026-11-18T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "NVDA",
+      "quantity": "10",
+      "price": "228.10",
+      "price_as_of": "2026-11-17T16:01:00Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "quantity": "10",
+      "price": "161.40",
+      "price_as_of": "2026-11-17T16:01:00Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "quantity": "10",
+      "price": "72.05",
+      "price_as_of": "2026-11-17T16:01:00Z"
+     }
+    ],
+    "open_orders": [],
+    "earnings": {
+     "NVDA": {
+      "date": "2026-11-17",
+      "timing": "am",
+      "verified": false
+     },
+     "AMD": {
+      "date": "2026-11-17",
+      "timing": "pm",
+      "verified": false
+     },
+     "KO": {
+      "date": "2026-11-18",
+      "timing": null,
+      "verified": false
+     }
+    }
+   },
+   "expect": {
+    "ok": true,
+    "positions": {
+     "NVDA@X4F1": {
+      "gaps": []
+     },
+     "AMD@X4F1": {
+      "gaps": [
+       "EARNINGS_BEFORE_NEXT_SESSION"
+      ]
+     },
+     "KO@X4F1": {
+      "gaps": [
+       "EARNINGS_BEFORE_NEXT_SESSION"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "stale and missing quotes (equity outside the session, crypto by minutes)",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "quantity": "10",
+      "price": "72.05",
+      "price_as_of": "2026-11-13T21:00:00Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "PLTR",
+      "quantity": "5"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "BTC-USD",
+      "quantity": "0.01",
+      "price": "90000.00",
+      "price_as_of": "2026-11-17T00:30:00Z",
+      "asset_class": "crypto"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "TSLA",
+      "quantity": "1",
+      "price": "262.00",
+      "price_as_of": null
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "quantity": "1",
+      "price": "161.40",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ],
+    "open_orders": []
+   },
+   "expect": {
+    "ok": true,
+    "first_line": "ACTION NEEDED: Dollars at stake: $2,043.90 unprotected (BTC $900.00 · KO $720.50 · TSLA $262.00) · 1 without a quote",
+    "positions": {
+     "KO@X4F1": {
+      "gaps": [
+       "STALE_QUOTE"
+      ],
+      "gap_text": {
+       "STALE_QUOTE": "the quote is from 16:00 ET Fri 2026-11-13; values may be off"
+      }
+     },
+     "PLTR@X4F1": {
+      "gaps": [
+       "STALE_QUOTE"
+      ],
+      "value_usd": null,
+      "gap_text": {
+       "STALE_QUOTE": "no quote was given, so the position's value is unknown"
+      }
+     },
+     "BTC@X4F1": {
+      "gaps": [
+       "STALE_QUOTE"
+      ]
+     },
+     "TSLA@X4F1": {
+      "gaps": [
+       "STALE_QUOTE"
+      ]
+     },
+     "AMD@X4F1": {
+      "gaps": []
+     }
+    }
+   }
+  },
+  {
+   "name": "partial fills, closed states ignored, unexplained held shares, crypto GTC",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "quantity": "100",
+      "price": "72.05",
+      "price_as_of": "2026-11-17T01:04:00Z",
+      "held_for_orders": "40"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "ETH",
+      "quantity": "1.5",
+      "price": "3000.00",
+      "price_as_of": "2026-11-17T01:04:00Z",
+      "asset_class": "crypto"
+     }
+    ],
+    "open_orders": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "partially_filled",
+      "quantity": "30",
+      "stop_price": "65.00",
+      "time_in_force": "gtc",
+      "cumulative_quantity": "10"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "filled",
+      "quantity": "50",
+      "stop_price": "60.00",
+      "time_in_force": "gtc"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "cancelled",
+      "quantity": "50",
+      "stop_price": "60.00",
+      "time_in_force": "gtc"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "rejected",
+      "quantity": "50",
+      "stop_price": "60.00",
+      "time_in_force": "gtc"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "voided",
+      "quantity": "50",
+      "stop_price": "60.00",
+      "time_in_force": "gtc"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "failed",
+      "quantity": "50",
+      "stop_price": "60.00",
+      "time_in_force": "gtc"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset_class": "crypto",
+      "symbol": "ETH",
+      "side": "sell",
+      "type": "stop_loss",
+      "state": "confirmed",
+      "quantity": "1.5",
+      "stop_price": "2500",
+      "time_in_force": "gtc"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset_class": "crypto",
+      "symbol": "ETH",
+      "side": "sell",
+      "type": "stop_loss",
+      "state": "canceled",
+      "quantity": "1.5",
+      "stop_price": "2400",
+      "time_in_force": "gfd"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "side": "buy",
+      "type": "limit",
+      "state": "confirmed",
+      "quantity": "5",
+      "price": "60"
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "positions": {
+     "KO@X4F1": {
+      "status": "partial",
+      "covered_qty": "20",
+      "uncovered_qty": "80",
+      "gaps": [
+       "UNCOVERED_SHARES",
+       "STOP_MARKET_GAP_RISK",
+       "NO_EXTENDED_HOURS_COVERAGE",
+       "HELD_SHARES_UNEXPLAINED"
+      ],
+      "gap_text": {
+       "HELD_SHARES_UNEXPLAINED": "20 sh are held for sell orders this check could not see (for example an OCO or an order older than the lookback); check the app"
+      }
+     },
+     "ETH@X4F1": {
+      "status": "protected",
+      "gaps": [
+       "STOP_MARKET_GAP_RISK",
+       "CRYPTO_GTC_90D"
+      ],
+      "gap_text": {
+       "STOP_MARKET_GAP_RISK": "a stop order becomes a market order when it triggers: a fast move can fill well below the stop"
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "option collateral: exits compete for the other shares; holds without a breakdown are ambiguous",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "quantity": "150",
+      "price": "72.05",
+      "price_as_of": "2026-11-17T01:04:00Z",
+      "sellable": "30",
+      "held_for_collateral": "100"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "PLTR",
+      "quantity": "30",
+      "price": "31.20",
+      "price_as_of": "2026-11-17T01:04:00Z",
+      "sellable": "20"
+     }
+    ],
+    "open_orders": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "confirmed",
+      "quantity": "60",
+      "stop_price": "65.00",
+      "time_in_force": "gtc"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "confirmed",
+      "quantity": "20",
+      "stop_price": "64.00",
+      "time_in_force": "gtc"
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "positions": {
+     "KO@X4F1": {
+      "status": "partial",
+      "covered_qty": "20",
+      "uncovered_qty": "130",
+      "max_whole_shares": "50",
+      "covering": [
+       "stop 20 sh GTC 64"
+      ],
+      "not_counted": [
+       {
+        "order": "stop 60 sh GTC 65",
+        "why": "bigger than the 50 sh left when it triggers, so it is assumed to be rejected"
+       }
+      ],
+      "gaps": [
+       "UNCOVERED_SHARES",
+       "EXITS_EXCEED_POSITION",
+       "COLLATERAL_SHARES",
+       "STOP_MARKET_GAP_RISK",
+       "NO_EXTENDED_HOURS_COVERAGE"
+      ],
+      "gap_text": {
+       "EXITS_EXCEED_POSITION": "stop 60 + stop 20 = 80 sh of exits vs 50 free of option collateral (150 held)"
+      }
+     },
+     "PLTR@X4F1": {
+      "status": "unprotected",
+      "gaps": [
+       "HELD_SHARES_UNEXPLAINED"
+      ],
+      "gap_text": {
+       "HELD_SHARES_UNEXPLAINED": "10 sh are held for sell orders or as option collateral this check could not see (for example an OCO or an order older than the lookback); check the app"
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "ACTION NEEDED still names an account whose holdings weren't fully read",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     },
+     {
+      "account_last4": "M7Q5",
+      "label": "Individual",
+      "agentic": false,
+      "read": {
+       "positions": "partial",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "not_applicable",
+       "crypto_orders": "not_applicable"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "quantity": "10",
+      "price": "72.05",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ],
+    "open_orders": []
+   },
+   "expect": {
+    "ok": true,
+    "first_line": "ACTION NEEDED: Dollars at stake: $720.50 unprotected (KO $720.50) · holdings not fully read in ••••M7Q5"
+   }
+  },
+  {
+   "name": "positions read failed and nothing found -> UNKNOWN, never NO ACTION",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "failed",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [],
+    "open_orders": []
+   },
+   "expect": {
+    "ok": true,
+    "first_line": "UNKNOWN: Dollars at stake: none found, but not every account's positions were read"
+   }
+  },
+  {
+   "name": "non-agentic account with no linked crypto account: crypto reads not_applicable -> CLEAR; a raw lowercase label is capitalized",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "M7Q5",
+      "label": "individual",
+      "agentic": false,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "not_applicable",
+       "crypto_orders": "not_applicable"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "NVDA",
+      "quantity": "10",
+      "price": "228.10",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ],
+    "open_orders": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "NVDA",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "confirmed",
+      "quantity": "10",
+      "stop_price": "200.00",
+      "time_in_force": "gtc"
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "first_line": "CLEAR: Dollars at stake: none found; every position read has a working stop or OCO · 3 gaps to review",
+    "scope_line": "Accounts read: Individual ••••M7Q5 · Not read: none"
+   }
+  },
+  {
+   "name": "non-agentic account whose crypto reads were omitted -> not_read: UNKNOWN and listed as incomplete, never CLEAR",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "M7Q5",
+      "label": "individual",
+      "agentic": false,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "NVDA",
+      "quantity": "10",
+      "price": "228.10",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ],
+    "open_orders": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "NVDA",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "confirmed",
+      "quantity": "10",
+      "stop_price": "200.00",
+      "time_in_force": "gtc"
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "first_line": "UNKNOWN: Dollars at stake: none found in what was read; read completeness was not confirmed for every account",
+    "scope_line": "Accounts read: Individual ••••M7Q5 · Not read: none · Incomplete: Individual ••••M7Q5: crypto orders not_read, crypto positions not_read"
+   }
+  },
+  {
+   "name": "crypto outside the Agentic account: BTC with no stop is unprotected (alert rung only); an app-placed stop with no time in force in the data is TIF_UNKNOWN, not day-only",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     },
+     {
+      "account_last4": "M7Q5",
+      "label": "Individual",
+      "agentic": false,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "M7Q5",
+      "asset_class": "crypto",
+      "symbol": "BTC",
+      "quantity": "0.5",
+      "price": "60000.00",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     },
+     {
+      "account_last4": "M7Q5",
+      "asset_class": "crypto",
+      "symbol": "ETH",
+      "quantity": "2",
+      "price": "3000.00",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ],
+    "open_orders": [
+     {
+      "account_last4": "M7Q5",
+      "asset_class": "crypto",
+      "symbol": "ETH",
+      "side": "sell",
+      "type": "stop_loss",
+      "state": "confirmed",
+      "quantity": "2",
+      "stop_price": "2500.00"
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "first_line": "ACTION NEEDED: Dollars at stake: $30,000.00 unprotected (BTC $30,000.00)",
+    "scope_line": "Accounts read: Agentic ••••X4F1 · Individual ••••M7Q5 · Not read: none",
+    "position_order": [
+     "BTC@M7Q5",
+     "ETH@M7Q5"
+    ],
+    "positions": {
+     "BTC@M7Q5": {
+      "status": "unprotected",
+      "asset_class": "crypto",
+      "gaps": [
+       "NOT_AGENT_TRADABLE"
+      ],
+      "can_add": [
+       "alert"
+      ]
+     },
+     "ETH@M7Q5": {
+      "status": "protected",
+      "asset_class": "crypto",
+      "covering": [
+       "stop order 2 ETH TIF? 2,500"
+      ],
+      "gaps": [
+       "TIF_UNKNOWN",
+       "STOP_MARKET_GAP_RISK",
+       "NOT_AGENT_TRADABLE"
+      ],
+      "gap_text": {
+       "TIF_UNKNOWN": "stop order 2 ETH: time in force not in the order data; if it is gfd it expires at the end of the day; check it in the app"
+      },
+      "can_add": [
+       "alert"
+      ]
+     }
+    },
+    "table_rows": [
+     "| BTC 0.5 | Individual ••••M7Q5 | unprotected | none | agent can't place orders here |",
+     "| ETH 2 | Individual ••••M7Q5 | protected | stop order 2 ETH TIF? 2,500 | TIF not shown · stop-market gap risk · agent can't place orders here |"
+    ],
+    "footer_exact": true
+   }
+  },
+  {
+   "name": "scope, orphan exits, alerts read partly, price_crosses backstop, buy and inactive OCOs",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [
+     {
+      "symbol": "NVDA",
+      "asset_class": "equity",
+      "condition_type": "price_crosses",
+      "threshold": "200",
+      "enabled": true,
+      "alert_id": "a1"
+     },
+     {
+      "symbol": "NVDA",
+      "asset_class": "equity",
+      "condition_type": "price_crosses",
+      "threshold": "200.00",
+      "enabled": true,
+      "alert_id": "a2"
+     }
+    ],
+    "alerts_read": "partial",
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     },
+     {
+      "account_last4": "M7Q5",
+      "label": "Individual",
+      "agentic": false,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "not_applicable",
+       "crypto_orders": "not_applicable"
+      }
+     },
+     {
+      "account_last4": "P0Z9",
+      "label": "Roth IRA",
+      "agentic": false,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "not_applicable",
+       "crypto_orders": "not_applicable"
+      },
+      "in_scope": false
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "KO",
+      "quantity": "10",
+      "price": "72.05",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     },
+     {
+      "account_last4": "M7Q5",
+      "symbol": "NVDA",
+      "quantity": "5",
+      "price": "228.10",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     },
+     {
+      "account_last4": "P0Z9",
+      "symbol": "VTI",
+      "quantity": "1",
+      "price": "290.00",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ],
+    "open_orders": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "MU",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "confirmed",
+      "quantity": "5",
+      "stop_price": "90.00",
+      "time_in_force": "gtc"
+     },
+     {
+      "account_last4": "P0Z9",
+      "symbol": "SNAP",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "confirmed",
+      "quantity": "5",
+      "stop_price": "5.00",
+      "time_in_force": "gtc"
+     }
+    ],
+    "advanced_orders": [
+     {
+      "account_last4": "X4F1",
+      "id_short": "c3d",
+      "symbol": "KO",
+      "side": "buy",
+      "quantity": "10",
+      "take_profit_limit_price": "180.00",
+      "stop_loss_stop_price": "142.00",
+      "time_in_force": "gtc",
+      "active": true
+     },
+     {
+      "account_last4": "X4F1",
+      "id_short": "d4e",
+      "symbol": "KO",
+      "side": "sell",
+      "quantity": "10",
+      "take_profit_limit_price": "80",
+      "stop_loss_stop_price": "65",
+      "time_in_force": "gtc",
+      "active": false
+     }
+    ]
+   },
+   "expect": {
+    "ok": true,
+    "scope_line": "Accounts read: Agentic ••••X4F1 · Individual ••••M7Q5 · Not read: Roth IRA ••••P0Z9",
+    "summary": {
+     "positions": 2
+    },
+    "positions": {
+     "KO@X4F1": {
+      "status": "unprotected",
+      "gaps": [
+       "READ_INCOMPLETE"
+      ]
+     },
+     "NVDA@M7Q5": {
+      "status": "backstop_only",
+      "gaps": [
+       "NOT_AGENT_TRADABLE",
+       "ALERT_NOTIFIES_ONLY",
+       "READ_INCOMPLETE"
+      ]
+     }
+    },
+    "orphan_exits": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "MU",
+      "order": "stop 5 sh GTC 90"
+     }
+    ],
+    "alert_cleanup": [
+     {
+      "alert_id": "a2",
+      "issue": "duplicate of another alert with the same condition"
+     }
+    ],
+    "notes_contain": [
+     "skipped: that account is out of scope",
+     "is a buy OCO",
+     "not active"
+    ]
+   }
+  },
+  {
+   "name": "error: full account number is refused",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "positions": [
+     {
+      "account_last4": "5QR9X4F1",
+      "symbol": "AMD",
+      "quantity": "1",
+      "agentic": true
+     }
+    ]
+   },
+   "expect": {
+    "ok": false,
+    "error_code": "FULL_ACCOUNT_NUMBER"
+   }
+  },
+  {
+   "name": "error: a position from an unlisted account is refused",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "AMD",
+      "quantity": "1",
+      "price": "100.00",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ]
+   },
+   "expect": {
+    "ok": false,
+    "error_code": "UNKNOWN_ACCOUNT"
+   }
+  },
+  {
+   "name": "error: a time without an offset is refused",
+   "input": {
+    "now": "2026-11-17T01:05:00",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "positions": []
+   },
+   "expect": {
+    "ok": false,
+    "error_code": "BAD_TIME"
+   }
+  },
+  {
+   "name": "error: options are the options monitor's job",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "quantity": "1",
+      "price": "100.00",
+      "price_as_of": "2026-11-17T01:04:00Z",
+      "asset_class": "option"
+     }
+    ]
+   },
+   "expect": {
+    "ok": false,
+    "error_code": "BAD_ASSET_CLASS"
+   }
+  },
+  {
+   "name": "error: duplicate position rows",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "quantity": "1",
+      "price": "100.00",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "quantity": "2",
+      "price": "100.00",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ]
+   },
+   "expect": {
+    "ok": false,
+    "error_code": "DUPLICATE_POSITION"
+   }
+  },
+  {
+   "name": "error: a stop without a stop price",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "complete",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "quantity": "1",
+      "price": "100.00",
+      "price_as_of": "2026-11-17T01:04:00Z"
+     }
+    ],
+    "open_orders": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "side": "sell",
+      "type": "stop_market",
+      "state": "confirmed",
+      "quantity": "1",
+      "stop_price": null,
+      "time_in_force": "gtc"
+     }
+    ]
+   },
+   "expect": {
+    "ok": false,
+    "error_code": "MISSING_FIELD"
+   }
+  },
+  {
+   "name": "error: an unknown read status",
+   "input": {
+    "now": "2026-11-17T01:05:00Z",
+    "session_regular_open": false,
+    "next_regular_open_et": "2026-11-17T09:30:00-05:00",
+    "alerts": [],
+    "accounts": [
+     {
+      "account_last4": "X4F1",
+      "label": "Agentic",
+      "agentic": true,
+      "read": {
+       "positions": "complete",
+       "equity_orders": "done",
+       "advanced_orders": "complete",
+       "crypto_positions": "complete",
+       "crypto_orders": "complete"
+      }
+     }
+    ],
+    "positions": []
+   },
+   "expect": {
+    "ok": false,
+    "error_code": "BAD_ENUM"
+   }
+  },
+  {
+   "name": "error: positions is required",
+   "input": {
+    "now": "2026-11-17T01:05:00Z"
+   },
+   "expect": {
+    "ok": false,
+    "error_code": "MISSING_FIELD"
+   }
+  }
+ ]
+}

@@ -1,0 +1,741 @@
+{
+ "script": "lot_select",
+ "about": "validate: the tax_lots array review_equity_order will accept (build spec B.7.10; review_equity_order schema).",
+ "cases": [
+  {
+   "name": "valid two-lot array",
+   "op": "validate",
+   "input": {
+    "sell_quantity": "25",
+    "tax_lots": [
+     {
+      "open_lot_id": "L7",
+      "quantity": "20"
+     },
+     {
+      "open_lot_id": "L1",
+      "quantity": "5"
+     }
+    ],
+    "lots": [
+     {
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity_available": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity_available": "20",
+      "cost_per_share": "280.00"
+     }
+    ],
+    "order": {
+     "side": "sell",
+     "type": "limit",
+     "market_hours": "extended_hours"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": true,
+    "errors": [],
+    "sum": "25",
+    "lot_count": 2
+   }
+  },
+  {
+   "name": "exact decimal sum: 0.1 + 0.2 = 0.3",
+   "op": "validate",
+   "input": {
+    "sell_quantity": "0.3",
+    "tax_lots": [
+     {
+      "open_lot_id": "L7",
+      "quantity": "0.1"
+     },
+     {
+      "open_lot_id": "L1",
+      "quantity": "0.2"
+     }
+    ],
+    "lots": [
+     {
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity_available": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity_available": "20",
+      "cost_per_share": "280.00"
+     }
+    ],
+    "order": {
+     "side": "sell",
+     "type": "market",
+     "market_hours": "regular_hours"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": true,
+    "sum": "0.3"
+   }
+  },
+  {
+   "name": "sum mismatch",
+   "op": "validate",
+   "input": {
+    "sell_quantity": "10",
+    "tax_lots": [
+     {
+      "open_lot_id": "L7",
+      "quantity": "9.999999"
+     }
+    ],
+    "lots": [
+     {
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity_available": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity_available": "20",
+      "cost_per_share": "280.00"
+     }
+    ],
+    "order": {
+     "side": "sell",
+     "type": "limit"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": false,
+    "errors": [
+     {
+      "code": "TAX_LOTS_SUM_MISMATCH"
+     }
+    ]
+   }
+  },
+  {
+   "name": "more than quantity_available",
+   "op": "validate",
+   "input": {
+    "sell_quantity": "21",
+    "tax_lots": [
+     {
+      "open_lot_id": "L7",
+      "quantity": "21"
+     }
+    ],
+    "lots": [
+     {
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity_available": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity_available": "20",
+      "cost_per_share": "280.00"
+     }
+    ],
+    "order": {
+     "side": "sell",
+     "type": "limit"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": false,
+    "errors": [
+     {
+      "code": "TAX_LOTS_EXCEEDS_AVAILABLE"
+     }
+    ]
+   }
+  },
+  {
+   "name": "unknown and duplicate lots",
+   "op": "validate",
+   "input": {
+    "sell_quantity": "3",
+    "tax_lots": [
+     {
+      "open_lot_id": "ZZ",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "L7",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "L7",
+      "quantity": "1"
+     }
+    ],
+    "lots": [
+     {
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity_available": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity_available": "20",
+      "cost_per_share": "280.00"
+     }
+    ],
+    "order": {
+     "side": "sell",
+     "type": "limit"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": false,
+    "errors": [
+     {
+      "code": "UNKNOWN_LOT"
+     },
+     {
+      "code": "DUPLICATE_LOT"
+     }
+    ]
+   }
+  },
+  {
+   "name": "not with dollar_amount, stop orders or all_day_hours",
+   "op": "validate",
+   "input": {
+    "sell_quantity": "1",
+    "tax_lots": [
+     {
+      "open_lot_id": "L7",
+      "quantity": "1"
+     }
+    ],
+    "lots": [
+     {
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity_available": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity_available": "20",
+      "cost_per_share": "280.00"
+     }
+    ],
+    "order": {
+     "side": "sell",
+     "type": "stop_limit",
+     "market_hours": "all_day_hours",
+     "dollar_amount": "100.00"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": false,
+    "errors": [
+     {
+      "code": "TAX_LOTS_NOT_ALLOWED_WITH",
+      "field": "order.dollar_amount"
+     },
+     {
+      "code": "TAX_LOTS_NOT_ALLOWED_WITH",
+      "field": "order.type"
+     },
+     {
+      "code": "TAX_LOTS_NOT_ALLOWED_WITH",
+      "field": "order.market_hours"
+     }
+    ]
+   }
+  },
+  {
+   "name": "not on a fractional limit order",
+   "op": "validate",
+   "input": {
+    "sell_quantity": "1.5",
+    "tax_lots": [
+     {
+      "open_lot_id": "L7",
+      "quantity": "1.5"
+     }
+    ],
+    "lots": [
+     {
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity_available": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity_available": "20",
+      "cost_per_share": "280.00"
+     }
+    ],
+    "order": {
+     "side": "sell",
+     "type": "limit"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": false,
+    "errors": [
+     {
+      "code": "TAX_LOTS_NOT_ALLOWED_WITH",
+      "field": "sell_quantity"
+     }
+    ]
+   }
+  },
+  {
+   "name": "sell orders only",
+   "op": "validate",
+   "input": {
+    "sell_quantity": "1",
+    "tax_lots": [
+     {
+      "open_lot_id": "L7",
+      "quantity": "1"
+     }
+    ],
+    "lots": [
+     {
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity_available": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity_available": "20",
+      "cost_per_share": "280.00"
+     }
+    ],
+    "order": {
+     "side": "buy",
+     "type": "limit"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": false,
+    "errors": [
+     {
+      "code": "TAX_LOTS_SELL_ONLY"
+     }
+    ]
+   }
+  },
+  {
+   "name": "quantities must be decimal strings",
+   "op": "validate",
+   "input": {
+    "sell_quantity": "1",
+    "tax_lots": [
+     {
+      "open_lot_id": "L7",
+      "quantity": 1
+     }
+    ],
+    "lots": [
+     {
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity_available": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity_available": "20",
+      "cost_per_share": "280.00"
+     }
+    ],
+    "order": {
+     "side": "sell",
+     "type": "limit"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": false,
+    "errors": [
+     {
+      "code": "BAD_QUANTITY"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a lot still syncing cannot be named",
+   "op": "validate",
+   "input": {
+    "sell_quantity": "1",
+    "tax_lots": [
+     {
+      "open_lot_id": "L7",
+      "quantity": "1"
+     }
+    ],
+    "lots": [
+     {
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity_available": "20",
+      "cost_per_share": "340.00",
+      "is_selectable": false
+     }
+    ],
+    "order": {
+     "side": "sell",
+     "type": "limit"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": false,
+    "errors": [
+     {
+      "code": "LOT_NOT_SELECTABLE"
+     }
+    ]
+   }
+  },
+  {
+   "name": "31 lots is over the cap",
+   "op": "validate",
+   "input": {
+    "sell_quantity": "31",
+    "tax_lots": [
+     {
+      "open_lot_id": "K00",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K01",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K02",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K03",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K04",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K05",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K06",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K07",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K08",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K09",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K10",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K11",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K12",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K13",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K14",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K15",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K16",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K17",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K18",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K19",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K20",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K21",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K22",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K23",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K24",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K25",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K26",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K27",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K28",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K29",
+      "quantity": "1"
+     },
+     {
+      "open_lot_id": "K30",
+      "quantity": "1"
+     }
+    ],
+    "lots": [
+     {
+      "open_lot_id": "K00",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K01",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K02",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K03",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K04",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K05",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K06",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K07",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K08",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K09",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K10",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K11",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K12",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K13",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K14",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K15",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K16",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K17",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K18",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K19",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K20",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K21",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K22",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K23",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K24",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K25",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K26",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K27",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K28",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K29",
+      "quantity_available": "1"
+     },
+     {
+      "open_lot_id": "K30",
+      "quantity_available": "1"
+     }
+    ],
+    "order": {
+     "side": "sell",
+     "type": "limit"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": false,
+    "errors": [
+     {
+      "code": "TAX_LOTS_MAX_30"
+     }
+    ]
+   }
+  },
+  {
+   "name": "extra keys in a tax_lots entry are refused (the schema allows only open_lot_id and quantity)",
+   "op": "validate",
+   "input": {
+    "sell_quantity": "1",
+    "tax_lots": [
+     {
+      "open_lot_id": "L7",
+      "quantity": "1",
+      "cost": "340"
+     }
+    ],
+    "lots": [
+     {
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity_available": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity_available": "20",
+      "cost_per_share": "280.00"
+     }
+    ],
+    "order": {
+     "side": "sell",
+     "type": "limit"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": false,
+    "errors": [
+     {
+      "code": "BAD_VALUE"
+     }
+    ]
+   }
+  }
+ ]
+}

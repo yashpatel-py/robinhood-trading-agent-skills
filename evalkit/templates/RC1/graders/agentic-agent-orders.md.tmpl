@@ -1,0 +1,9 @@
+---
+# Agentic account, agent-placed orders, bounded by created_at_gte at or before the window start
+# (the last 7 days start 2026-11-10; last week starts 2026-11-09).
+type: tool_used
+tool: "{{tool:get_equity_orders}}"
+input_match: "^(?=[\\s\\S]*\"account_number\"\\s*:\\s*\"{{acct:agentic}}\")(?=[\\s\\S]*\"placed_agent\"\\s*:\\s*\"agentic\")(?=[\\s\\S]*\"created_at_gte\"\\s*:\\s*\"2026-(0\\d-|10-|11-0\\d|11-10))"
+min: 1
+weight: 1
+---

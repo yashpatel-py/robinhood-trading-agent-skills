@@ -1,0 +1,22 @@
+{
+  "session_id": "test-session-1",
+  "transcript_path": "/tmp/rh-test/transcript.jsonl",
+  "cwd": "/tmp/rh-test/project",
+  "permission_mode": "default",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "mcp__rh-uuid-server__preview_crypto_order",
+  "tool_input": {
+    "rhs_account_number": "__RHS__",
+    "symbol": "BTC",
+    "side": "buy",
+    "type": "market",
+    "dollar_amount": "25.00"
+  },
+  "tool_response": [
+    {
+      "type": "text",
+      "text": "{\"data\": {\"symbol\": \"BTC-USD\", \"validation_errors\": [{\"message\": \"Amount is below the minimum order size.\"}]}, \"guide\": \"Test guide text.\"}"
+    }
+  ],
+  "tool_use_id": "toolu_test_2"
+}

@@ -1,0 +1,1952 @@
+{
+ "script": "harvest_plan",
+ "about": "Harvest scan: lot-level candidates by account and symbol, with wash status and dollars at stake; retirement listed separately; no 'best' (build spec B.2 workflow B, B.7.11 'Other tax scripts').",
+ "cases": [
+  {
+   "name": "TSLA in the Individual account: $1,920.00 harvestable ($1,560.00 short, $360.00 long), $90.00 permanently lost if both lots are sold now (the earliest-acquired lot L1 is matched first)",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity": "20",
+      "cost_per_share": "280.00"
+     },
+     {
+      "account_last4": "P0Z9",
+      "symbol": "TSLA",
+      "open_lot_id": "R1",
+      "open_date": "2026-11-06",
+      "quantity": "5",
+      "cost_per_share": "270.00"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "PLTR",
+      "open_lot_id": "P1",
+      "open_date": "2026-08-01",
+      "quantity": "30",
+      "cost_per_share": "28.00"
+     },
+     {
+      "account_last4": "M7Q5",
+      "symbol": "NVDA",
+      "open_lot_id": "N1",
+      "open_date": "2025-03-10",
+      "quantity": "100",
+      "cost_per_share": "118.00"
+     },
+     {
+      "account_last4": "M7Q5",
+      "symbol": "NVDA",
+      "open_lot_id": "N2",
+      "open_date": "2025-12-03",
+      "quantity": "40",
+      "cost_per_share": "181.50"
+     }
+    ],
+    "prices": {
+     "TSLA": "262.00",
+     "PLTR": "31.20",
+     "NVDA": "228.10"
+    },
+    "wash": {
+     "M7Q5:TSLA": {
+      "ok": true,
+      "status": "conflict",
+      "status_line": "CONFLICT: Dollars at stake: $90.00 of TSLA loss permanently disallowed if sold before 2026-12-07",
+      "disallowed_total_usd": "90.00",
+      "permanent_total_usd": "90.00",
+      "earliest_clean_sale_date": "2026-12-07",
+      "do_not_buy_until": "2026-12-17",
+      "first_trading_day_after": "2026-12-17",
+      "per_lot": {
+       "L7": {
+        "disallowed_usd": "0.00",
+        "permanent_usd": "0.00"
+       },
+       "L1": {
+        "disallowed_usd": "90.00",
+        "permanent_usd": "90.00"
+       }
+      },
+      "possible": []
+     }
+    },
+    "ytd_realized": {
+     "X4F1": "462.23",
+     "M7Q5": "7950.10",
+     "P0Z9": "1204.00"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "candidates": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "harvestable_loss_usd": "1920.00",
+      "short_term_loss_usd": "1560.00",
+      "long_term_loss_usd": "360.00",
+      "wash_status": "conflict",
+      "disallowed_if_sold_now_usd": "90.00",
+      "permanent_if_sold_now_usd": "90.00",
+      "net_loss_after_wash_usd": "1830.00",
+      "earliest_clean_sale_date": "2026-12-07",
+      "reviewable": false,
+      "ticket_route": "manual_ticket",
+      "fifo_sells_first": {
+       "open_lot_id": "L1",
+       "at_a_loss": true
+      }
+     }
+    ],
+    "excluded_retirement": [
+     {
+      "account_last4": "P0Z9",
+      "symbol": "TSLA",
+      "unrealized_usd": "-40.00"
+     }
+    ],
+    "totals": {
+     "harvestable_loss_usd": "1920.00",
+     "disallowed_if_sold_now_usd": "90.00",
+     "net_loss_after_wash_usd": "1830.00"
+    },
+    "ytd": {
+     "realized_taxable_usd": "8412.33",
+     "if_every_candidate_were_sold_usd": "6582.33"
+    },
+    "status_line": "CONFLICT: Dollars at stake: TSLA ••••M7Q5: $1,920.00 harvestable ($90.00 disallowed if sold now, permanently)"
+   }
+  },
+  {
+   "name": "no wash result for a candidate -> not checked -> the scan is unknown",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity": "20",
+      "cost_per_share": "280.00"
+     }
+    ],
+    "prices": {
+     "TSLA": "262.00",
+     "PLTR": "31.20",
+     "NVDA": "228.10"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "unknown",
+    "candidates": [
+     {
+      "wash_status": "not_checked",
+      "disallowed_if_sold_now_usd": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "min_loss_usd filters small candidates into below_threshold",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "L1",
+      "open_date": "2025-03-10",
+      "quantity": "20",
+      "cost_per_share": "280.00"
+     }
+    ],
+    "prices": {
+     "TSLA": "262.00",
+     "PLTR": "31.20",
+     "NVDA": "228.10"
+    },
+    "wash": {
+     "TSLA": {
+      "ok": true,
+      "status": "conflict",
+      "status_line": "CONFLICT: Dollars at stake: $390.00 of TSLA loss permanently disallowed if sold before 2026-12-07",
+      "disallowed_total_usd": "390.00",
+      "permanent_total_usd": "390.00",
+      "earliest_clean_sale_date": "2026-12-07",
+      "do_not_buy_until": "2026-12-17",
+      "first_trading_day_after": "2026-12-17",
+      "per_lot": {
+       "L7": {
+        "disallowed_usd": "390.00",
+        "permanent_usd": "390.00"
+       },
+       "L1": {
+        "disallowed_usd": "0.00",
+        "permanent_usd": "0.00"
+       }
+      },
+      "possible": [],
+      "sale_account_last4": "M7Q5"
+     }
+    },
+    "min_loss_usd": "2000"
+   },
+   "expected": {
+    "ok": true,
+    "status": "none",
+    "candidates": [],
+    "below_threshold": [
+     {
+      "symbol": "TSLA",
+      "harvestable_loss_usd": "1920.00"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a loss lot in the Agentic account is reviewable",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "prices": {
+     "AMD": "150.00"
+    },
+    "lots": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "AMD",
+      "open_lot_id": "A1",
+      "open_date": "2026-09-01",
+      "quantity": "2",
+      "cost_per_share": "160.00"
+     }
+    ],
+    "wash": {
+     "X4F1:AMD": {
+      "ok": true,
+      "status": "clear",
+      "disallowed_total_usd": "0.00",
+      "permanent_total_usd": "0.00",
+      "earliest_clean_sale_date": null,
+      "do_not_buy_until": "2026-12-17"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear",
+    "candidates": [
+     {
+      "reviewable": true,
+      "ticket_route": "review_equity_order",
+      "harvestable_loss_usd": "20.00",
+      "disallowed_if_sold_now_usd": "0.00"
+     }
+    ]
+   }
+  },
+  {
+   "name": "FIFO would sell a gain lot first: the note says to name the loss lots (a symbol-only key whose sale_account_last4 matches is used)",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "prices": {
+     "NVDA": "170.00"
+    },
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "NVDA",
+      "open_lot_id": "N1",
+      "open_date": "2025-03-10",
+      "quantity": "100",
+      "cost_per_share": "118.00"
+     },
+     {
+      "account_last4": "M7Q5",
+      "symbol": "NVDA",
+      "open_lot_id": "N2",
+      "open_date": "2025-12-03",
+      "quantity": "40",
+      "cost_per_share": "181.50"
+     }
+    ],
+    "wash": {
+     "NVDA": {
+      "ok": true,
+      "status": "clear",
+      "disallowed_total_usd": "0.00",
+      "permanent_total_usd": "0.00",
+      "sale_account_last4": "M7Q5"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "candidates": [
+     {
+      "symbol": "NVDA",
+      "harvestable_loss_usd": "460.00",
+      "gain_lots_count": 1,
+      "fifo_sells_first": {
+       "open_lot_id": "N1",
+       "at_a_loss": false
+      },
+      "wash_status": "clear"
+     }
+    ]
+   }
+  },
+  {
+   "name": "basis pending and unpriced lots make the scan unknown",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "prices": {},
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "KO",
+      "open_lot_id": "K1",
+      "open_date": "2026-11-16",
+      "quantity": "1",
+      "cost_per_share": null
+     },
+     {
+      "account_last4": "M7Q5",
+      "symbol": "XYZ",
+      "open_lot_id": "Z1",
+      "open_date": "2026-01-02",
+      "quantity": "1",
+      "cost_per_share": "5.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "unknown",
+    "basis_pending": [
+     {
+      "open_lot_id": "K1"
+     }
+    ],
+    "unpriced": [
+     {
+      "symbol": "XYZ"
+     }
+    ]
+   }
+  },
+  {
+   "name": "sort by symbol is disclosed as a display order",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "prices": {
+     "AAA": "1",
+     "BBB": "1"
+    },
+    "sort_by": "symbol",
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "BBB",
+      "open_lot_id": "B",
+      "open_date": "2026-01-02",
+      "quantity": "100",
+      "cost_per_share": "2.00"
+     },
+     {
+      "account_last4": "M7Q5",
+      "symbol": "AAA",
+      "open_lot_id": "A",
+      "open_date": "2026-01-02",
+      "quantity": "1",
+      "cost_per_share": "2.00"
+     }
+    ],
+    "wash": {
+     "M7Q5:AAA": {
+      "ok": true,
+      "status": "clear",
+      "disallowed_total_usd": "0.00",
+      "permanent_total_usd": "0.00"
+     },
+     "M7Q5:BBB": {
+      "ok": true,
+      "status": "possible",
+      "disallowed_total_usd": "0.00",
+      "permanent_total_usd": "0.00",
+      "possible": [
+       {}
+      ]
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "possible",
+    "candidates": [
+     {
+      "symbol": "AAA"
+     },
+     {
+      "symbol": "BBB",
+      "possible_items": 1
+     }
+    ],
+    "sort": "symbol, A to Z (a display order, not a recommendation)"
+   }
+  },
+  {
+   "name": "an incomplete account makes the scan unknown",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic",
+      "read_status": "partial"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "prices": {
+     "AAA": "1"
+    },
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "AAA",
+      "open_lot_id": "A",
+      "open_date": "2026-01-02",
+      "quantity": "1",
+      "cost_per_share": "2.00"
+     }
+    ],
+    "wash": {
+     "M7Q5:AAA": {
+      "ok": true,
+      "status": "clear",
+      "disallowed_total_usd": "0.00",
+      "permanent_total_usd": "0.00"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "unknown",
+    "accounts_not_fully_read": [
+     "X4F1"
+    ]
+   }
+  },
+  {
+   "name": "read scope left the Roth out: the sweep is clear_in_scope, so the scan is CLEAR in the accounts read only, never plain clear",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA",
+      "read_status": "not_in_scope"
+     }
+    ],
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity": "20",
+      "cost_per_share": "340.00"
+     }
+    ],
+    "prices": {
+     "TSLA": "262.00"
+    },
+    "wash": {
+     "M7Q5:TSLA": {
+      "ok": true,
+      "mode": "sale",
+      "symbol": "TSLA",
+      "sale_account_last4": "M7Q5",
+      "status": "clear_in_scope",
+      "status_line": "CLEAR: Dollars at stake: none found for TSLA",
+      "disallowed_total_usd": "0.00",
+      "permanent_total_usd": "0.00",
+      "earliest_clean_sale_date": null,
+      "do_not_buy_until": "2026-12-17",
+      "first_trading_day_after": "2026-12-17",
+      "per_lot": {
+       "L7": {
+        "disallowed_usd": "0.00",
+        "permanent_usd": "0.00"
+       }
+      },
+      "possible": [],
+      "not_evaluated": [
+       "other brokers",
+       "spouse accounts"
+      ],
+      "accounts_read": [
+       {
+        "account_last4": "M7Q5",
+        "type": "taxable",
+        "read_status": "complete"
+       },
+       {
+        "account_last4": "P0Z9",
+        "type": "retirement",
+        "read_status": "not_in_scope"
+       },
+       {
+        "account_last4": "X4F1",
+        "type": "taxable",
+        "read_status": "complete"
+       }
+      ]
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear_in_scope",
+    "accounts_not_in_scope": [
+     "P0Z9"
+    ],
+    "accounts_not_fully_read": [],
+    "candidates": [
+     {
+      "wash_status": "clear_in_scope",
+      "disallowed_if_sold_now_usd": "0.00"
+     }
+    ],
+    "status_line": "CLEAR: Dollars at stake: TSLA ••••M7Q5: $1,560.00 harvestable (wash checked only in the accounts read; not read, by your choice: ••••P0Z9)"
+   }
+  },
+  {
+   "name": "an account marked not_in_scope keeps the scan out of plain clear even when the sweep result says clear",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA",
+      "read_status": "not_in_scope"
+     }
+    ],
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity": "20",
+      "cost_per_share": "340.00"
+     }
+    ],
+    "prices": {
+     "TSLA": "262.00"
+    },
+    "wash": {
+     "M7Q5:TSLA": {
+      "ok": true,
+      "mode": "sale",
+      "symbol": "TSLA",
+      "sale_account_last4": "M7Q5",
+      "status": "clear",
+      "status_line": "CLEAR: Dollars at stake: none found for TSLA",
+      "disallowed_total_usd": "0.00",
+      "permanent_total_usd": "0.00",
+      "earliest_clean_sale_date": null,
+      "do_not_buy_until": "2026-12-17",
+      "first_trading_day_after": "2026-12-17",
+      "per_lot": {
+       "L7": {
+        "disallowed_usd": "0.00",
+        "permanent_usd": "0.00"
+       }
+      },
+      "possible": [],
+      "not_evaluated": [
+       "other brokers",
+       "spouse accounts"
+      ]
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear_in_scope",
+    "accounts_not_in_scope": [
+     "P0Z9"
+    ]
+   }
+  },
+  {
+   "name": "the sweep itself reports a skipped account (clear_in_scope) although the scan's accounts say complete: still not plain clear",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity": "20",
+      "cost_per_share": "340.00"
+     }
+    ],
+    "prices": {
+     "TSLA": "262.00"
+    },
+    "wash": {
+     "M7Q5:TSLA": {
+      "ok": true,
+      "mode": "sale",
+      "symbol": "TSLA",
+      "sale_account_last4": "M7Q5",
+      "status": "clear_in_scope",
+      "status_line": "CLEAR: Dollars at stake: none found for TSLA",
+      "disallowed_total_usd": "0.00",
+      "permanent_total_usd": "0.00",
+      "earliest_clean_sale_date": null,
+      "do_not_buy_until": "2026-12-17",
+      "first_trading_day_after": "2026-12-17",
+      "per_lot": {
+       "L7": {
+        "disallowed_usd": "0.00",
+        "permanent_usd": "0.00"
+       }
+      },
+      "possible": [],
+      "not_evaluated": [
+       "other brokers",
+       "spouse accounts"
+      ],
+      "accounts_read": [
+       {
+        "account_last4": "P0Z9",
+        "type": "retirement",
+        "read_status": "not_in_scope"
+       }
+      ]
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear_in_scope",
+    "accounts_not_in_scope": [
+     "P0Z9"
+    ]
+   }
+  },
+  {
+   "name": "no loss lot, but a taxable account was left out: NO ACTION names the accounts not read",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic",
+      "read_status": "not_in_scope"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "prices": {
+     "PLTR": "31.20"
+    },
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "PLTR",
+      "open_lot_id": "P1",
+      "open_date": "2026-08-01",
+      "quantity": "30",
+      "cost_per_share": "28.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "none",
+    "accounts_not_in_scope": [
+     "X4F1"
+    ],
+    "status_line": "NO ACTION: Dollars at stake: none found (no taxable lot is at a loss in the accounts read; not read, by your choice: ••••X4F1)"
+   }
+  },
+  {
+   "name": "a read_status outside complete/partial/failed/not_in_scope is refused",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA",
+      "read_status": "skipped"
+     }
+    ],
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity": "20",
+      "cost_per_share": "340.00"
+     }
+    ],
+    "prices": {
+     "TSLA": "262.00"
+    }
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_VALUE",
+      "field": "accounts[2].read_status"
+     }
+    ]
+   }
+  },
+  {
+   "name": "one symbol-keyed sweep for the Individual sale never prices the Agentic account's TSLA lots: that candidate is not checked, totals count $390.00 once",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "prices": {
+     "TSLA": "262.00"
+    },
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "TSLA",
+      "open_lot_id": "A1",
+      "open_date": "2026-10-01",
+      "quantity": "1",
+      "cost_per_share": "338.00"
+     }
+    ],
+    "wash": {
+     "TSLA": {
+      "ok": true,
+      "status": "conflict",
+      "status_line": "CONFLICT: Dollars at stake: $390.00 of TSLA loss permanently disallowed if sold before 2026-12-07",
+      "disallowed_total_usd": "390.00",
+      "permanent_total_usd": "390.00",
+      "earliest_clean_sale_date": "2026-12-07",
+      "do_not_buy_until": "2026-12-17",
+      "first_trading_day_after": "2026-12-17",
+      "per_lot": {
+       "L7": {
+        "disallowed_usd": "390.00",
+        "permanent_usd": "390.00"
+       }
+      },
+      "possible": [],
+      "mode": "sale",
+      "symbol": "TSLA",
+      "sale_account_last4": "M7Q5"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "candidates": [
+     {
+      "account_last4": "M7Q5",
+      "wash_status": "conflict",
+      "disallowed_if_sold_now_usd": "390.00",
+      "permanent_if_sold_now_usd": "390.00",
+      "net_loss_after_wash_usd": "1170.00"
+     },
+     {
+      "account_last4": "X4F1",
+      "harvestable_loss_usd": "76.00",
+      "wash_status": "not_checked",
+      "disallowed_if_sold_now_usd": null,
+      "permanent_if_sold_now_usd": null,
+      "net_loss_after_wash_usd": null,
+      "wash_note": "the wash result keyed \"TSLA\" is for the sale in ••••M7Q5, not in ••••X4F1; run one wash sweep for TSLA with every candidate lot in lots_sold (key it \"TSLA\"), or one for selling these lots in ••••X4F1 (key it \"X4F1:TSLA\")"
+     }
+    ],
+    "totals": {
+     "disallowed_if_sold_now_usd": "390.00",
+     "permanent_if_sold_now_usd": "390.00"
+    }
+   }
+  },
+  {
+   "name": "two taxable accounts hold TSLA and only one account's clear sweep is supplied: the other is not checked and the scan is UNKNOWN",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "prices": {
+     "TSLA": "262.00"
+    },
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "TSLA",
+      "open_lot_id": "A1",
+      "open_date": "2026-10-01",
+      "quantity": "1",
+      "cost_per_share": "338.00"
+     }
+    ],
+    "wash": {
+     "TSLA": {
+      "ok": true,
+      "mode": "sale",
+      "symbol": "TSLA",
+      "sale_account_last4": "M7Q5",
+      "status": "clear",
+      "status_line": "CLEAR: Dollars at stake: none found for TSLA",
+      "disallowed_total_usd": "0.00",
+      "permanent_total_usd": "0.00",
+      "earliest_clean_sale_date": null,
+      "do_not_buy_until": "2026-12-17",
+      "first_trading_day_after": "2026-12-17",
+      "per_lot": {
+       "L7": {
+        "disallowed_usd": "0.00",
+        "permanent_usd": "0.00"
+       }
+      },
+      "possible": [],
+      "not_evaluated": [
+       "other brokers",
+       "spouse accounts"
+      ]
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "unknown",
+    "candidates": [
+     {
+      "account_last4": "M7Q5",
+      "wash_status": "clear"
+     },
+     {
+      "account_last4": "X4F1",
+      "wash_status": "not_checked"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a symbol-only key with no sale account is never matched to an account",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "prices": {
+     "TSLA": "262.00"
+    },
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity": "20",
+      "cost_per_share": "340.00"
+     }
+    ],
+    "wash": {
+     "TSLA": {
+      "ok": true,
+      "status": "clear",
+      "disallowed_total_usd": "0.00",
+      "permanent_total_usd": "0.00"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "unknown",
+    "candidates": [
+     {
+      "wash_status": "not_checked",
+      "disallowed_if_sold_now_usd": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "an ACCT:SYMBOL key whose sweep names another sale account is refused (mislabeled key)",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "prices": {
+     "TSLA": "262.00"
+    },
+    "lots": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "TSLA",
+      "open_lot_id": "A1",
+      "open_date": "2026-10-01",
+      "quantity": "1",
+      "cost_per_share": "338.00"
+     }
+    ],
+    "wash": {
+     "X4F1:TSLA": {
+      "ok": true,
+      "status": "conflict",
+      "status_line": "CONFLICT: Dollars at stake: $390.00 of TSLA loss permanently disallowed if sold before 2026-12-07",
+      "disallowed_total_usd": "390.00",
+      "permanent_total_usd": "390.00",
+      "earliest_clean_sale_date": "2026-12-07",
+      "do_not_buy_until": "2026-12-17",
+      "first_trading_day_after": "2026-12-17",
+      "per_lot": {
+       "L7": {
+        "disallowed_usd": "390.00",
+        "permanent_usd": "390.00"
+       }
+      },
+      "possible": [],
+      "mode": "sale",
+      "symbol": "TSLA",
+      "sale_account_last4": "M7Q5"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "unknown",
+    "candidates": [
+     {
+      "account_last4": "X4F1",
+      "wash_status": "not_checked",
+      "disallowed_if_sold_now_usd": null
+     }
+    ],
+    "totals": {
+     "permanent_if_sold_now_usd": "0.00"
+    }
+   }
+  },
+  {
+   "name": "a sweep whose per_lot misses one of the loss lots: that lot is unknown, never counted as $0 disallowed",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "prices": {
+     "TSLA": "262.00"
+    },
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity": "20",
+      "cost_per_share": "340.00"
+     },
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "L9",
+      "open_date": "2026-09-01",
+      "quantity": "5",
+      "cost_per_share": "300.00"
+     }
+    ],
+    "wash": {
+     "M7Q5:TSLA": {
+      "ok": true,
+      "mode": "sale",
+      "symbol": "TSLA",
+      "sale_account_last4": "M7Q5",
+      "status": "clear",
+      "status_line": "CLEAR: Dollars at stake: none found for TSLA",
+      "disallowed_total_usd": "0.00",
+      "permanent_total_usd": "0.00",
+      "earliest_clean_sale_date": null,
+      "do_not_buy_until": "2026-12-17",
+      "first_trading_day_after": "2026-12-17",
+      "per_lot": {
+       "L7": {
+        "disallowed_usd": "0.00",
+        "permanent_usd": "0.00"
+       }
+      },
+      "possible": [],
+      "not_evaluated": [
+       "other brokers",
+       "spouse accounts"
+      ]
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "unknown",
+    "candidates": [
+     {
+      "harvestable_loss_usd": "1750.00",
+      "wash_status": "unknown",
+      "wash_lots_not_checked": [
+       "L9"
+      ],
+      "disallowed_if_sold_now_usd": "0.00"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a sweep with no per_lot row for any of the candidate's loss lots is not used at all",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "prices": {
+     "TSLA": "262.00"
+    },
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity": "20",
+      "cost_per_share": "340.00"
+     }
+    ],
+    "wash": {
+     "M7Q5:TSLA": {
+      "ok": true,
+      "mode": "sale",
+      "symbol": "TSLA",
+      "sale_account_last4": "M7Q5",
+      "status": "clear",
+      "status_line": "CLEAR: Dollars at stake: none found for TSLA",
+      "disallowed_total_usd": "0.00",
+      "permanent_total_usd": "0.00",
+      "earliest_clean_sale_date": null,
+      "do_not_buy_until": "2026-12-17",
+      "first_trading_day_after": "2026-12-17",
+      "per_lot": {
+       "lot1": {
+        "disallowed_usd": "0.00",
+        "permanent_usd": "0.00"
+       }
+      },
+      "possible": [],
+      "not_evaluated": [
+       "other brokers",
+       "spouse accounts"
+      ]
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "unknown",
+    "candidates": [
+     {
+      "wash_status": "not_checked",
+      "disallowed_if_sold_now_usd": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "disallowed dollars are capped at the candidate's harvestable loss (a sweep run on other lots or another price)",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "prices": {
+     "TSLA": "262.00"
+    },
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "A1",
+      "open_date": "2026-10-01",
+      "quantity": "1",
+      "cost_per_share": "338.00"
+     }
+    ],
+    "wash": {
+     "M7Q5:TSLA": {
+      "ok": true,
+      "mode": "sale",
+      "symbol": "TSLA",
+      "sale_account_last4": "M7Q5",
+      "status": "conflict",
+      "disallowed_total_usd": "390.00",
+      "permanent_total_usd": "390.00"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "candidates": [
+     {
+      "harvestable_loss_usd": "76.00",
+      "disallowed_if_sold_now_usd": "76.00",
+      "permanent_if_sold_now_usd": "76.00",
+      "net_loss_after_wash_usd": "0.00"
+     }
+    ]
+   }
+  },
+  {
+   "name": "Robinhood reports a lot long-term that the date arithmetic calls short-term: Robinhood's term wins and the split is flagged as disputed, with the date arithmetic's split next to it",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "prices": {
+     "TSLA": "262.00"
+    },
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "R",
+      "open_date": "2026-10-10",
+      "quantity": "20",
+      "cost_per_share": "300.00",
+      "term": "long_term"
+     }
+    ],
+    "wash": {
+     "M7Q5:TSLA": {
+      "ok": true,
+      "mode": "sale",
+      "symbol": "TSLA",
+      "sale_account_last4": "M7Q5",
+      "status": "clear",
+      "status_line": "CLEAR: Dollars at stake: none found for TSLA",
+      "disallowed_total_usd": "0.00",
+      "permanent_total_usd": "0.00",
+      "earliest_clean_sale_date": null,
+      "do_not_buy_until": "2026-12-17",
+      "first_trading_day_after": "2026-12-17",
+      "per_lot": {
+       "R": {
+        "disallowed_usd": "0.00",
+        "permanent_usd": "0.00"
+       }
+      },
+      "possible": [],
+      "not_evaluated": [
+       "other brokers",
+       "spouse accounts"
+      ]
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear",
+    "candidates": [
+     {
+      "short_term_loss_usd": "0.00",
+      "long_term_loss_usd": "760.00",
+      "term_split_disputed": true,
+      "term_disputed_lots": [
+       "R"
+      ],
+      "loss_lots": [
+       {
+        "open_lot_id": "R",
+        "term": "long",
+        "broker_term": "long",
+        "date_term": "short",
+        "term_agrees": false
+       }
+      ],
+      "date_term_split": {
+       "short_term_loss_usd": "760.00",
+       "long_term_loss_usd": "0.00"
+      }
+     }
+    ],
+    "totals": {
+     "term_disagreements": 1
+    }
+   }
+  },
+  {
+   "name": "Robinhood's term agrees: nothing disputed",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "prices": {
+     "TSLA": "262.00"
+    },
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity": "20",
+      "cost_per_share": "340.00",
+      "term": "short"
+     }
+    ],
+    "wash": {
+     "M7Q5:TSLA": {
+      "ok": true,
+      "mode": "sale",
+      "symbol": "TSLA",
+      "sale_account_last4": "M7Q5",
+      "status": "clear",
+      "status_line": "CLEAR: Dollars at stake: none found for TSLA",
+      "disallowed_total_usd": "0.00",
+      "permanent_total_usd": "0.00",
+      "earliest_clean_sale_date": null,
+      "do_not_buy_until": "2026-12-17",
+      "first_trading_day_after": "2026-12-17",
+      "per_lot": {
+       "L7": {
+        "disallowed_usd": "0.00",
+        "permanent_usd": "0.00"
+       }
+      },
+      "possible": [],
+      "not_evaluated": [
+       "other brokers",
+       "spouse accounts"
+      ]
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "candidates": [
+     {
+      "term_split_disputed": false,
+      "loss_lots": [
+       {
+        "broker_term": "short",
+        "term_agrees": true
+       }
+      ]
+     }
+    ],
+    "totals": {
+     "term_disagreements": 0
+    }
+   }
+  },
+  {
+   "name": "lots bought within 30 days of a loss sale of the same stock in another account are flagged as possible replacement lots (loss or gain)",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "prices": {
+     "TSLA": "262.00"
+    },
+    "lots": [
+     {
+      "account_last4": "X4F1",
+      "symbol": "TSLA",
+      "open_lot_id": "A1",
+      "open_date": "2026-10-20",
+      "quantity": "1",
+      "cost_per_share": "338.00"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "TSLA",
+      "open_lot_id": "A2",
+      "open_date": "2026-10-21",
+      "quantity": "1",
+      "cost_per_share": "250.00"
+     },
+     {
+      "account_last4": "X4F1",
+      "symbol": "TSLA",
+      "open_lot_id": "A0",
+      "open_date": "2026-01-05",
+      "quantity": "1",
+      "cost_per_share": "400.00"
+     }
+    ],
+    "loss_sales": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "date": "2026-10-15",
+      "realized_usd": "-500.00"
+     },
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "date": "2026-10-16",
+      "realized_usd": "120.00"
+     },
+     {
+      "account_last4": "P0Z9",
+      "symbol": "TSLA",
+      "date": "2026-10-15"
+     }
+    ],
+    "wash": {
+     "X4F1:TSLA": {
+      "ok": true,
+      "mode": "sale",
+      "symbol": "TSLA",
+      "sale_account_last4": "X4F1",
+      "status": "clear",
+      "status_line": "CLEAR: Dollars at stake: none found for TSLA",
+      "disallowed_total_usd": "0.00",
+      "permanent_total_usd": "0.00",
+      "earliest_clean_sale_date": null,
+      "do_not_buy_until": "2026-12-17",
+      "first_trading_day_after": "2026-12-17",
+      "per_lot": {
+       "A1": {
+        "disallowed_usd": "0.00",
+        "permanent_usd": "0.00"
+       },
+       "A0": {
+        "disallowed_usd": "0.00",
+        "permanent_usd": "0.00"
+       }
+      },
+      "possible": [],
+      "not_evaluated": [
+       "other brokers",
+       "spouse accounts"
+      ]
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear",
+    "candidates": [
+     {
+      "replacement_lot_ids": [
+       "A1"
+      ]
+     }
+    ],
+    "possible_replacement_lots": [
+     {
+      "open_lot_id": "A1",
+      "loss_sales": [
+       {
+        "account_last4": "M7Q5",
+        "date": "2026-10-15"
+       }
+      ]
+     },
+     {
+      "open_lot_id": "A2",
+      "unrealized_usd": "12.00"
+     }
+    ],
+    "not_evaluated": [
+     "other brokers",
+     "spouse accounts"
+    ]
+   }
+  },
+  {
+   "name": "without loss_sales the replacement-lot adjustment is listed as not evaluated",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "agentic": true,
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "agentic": false,
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "agentic": false,
+      "label": "Roth IRA"
+     }
+    ],
+    "prices": {
+     "TSLA": "262.00"
+    },
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "TSLA",
+      "open_lot_id": "L7",
+      "open_date": "2026-06-02",
+      "quantity": "20",
+      "cost_per_share": "340.00"
+     }
+    ],
+    "wash": {
+     "M7Q5:TSLA": {
+      "ok": true,
+      "mode": "sale",
+      "symbol": "TSLA",
+      "sale_account_last4": "M7Q5",
+      "status": "clear",
+      "status_line": "CLEAR: Dollars at stake: none found for TSLA",
+      "disallowed_total_usd": "0.00",
+      "permanent_total_usd": "0.00",
+      "earliest_clean_sale_date": null,
+      "do_not_buy_until": "2026-12-17",
+      "first_trading_day_after": "2026-12-17",
+      "per_lot": {
+       "L7": {
+        "disallowed_usd": "0.00",
+        "permanent_usd": "0.00"
+       }
+      },
+      "possible": [],
+      "not_evaluated": [
+       "other brokers",
+       "spouse accounts"
+      ]
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear",
+    "possible_replacement_lots": [],
+    "not_evaluated": [
+     "basis and holding-period adjustments on replacement lots from earlier washes (cross-account ones are not in Robinhood's lots)",
+     "other brokers",
+     "spouse accounts"
+    ]
+   }
+  },
+  {
+   "name": "a lot in an account with no type is refused",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [],
+    "prices": {
+     "AAA": "1"
+    },
+    "lots": [
+     {
+      "account_last4": "M7Q5",
+      "symbol": "AAA",
+      "open_lot_id": "A",
+      "open_date": "2026-01-02",
+      "quantity": "1",
+      "cost_per_share": "2.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "UNKNOWN_ACCOUNT"
+     }
+    ]
+   }
+  }
+ ]
+}

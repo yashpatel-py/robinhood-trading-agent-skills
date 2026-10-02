@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "robinhood-trading",
+  "displayName": "Preflight for Robinhood Agentic Trading (unofficial)",
+  "version": "2.0.0",
+  "description": "Unofficial. Six skills for Robinhood's agentic-trading MCP: checked order tickets, cross-account wash-sale checks, exit protection with native alerts, an options monitor (exits, expiration, assignment), an agent report card and a config-driven options screener. Simulates orders by default; a fail-closed PreToolUse hook blocks placement, and opt-in confirm mode asks you to approve each reviewed order. Not affiliated with Robinhood Markets, Inc.",
+  "author": { "name": "Yash Patel", "url": "https://github.com/yashpatel-py" },
+  "homepage": "https://github.com/yashpatel-py/robinhood-trading-agent-skills",
+  "repository": "https://github.com/yashpatel-py/robinhood-trading-agent-skills",
+  "license": "MIT",
+  "keywords": ["robinhood", "agentic-trading", "mcp", "wash-sale", "tax-loss-harvesting", "stop-loss", "oco", "price-alerts", "options", "guardrails", "audit-log"],
+  "userConfig": {
+    "audit_log": {
+      "type": "boolean",
+      "title": "Local audit log",
+      "description": "Append each Robinhood tool call (account numbers masked, responses summarized) to a hash-chained JSONL file under ~/.local/state/robinhood-skills/audit. Local only; never uploaded. Turning it off also makes confirm mode unavailable, because the confirm gate needs the review ledger.",
+      "default": true
+    },
+    "guard_exempt_servers": {
+      "type": "string",
+      "title": "Order-guard exempt MCP servers",
+      "description": "Comma-separated MCP server names whose place_/exercise_/replace_ tools the guard should ignore (for example another broker's server you manage yourself). Servers that have served a known Robinhood tool are never exempt. Leave empty unless you know you need it.",
+      "default": ""
+    },
+    "order_mode": {
+      "type": "string",
+      "title": "Order mode",
+      "description": "simulate_only (default): every place_* call is blocked. confirm: the agent may call place_* only for the exact order you reviewed and approved in chat, and you approve each live order in a permission prompt. exercise_option stays blocked. Interactive sessions only. Confirm mode also needs max_order_notional_usd and the local audit log.",
+      "default": "simulate_only",
+      "options": ["simulate_only", "confirm"]
+    },
+    "max_order_notional_usd": {
+      "type": "string",
+      "title": "Max notional per live order (USD)",
+      "description": "Required for confirm mode. Live orders whose computed notional exceeds this, or can't be computed, are denied. Example: 500.00",
+      "default": ""
+    },
+    "review_ttl_seconds": {
+      "type": "string",
+      "title": "Review freshness (seconds)",
+      "description": "Confirm mode only. A place_* call must match a review from this session no older than this. Allowed 60-900.",
+      "default": "300"
+    }
+  }
+}

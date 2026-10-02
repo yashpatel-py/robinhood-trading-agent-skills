@@ -1,0 +1,2978 @@
+{
+ "script": "option_exits",
+ "about": "Hand-computed goldens for option_exits.py. Longs are marked at the bid and shorts at the ask. Includes the corrected trust example: open 4.05, bid 6.10, qty 2 long -> $410.00 / 50.6% (not 424.00 / 52.3). average_price units are settled by the opening fill, never guessed from the quote.",
+ "cases": [
+  {
+   "name": "spec: AMD 165C long x1, open 2.05, bid 3.30 -> PROFIT_TARGET +61.0% / $125.00, 11 DTE, 27 days held",
+   "why": "(3.30-2.05)x100x1 = 125.00; 1.25/2.05 = 60.9756%; 2026-11-27 - 2026-11-16 = 11; 2026-11-16 - 2026-10-20 = 27",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50",
+     "stop_loss_pct": "40",
+     "time_stop_dte": "7",
+     "max_hold_days": "30"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "3.30",
+      "ask": "3.40",
+      "ts": "2026-11-17T01:04:00Z"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "option_id": "o1",
+      "rules": [
+       "PROFIT_TARGET"
+      ],
+      "pnl_pct": 61.0,
+      "pnl_pct_raw": "60.9756",
+      "pnl_usd": "125.00",
+      "exit_value_basis": "bid",
+      "dte": 11,
+      "days_held": 27,
+      "close_leg": {
+       "option_id": "o1",
+       "side": "sell",
+       "position_effect": "close",
+       "ratio_quantity": 1
+      },
+      "limit_price": null,
+      "quantity": null,
+      "quantity_held": "1",
+      "type": "limit",
+      "time_in_force": "gfd",
+      "market_hours": "regular_hours",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "watch": [],
+    "not_configured": [],
+    "skipped": [],
+    "needs_grouping": []
+   }
+  },
+  {
+   "name": "corrected trust example: SPY 450C long x2, open 4.05, bid 6.10, ask 6.25 -> $410.00 / 50.6% (not 424.00 / 52.3)",
+   "why": "(6.10-4.05)x100x2 = 410.00; 2.05/4.05 = 50.617%",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50"
+    },
+    "positions": [
+     {
+      "option_id": "s1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "SPY",
+      "type": "call",
+      "side": "long",
+      "quantity": "2",
+      "strike": "450",
+      "expiration": "2026-12-18",
+      "avg_open_price_per_share": "4.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "SPY",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "s1": {
+      "bid": "6.10",
+      "ask": "6.25"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "rules": [
+       "PROFIT_TARGET"
+      ],
+      "pnl_usd": "410.00",
+      "pnl_pct": 50.6,
+      "pnl_pct_raw": "50.6173",
+      "exit_price": "6.10"
+     }
+    ],
+    "not_configured": [
+     "stop_loss_pct",
+     "time_stop_dte",
+     "max_hold_days"
+    ]
+   }
+  },
+  {
+   "name": "short call marked at the ask: KO 70C short x1 open 1.10, ask 2.30 -> -$120.00 / -109.1% STOP_LOSS, closes with a buy",
+   "why": "(1.10-2.30)x100x1 = -120.00; -1.20/1.10 = -109.09%",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "stop_loss_pct": "40"
+    },
+    "positions": [
+     {
+      "option_id": "k1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-11-20",
+      "avg_open_price_per_share": "1.10",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "KO",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "k1": {
+      "bid": "2.20",
+      "ask": "2.30"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "rules": [
+       "STOP_LOSS"
+      ],
+      "pnl_usd": "-120.00",
+      "pnl_pct": -109.1,
+      "exit_value_basis": "ask",
+      "exit_price": "2.30",
+      "side": "short",
+      "close_leg": {
+       "option_id": "k1",
+       "side": "buy",
+       "position_effect": "close",
+       "ratio_quantity": 1
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "short put that decayed: open 3.00, ask 1.20, x2 -> +$360.00 / +60.0% PROFIT_TARGET",
+   "why": "(3.00-1.20)x100x2 = 360.00; 1.80/3.00 = 60%",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50",
+     "stop_loss_pct": "100"
+    },
+    "positions": [
+     {
+      "option_id": "p1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "put",
+      "side": "short",
+      "quantity": "2",
+      "strike": "150",
+      "expiration": "2026-12-18",
+      "avg_open_price_per_share": "3.00",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "p1": {
+      "bid": "1.10",
+      "ask": "1.20"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "rules": [
+       "PROFIT_TARGET"
+      ],
+      "pnl_usd": "360.00",
+      "pnl_pct": 60.0,
+      "exit_value_basis": "ask"
+     }
+    ]
+   }
+  },
+  {
+   "name": "MAX_HOLD is skipped (never estimated) when the opening date is unknown",
+   "why": "opened_date unknown -> days_held 'unknown'; +61% below a 100% target, 11 DTE above a 7 DTE stop",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "100",
+     "time_stop_dte": "7",
+     "max_hold_days": "5"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "unknown",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "3.30",
+      "ask": "3.40"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [],
+    "watch": [
+     {
+      "rules": [],
+      "days_held": "unknown",
+      "limit_price": null,
+      "rule_skips": [
+       {
+        "rule": "MAX_HOLD"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "MAX_HOLD fires at 46 days held against a 30-day cap",
+   "why": "2026-11-16 - 2026-10-01 = 46 >= 30",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "max_hold_days": "30"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-01",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "2.00",
+      "ask": "2.10"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "rules": [
+       "MAX_HOLD"
+      ],
+      "days_held": 46,
+      "pnl_usd": "-5.00",
+      "pnl_pct": -2.4
+     }
+    ]
+   }
+  },
+  {
+   "name": "TIME_STOP fires when DTE equals the setting (<=)",
+   "why": "2026-11-23 - 2026-11-16 = 7 <= 7",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "time_stop_dte": "7"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-23",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "2.05",
+      "ask": "2.15"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "rules": [
+       "TIME_STOP"
+      ],
+      "dte": 7,
+      "pnl_usd": "0.00",
+      "pnl_pct": 0.0
+     }
+    ]
+   }
+  },
+  {
+   "name": "no rules configured: nothing fires, every rule named, the P&L table still works",
+   "why": "UNSET and missing both count as not configured",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "UNSET",
+     "stop_loss_pct": "UNSET"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "3.30",
+      "ask": "3.40"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [],
+    "watch": [
+     {
+      "pnl_usd": "125.00",
+      "rules": []
+     }
+    ],
+    "not_configured": [
+     "profit_target_pct",
+     "stop_loss_pct",
+     "time_stop_dte",
+     "max_hold_days"
+    ],
+    "rules_applied": {}
+   }
+  },
+  {
+   "name": "debit call spread judged as one position: +$110.00 / +22.0%, closes for a credit",
+   "why": "open (4.00-1.50)x100x2 = 500; exit (5.10 bid - 2.05 ask)x100x2 = 610; pnl 110; 110/500 = 22%; natural net 3.05; mid net 5.20-1.975 = 3.225",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "20"
+    },
+    "positions": [
+     {
+      "option_id": "L",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "2",
+      "strike": "165",
+      "expiration": "2026-12-18",
+      "avg_open_price_per_share": "4.00",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     },
+     {
+      "option_id": "S",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "short",
+      "quantity": "2",
+      "strike": "175",
+      "expiration": "2026-12-18",
+      "avg_open_price_per_share": "1.50",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "L": {
+      "bid": "5.10",
+      "ask": "5.30"
+     },
+     "S": {
+      "bid": "1.90",
+      "ask": "2.05"
+     }
+    },
+    "groups": [
+     {
+      "group_id": "amd-165-175",
+      "option_ids": [
+       "L",
+       "S"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "kind": "group",
+      "group_id": "amd-165-175",
+      "rules": [
+       "PROFIT_TARGET"
+      ],
+      "pnl_usd": "110.00",
+      "pnl_pct": 22.0,
+      "open_net": "2.50",
+      "open_net_direction": "debit",
+      "quantity_held": "2",
+      "direction": "credit",
+      "limit_price": null,
+      "close_legs": [
+       {
+        "option_id": "L",
+        "side": "sell",
+        "position_effect": "close",
+        "ratio_quantity": 1
+       },
+       {
+        "option_id": "S",
+        "side": "buy",
+        "position_effect": "close",
+        "ratio_quantity": 1
+       }
+      ],
+      "reference_prices": {
+       "natural_net": "3.05",
+       "natural_net_direction": "credit",
+       "mid_net": "3.23"
+      }
+     }
+    ],
+    "needs_grouping": []
+   }
+  },
+  {
+   "name": "credit put spread: +$50.00 / +27.8% of the credit, closes for a debit",
+   "why": "open -3.00+1.20 = -1.80 (x100 = -180); exit -2.10+0.80 = -1.30 (x100 = -130); pnl 50; 50/180 = 27.78%",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "25"
+    },
+    "positions": [
+     {
+      "option_id": "SP",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "put",
+      "side": "short",
+      "quantity": "1",
+      "strike": "100",
+      "expiration": "2026-12-18",
+      "avg_open_price_per_share": "3.00",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     },
+     {
+      "option_id": "LP",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "put",
+      "side": "long",
+      "quantity": "1",
+      "strike": "95",
+      "expiration": "2026-12-18",
+      "avg_open_price_per_share": "1.20",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "SP": {
+      "bid": "2.00",
+      "ask": "2.10"
+     },
+     "LP": {
+      "bid": "0.80",
+      "ask": "0.90"
+     }
+    },
+    "groups": [
+     {
+      "option_ids": [
+       "SP",
+       "LP"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "kind": "group",
+      "group_id": "g1",
+      "pnl_usd": "50.00",
+      "pnl_pct": 27.8,
+      "open_net": "1.80",
+      "open_net_direction": "credit",
+      "direction": "debit",
+      "reference_prices": {
+       "natural_net": "1.30",
+       "natural_net_direction": "debit",
+       "mid_net": "1.20"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "long and short legs on one underlying, not grouped: held back under needs_grouping, no rule fires",
+   "why": "a spread's short leg 'losing' is the trade working; judging legs alone gives false signals",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "stop_loss_pct": "40",
+     "profit_target_pct": "20"
+    },
+    "positions": [
+     {
+      "option_id": "L",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-12-18",
+      "avg_open_price_per_share": "4.00",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     },
+     {
+      "option_id": "S",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "175",
+      "expiration": "2026-12-18",
+      "avg_open_price_per_share": "1.50",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "L": {
+      "bid": "5.10",
+      "ask": "5.30"
+     },
+     "S": {
+      "bid": "1.90",
+      "ask": "2.05"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [],
+    "watch": [],
+    "skipped": [],
+    "needs_grouping": [
+     {
+      "account_last4": "X4F1",
+      "chain_symbol": "AMD",
+      "option_ids": [
+       "L",
+       "S"
+      ]
+     }
+    ],
+    "counts": {
+     "positions": 2,
+     "evaluated": 0,
+     "fired": 0,
+     "skipped": 0,
+     "needs_grouping": 2
+    }
+   }
+  },
+  {
+   "name": "the same legs declared standalone are judged one by one",
+   "why": "long +27.5% hits 20; short (1.50-2.05)/1.50 = -36.7% does not hit 40",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "stop_loss_pct": "40",
+     "profit_target_pct": "20"
+    },
+    "positions": [
+     {
+      "option_id": "L",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-12-18",
+      "avg_open_price_per_share": "4.00",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     },
+     {
+      "option_id": "S",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "175",
+      "expiration": "2026-12-18",
+      "avg_open_price_per_share": "1.50",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "L": {
+      "bid": "5.10",
+      "ask": "5.30"
+     },
+     "S": {
+      "bid": "1.90",
+      "ask": "2.05"
+     }
+    },
+    "standalone": [
+     "L",
+     "S"
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "option_id": "L",
+      "rules": [
+       "PROFIT_TARGET"
+      ],
+      "pnl_pct": 27.5
+     }
+    ],
+    "watch": [
+     {
+      "option_id": "S",
+      "pnl_pct": -36.7,
+      "pnl_usd": "-55.00"
+     }
+    ],
+    "needs_grouping": []
+   }
+  },
+  {
+   "name": "average_price 205.0000 with unknown unit and no opening fill: never guessed from the quote; P&L blank, PROFIT_TARGET not evaluated",
+   "why": "205 and 2.05 are both possible open prices; against the 3.35 mark a 20-500x move looks exactly like a 100x unit error, so the quote can't pick",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "205.0000",
+      "average_price_unit": "unknown",
+      "multiplier": "100.0000"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "3.30",
+      "ask": "3.40",
+      "mark": "3.35"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [],
+    "skipped": [],
+    "watch": [
+     {
+      "open_price": null,
+      "pnl_usd": null,
+      "pnl_pct": null,
+      "mark_pnl_usd": null,
+      "open_value_usd": null,
+      "open_price_problem": {
+       "code": "AVG_PRICE_UNIT_AMBIGUOUS"
+      },
+      "rule_skips": [
+       {
+        "rule": "PROFIT_TARGET",
+        "code": "AVG_PRICE_UNIT_AMBIGUOUS"
+       }
+      ],
+      "warnings": []
+     }
+    ],
+    "rules_not_evaluated": [
+     {
+      "rule": "PROFIT_TARGET",
+      "code": "AVG_PRICE_UNIT_AMBIGUOUS",
+      "option_ids": [
+       "o1"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "average_price stated per contract but only per share fits the quote, no opening fill: held back, never guessed",
+   "why": "2.05 per contract = 0.0205 (0.006x the mark); per share 2.05 (0.61x) fits",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "2.05",
+      "average_price_unit": "per_contract"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "3.30",
+      "ask": "3.40",
+      "mark": "3.35"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [],
+    "skipped": [],
+    "watch": [
+     {
+      "pnl_usd": null,
+      "open_price": null,
+      "open_price_problem": {
+       "code": "AVG_PRICE_UNIT_CONFLICT"
+      }
+     }
+    ],
+    "rules_not_evaluated": [
+     {
+      "rule": "PROFIT_TARGET",
+      "code": "AVG_PRICE_UNIT_CONFLICT",
+      "option_ids": [
+       "o1"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "average_price with unknown unit and no rules: P&L blank with the reason, nothing to evaluate",
+   "why": "30 vs 3.35 = 8.96x and 0.30 vs 3.35 = 0.09x: both outside 0.2-5",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "30"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "3.30",
+      "ask": "3.40",
+      "mark": "3.35"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "skipped": [],
+    "fired": [],
+    "watch": [
+     {
+      "pnl_usd": null,
+      "open_price_problem": {
+       "code": "AVG_PRICE_UNIT_AMBIGUOUS"
+      },
+      "rule_skips": []
+     }
+    ],
+    "rules_not_evaluated": []
+   }
+  },
+  {
+   "name": "a negative per-contract average price on a short is read as its absolute value",
+   "why": "|-110| / 100 = 1.10",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "stop_loss_pct": "40"
+    },
+    "positions": [
+     {
+      "option_id": "k1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-11-20",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "KO",
+      "underlying_type": "equity",
+      "average_price": "-110.0000",
+      "average_price_unit": "per_contract"
+     }
+    ],
+    "quotes": {
+     "k1": {
+      "bid": "2.20",
+      "ask": "2.30",
+      "mark": "2.25",
+      "prev_close": "2.10"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "open_price": "1.10",
+      "pnl_usd": "-120.00",
+      "mark_pnl_usd": "-115.00",
+      "mark_pnl_pct": -104.5,
+      "day_change_usd": "-15.00",
+      "mark_basis": "mark_price"
+     }
+    ]
+   }
+  },
+  {
+   "name": "average_price 205.0000 with unknown unit and the opening fill 2.05: the fill settles it per contract -> +61.0% / $125.00",
+   "why": "205/100 = 2.05 matches the 2.05 fill (1.0x); 205 is 100x it. (3.30-2.05)x100 = 125.00",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "205.0000",
+      "average_price_unit": "unknown",
+      "open_fill_price_per_share": "2.05"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "3.30",
+      "ask": "3.40",
+      "mark": "3.35"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "rules": [
+       "PROFIT_TARGET"
+      ],
+      "open_price": "2.05",
+      "pnl_usd": "125.00",
+      "pnl_pct": 61.0,
+      "open_price_problem": null,
+      "warnings": []
+     }
+    ],
+    "rules_not_evaluated": []
+   }
+  },
+  {
+   "name": "short sold at $0.10 (average_price -10.0000 per contract, opening fill 0.10) that went 20x against: STOP_LOSS -$195.00 / -1950.0%, never a false profit",
+   "why": "(0.10-2.05)x100 = -195.00; -195/10 = -1950%. The quote-only inference used to read it as $10.00 and report +79.5% PROFIT_TARGET",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50",
+     "stop_loss_pct": "40"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "-10.0000",
+      "average_price_unit": "per_contract",
+      "open_fill_price_per_share": "0.10"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "1.95",
+      "ask": "2.05",
+      "mark": "2.00"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "rules": [
+       "STOP_LOSS"
+      ],
+      "pnl_usd": "-195.00",
+      "pnl_pct": -1950.0,
+      "open_price": "0.10",
+      "exit_price": "2.05",
+      "exit_value_basis": "ask",
+      "warnings": [
+       {
+        "code": "AVG_PRICE_FAR_FROM_MARK"
+       }
+      ],
+      "close_leg": {
+       "side": "buy",
+       "position_effect": "close"
+      }
+     }
+    ],
+    "watch": [],
+    "rules_not_evaluated": []
+   }
+  },
+  {
+   "name": "the same short with unit unknown and no opening fill: price rules not evaluated (no fabricated +79.5% PROFIT_TARGET)",
+   "why": "10.00 (per share) is 5x the 2.00 mark and 0.10 (per contract) is 0.05x: the quote can't tell a 20x move from a unit error",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50",
+     "stop_loss_pct": "40"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "-10.0000",
+      "average_price_unit": "unknown"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "1.95",
+      "ask": "2.05",
+      "mark": "2.00"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [],
+    "skipped": [],
+    "watch": [
+     {
+      "rules": [],
+      "pnl_usd": null,
+      "pnl_pct": null,
+      "open_price": null
+     }
+    ],
+    "rules_not_evaluated": [
+     {
+      "rule": "PROFIT_TARGET",
+      "code": "AVG_PRICE_UNIT_AMBIGUOUS"
+     },
+     {
+      "rule": "STOP_LOSS",
+      "code": "AVG_PRICE_UNIT_AMBIGUOUS"
+     }
+    ]
+   }
+  },
+  {
+   "name": "the same short stated per contract without a fill: held back as AVG_PRICE_UNIT_CONFLICT until the fill settles it",
+   "why": "per contract 0.10 is 0.05x the mark (outside 0.1-10); per share 10.00 is 5x (inside)",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50",
+     "stop_loss_pct": "40"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "-10.0000",
+      "average_price_unit": "per_contract"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "1.95",
+      "ask": "2.05",
+      "mark": "2.00"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [],
+    "skipped": [],
+    "watch": [
+     {
+      "pnl_usd": null,
+      "open_price_problem": {
+       "code": "AVG_PRICE_UNIT_CONFLICT"
+      }
+     }
+    ],
+    "rules_not_evaluated": [
+     {
+      "rule": "PROFIT_TARGET",
+      "code": "AVG_PRICE_UNIT_CONFLICT"
+     },
+     {
+      "rule": "STOP_LOSS",
+      "code": "AVG_PRICE_UNIT_CONFLICT"
+     }
+    ]
+   }
+  },
+  {
+   "name": "the same short with unit unknown and the opening fill 0.10: the fill settles it per contract -> STOP_LOSS",
+   "why": "10/100 = 0.10 matches the fill; (0.10-2.05)x100 = -195.00",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50",
+     "stop_loss_pct": "40"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "-10.0000",
+      "average_price_unit": "unknown",
+      "open_fill_price_per_share": "0.10"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "1.95",
+      "ask": "2.05",
+      "mark": "2.00"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "rules": [
+       "STOP_LOSS"
+      ],
+      "pnl_usd": "-195.00",
+      "pnl_pct": -1950.0
+     }
+    ],
+    "rules_not_evaluated": []
+   }
+  },
+  {
+   "name": "5x-20x zone: short -16.0000 per contract, opening fill 0.16, ask 2.05 -> STOP_LOSS -$189.00 / -1181.3%",
+   "why": "(0.16-2.05)x100 = -189.00; -189/16 = -1181.25%",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50",
+     "stop_loss_pct": "40"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "-16.0000",
+      "average_price_unit": "per_contract",
+      "open_fill_price_per_share": "0.16"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "1.95",
+      "ask": "2.05",
+      "mark": "2.00"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "rules": [
+       "STOP_LOSS"
+      ],
+      "pnl_usd": "-189.00",
+      "pnl_pct": -1181.3
+     }
+    ],
+    "rules_not_evaluated": []
+   }
+  },
+  {
+   "name": "long bought at $0.25 (25.0000 per contract, opening fill 0.25) now bid 4.95: +$470.00 / +1880.0% PROFIT_TARGET, no STOP_LOSS",
+   "why": "(4.95-0.25)x100 = 470.00; 4.70/0.25 = 1880%. The quote-only inference used to read it as $25.00 and fire STOP_LOSS at -80.2%",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50",
+     "stop_loss_pct": "40"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "25.0000",
+      "average_price_unit": "per_contract",
+      "open_fill_price_per_share": "0.25"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "4.95",
+      "ask": "5.05",
+      "mark": "5.00"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "rules": [
+       "PROFIT_TARGET"
+      ],
+      "pnl_usd": "470.00",
+      "pnl_pct": 1880.0,
+      "open_price": "0.25"
+     }
+    ],
+    "rules_not_evaluated": []
+   }
+  },
+  {
+   "name": "the same long with unit unknown and no fill: no STOP_LOSS on a winner, price rules not evaluated",
+   "why": "25.00 is 5x the 5.00 mark and 0.25 is 0.05x",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50",
+     "stop_loss_pct": "40"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "25.0000",
+      "average_price_unit": "unknown"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "4.95",
+      "ask": "5.05",
+      "mark": "5.00"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [],
+    "watch": [
+     {
+      "pnl_usd": null
+     }
+    ],
+    "rules_not_evaluated": [
+     {
+      "rule": "PROFIT_TARGET",
+      "code": "AVG_PRICE_UNIT_AMBIGUOUS"
+     },
+     {
+      "rule": "STOP_LOSS",
+      "code": "AVG_PRICE_UNIT_AMBIGUOUS"
+     }
+    ]
+   }
+  },
+  {
+   "name": "long decayed 98%: 2.05 per share (stated), opening fill 2.05, bid 0.04 -> STOP_LOSS -$201.00 / -98.0%",
+   "why": "(0.04-2.05)x100 = -201.00; -2.01/2.05 = -98.05%. The fill confirms per share, so the 41x gap to the mark is a real move",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50",
+     "stop_loss_pct": "40"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "2.0500",
+      "average_price_unit": "per_share",
+      "open_fill_price_per_share": "2.05"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "0.04",
+      "ask": "0.06",
+      "mark": "0.05"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "rules": [
+       "STOP_LOSS"
+      ],
+      "pnl_usd": "-201.00",
+      "pnl_pct": -98.0,
+      "warnings": [
+       {
+        "code": "AVG_PRICE_FAR_FROM_MARK"
+       }
+      ]
+     }
+    ],
+    "rules_not_evaluated": []
+   }
+  },
+  {
+   "name": "the same decayed long stated per share without a fill: held back (CONFLICT), reported as not evaluated",
+   "why": "per share 2.05 is 41x the 0.05 mark; per contract 0.0205 is 0.41x",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50",
+     "stop_loss_pct": "40"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "2.0500",
+      "average_price_unit": "per_share"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "0.04",
+      "ask": "0.06",
+      "mark": "0.05"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [],
+    "rules_not_evaluated": [
+     {
+      "rule": "PROFIT_TARGET",
+      "code": "AVG_PRICE_UNIT_CONFLICT"
+     },
+     {
+      "rule": "STOP_LOSS",
+      "code": "AVG_PRICE_UNIT_CONFLICT"
+     }
+    ]
+   }
+  },
+  {
+   "name": "short decayed 97%: -2.05 per share (stated), opening fill 2.05, ask 0.06 -> PROFIT_TARGET +$199.00 / +97.1%",
+   "why": "(2.05-0.06)x100 = 199.00; 1.99/2.05 = 97.07%",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50",
+     "stop_loss_pct": "40"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "-2.0500",
+      "average_price_unit": "per_share",
+      "open_fill_price_per_share": "2.05"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "0.04",
+      "ask": "0.06",
+      "mark": "0.05"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "rules": [
+       "PROFIT_TARGET"
+      ],
+      "pnl_usd": "199.00",
+      "pnl_pct": 97.1
+     }
+    ],
+    "rules_not_evaluated": []
+   }
+  },
+  {
+   "name": "debit call spread whose short leg moved 20x: opening fills settle both legs -> +$505.00 / +103.1% PROFIT_TARGET",
+   "why": "open 5.00x100 - 0.10x100 = 490.00 debit; exit 12.00x100 - 2.05x100 = 995.00; 505/490 = 103.06%. Quote-only inference read the short leg as $10.00 and the spread as a credit",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50",
+     "stop_loss_pct": "40"
+    },
+    "positions": [
+     {
+      "option_id": "l1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "160",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "500.0000",
+      "average_price_unit": "unknown",
+      "open_fill_price_per_share": "5.00"
+     },
+     {
+      "option_id": "s1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "170",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "-10.0000",
+      "average_price_unit": "unknown",
+      "open_fill_price_per_share": "0.10"
+     }
+    ],
+    "quotes": {
+     "l1": {
+      "bid": "12.00",
+      "ask": "12.20",
+      "mark": "12.10"
+     },
+     "s1": {
+      "bid": "1.95",
+      "ask": "2.05",
+      "mark": "2.00"
+     }
+    },
+    "groups": [
+     {
+      "group_id": "g1",
+      "option_ids": [
+       "l1",
+       "s1"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "kind": "group",
+      "rules": [
+       "PROFIT_TARGET"
+      ],
+      "pnl_usd": "505.00",
+      "pnl_pct": 103.1,
+      "open_net": "4.90",
+      "open_net_direction": "debit",
+      "direction": "credit"
+     }
+    ],
+    "rules_not_evaluated": []
+   }
+  },
+  {
+   "name": "the same spread with no opening fills: the group's P&L stays blank and its price rules are not evaluated",
+   "why": "both legs' units are unknown and the quote can't settle them",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50",
+     "stop_loss_pct": "40"
+    },
+    "positions": [
+     {
+      "option_id": "l1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "160",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "500.0000",
+      "average_price_unit": "unknown"
+     },
+     {
+      "option_id": "s1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "170",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "-10.0000",
+      "average_price_unit": "unknown"
+     }
+    ],
+    "quotes": {
+     "l1": {
+      "bid": "12.00",
+      "ask": "12.20",
+      "mark": "12.10"
+     },
+     "s1": {
+      "bid": "1.95",
+      "ask": "2.05",
+      "mark": "2.00"
+     }
+    },
+    "groups": [
+     {
+      "group_id": "g1",
+      "option_ids": [
+       "l1",
+       "s1"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "fired": [],
+    "watch": [
+     {
+      "kind": "group",
+      "pnl_usd": null,
+      "open_net": null,
+      "open_net_direction": null,
+      "open_price_problem": {
+       "code": "AVG_PRICE_UNIT_AMBIGUOUS"
+      }
+     }
+    ],
+    "rules_not_evaluated": [
+     {
+      "rule": "PROFIT_TARGET",
+      "code": "AVG_PRICE_UNIT_AMBIGUOUS",
+      "option_ids": [
+       "l1",
+       "s1"
+      ]
+     },
+     {
+      "rule": "STOP_LOSS",
+      "code": "AVG_PRICE_UNIT_AMBIGUOUS",
+      "option_ids": [
+       "l1",
+       "s1"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "the opening fill contradicts the stated unit (2.05 passed per contract, fill 2.05): held back as CONFLICT",
+   "why": "per share 2.05 matches the fill; per contract 0.0205 is 0.01x it",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "2.05",
+      "average_price_unit": "per_contract",
+      "open_fill_price_per_share": "2.05"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "3.30",
+      "ask": "3.40",
+      "mark": "3.35"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [],
+    "rules_not_evaluated": [
+     {
+      "rule": "PROFIT_TARGET",
+      "code": "AVG_PRICE_UNIT_CONFLICT"
+     }
+    ]
+   }
+  },
+  {
+   "name": "avg_open_price_per_share 205.00 is 100x the opening fill 2.05: it looks per contract, so it is held back",
+   "why": "205.00 / 100 = 2.05 = the fill",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "avg_open_price_per_share": "205.00",
+      "open_fill_price_per_share": "2.05"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "3.30",
+      "ask": "3.40",
+      "mark": "3.35"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [],
+    "rules_not_evaluated": [
+     {
+      "rule": "PROFIT_TARGET",
+      "code": "AVG_PRICE_UNIT_CONFLICT"
+     }
+    ]
+   }
+  },
+  {
+   "name": "TIME_STOP still fires when the open price can't be settled; P&L stays blank and PROFIT_TARGET is listed as not evaluated",
+   "why": "11 DTE <= 14; the unit of 205.0000 is unknown with no fill",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50",
+     "time_stop_dte": "14"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "205.0000",
+      "average_price_unit": "unknown"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "3.30",
+      "ask": "3.40",
+      "mark": "3.35"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "rules": [
+       "TIME_STOP"
+      ],
+      "pnl_usd": null,
+      "limit_price": null,
+      "close_leg": {
+       "side": "sell",
+       "position_effect": "close"
+      }
+     }
+    ],
+    "rules_not_evaluated": [
+     {
+      "rule": "PROFIT_TARGET",
+      "code": "AVG_PRICE_UNIT_AMBIGUOUS"
+     }
+    ]
+   }
+  },
+  {
+   "name": "an unknown opening date lists MAX_HOLD under rules_not_evaluated",
+   "why": "max_hold_days is set but no opening fill was found",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "max_hold_days": "30"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "avg_open_price_per_share": "2.05"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "3.30",
+      "ask": "3.40",
+      "mark": "3.35"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [],
+    "rules_not_evaluated": [
+     {
+      "rule": "MAX_HOLD",
+      "code": "OPENING_DATE_UNKNOWN"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a long with no bid is worth $0.00 to close now: STOP_LOSS fires and ZERO_BID says why",
+   "why": "(0.00-0.50)x100 = -50.00 = -100%; 0.50 is 20x the 0.025 midpoint, so the unit check also speaks up",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "stop_loss_pct": "40"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "0.50",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "0",
+      "ask": "0.05"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "rules": [
+       "STOP_LOSS"
+      ],
+      "pnl_usd": "-50.00",
+      "pnl_pct": -100.0,
+      "warnings": [
+       {
+        "code": "AVG_PRICE_FAR_FROM_MARK"
+       },
+       {
+        "code": "ZERO_BID"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "exit_price_rule mid rounds toward the natural side on the contract's tick",
+   "why": "long: mid 3.375 >= cutoff 3.00 -> 0.05 tick, round down -> 3.35. short: mid 1.045 < 3.00 -> 0.01 tick, round up -> 1.05",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "time_stop_dte": "30",
+     "exit_price_rule": "mid"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "min_ticks": {
+       "above_tick": "0.05",
+       "below_tick": "0.01",
+       "cutoff_price": "3.00"
+      }
+     },
+     {
+      "option_id": "k1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "1.10",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "KO",
+      "underlying_type": "equity",
+      "min_ticks": {
+       "above_tick": "0.05",
+       "below_tick": "0.01",
+       "cutoff_price": "3.00"
+      }
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "3.30",
+      "ask": "3.45"
+     },
+     "k1": {
+      "bid": "1.02",
+      "ask": "1.07"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "exit_price_rule": "mid",
+    "fired": [
+     {
+      "option_id": "o1",
+      "rule_limit_price": "3.35",
+      "rule_limit_price_provenance": "user_config",
+      "limit_price": null
+     },
+     {
+      "option_id": "k1",
+      "rule_limit_price": "1.05",
+      "limit_price": null
+     }
+    ]
+   }
+  },
+  {
+   "name": "exit_price_rule bid prices a buy-to-close at the ask (the natural side)",
+   "why": "short: natural side is the ask",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "time_stop_dte": "30",
+     "exit_price_rule": "bid"
+    },
+    "positions": [
+     {
+      "option_id": "k1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "70",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "1.10",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "KO",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "k1": {
+      "bid": "1.02",
+      "ask": "1.07"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "rule_limit_price": "1.07",
+      "reference_prices": {
+       "natural": "1.07"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "a quote 30 minutes old during the regular session is flagged stale",
+   "why": "11:30 ET now, quote 16:00Z = 11:00 ET",
+   "input": {
+    "as_of": "2026-11-17",
+    "now": "2026-11-17T11:30:00-05:00",
+    "in_regular_session": true,
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "3.30",
+      "ask": "3.40",
+      "ts": "2026-11-17T16:00:00Z"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "watch": [
+     {
+      "warnings": [
+       {
+        "code": "STALE_QUOTE"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "pending quantities are surfaced; non-agentic positions get a manual ticket",
+   "why": "pending_sell_quantity 1 = a closing order is already working",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "M7Q5",
+      "agentic": false,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "pending": {
+       "pending_sell_quantity": "1.0000",
+       "pending_buy_quantity": "0"
+      }
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "3.30",
+      "ask": "3.40"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "account_last4": "M7Q5",
+      "agentic": false,
+      "ticket_kind": "manual: this account is read-only to agents (no review possible)",
+      "warnings": [
+       {
+        "code": "PENDING_ACTIVITY"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "expired contracts still listed and positions without quotes are skipped with reasons",
+   "why": "expired 2026-11-13 < as_of; no quote for q2",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-13",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     },
+     {
+      "option_id": "q2",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "1",
+      "ask": "1.1"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "skipped": [
+     {
+      "code": "EXPIRED_STILL_LISTED",
+      "option_ids": [
+       "o1"
+      ]
+     },
+     {
+      "code": "QUOTE_MISSING",
+      "option_ids": [
+       "q2"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "fixture household (case M1 rules 50/40/7/UNSET/bid): all three fire, max_hold_days not configured",
+   "why": "SPY +78.3% & 4 DTE; AMD +61.0%; KO -109.1% & 4 DTE; sorted by value at exit (4280 > 330 > 230); the fixture's get_option_positions guide states average_price is per share",
+   "input": {
+    "as_of": "2026-11-16",
+    "now": "2026-11-16T20:05:00-05:00",
+    "in_regular_session": false,
+    "rules": {
+     "profit_target_pct": "50",
+     "stop_loss_pct": "40",
+     "time_stop_dte": "7",
+     "max_hold_days": "UNSET",
+     "exit_price_rule": "bid"
+    },
+    "positions": [
+     {
+      "option_id": "ko",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "KO",
+      "type": "call",
+      "side": "short",
+      "quantity": "1.0000",
+      "strike": "70.0000",
+      "expiration": "2026-11-20",
+      "opened_date": "2026-10-26",
+      "chain_symbol": "KO",
+      "underlying_type": "equity",
+      "average_price": "1.10",
+      "average_price_unit": "per_share"
+     },
+     {
+      "option_id": "spy",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "SPY",
+      "type": "call",
+      "side": "long",
+      "quantity": "2.0000",
+      "strike": "650.0000",
+      "expiration": "2026-11-20",
+      "opened_date": "2026-10-05",
+      "chain_symbol": "SPY",
+      "underlying_type": "equity",
+      "average_price": "12.00",
+      "average_price_unit": "per_share"
+     },
+     {
+      "option_id": "amd",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165.0000",
+      "expiration": "2026-11-27",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity",
+      "average_price": "2.05",
+      "average_price_unit": "per_share"
+     }
+    ],
+    "quotes": {
+     "ko": {
+      "bid": "2.20",
+      "ask": "2.30",
+      "mark": "2.25"
+     },
+     "spy": {
+      "bid": "21.40",
+      "ask": "21.60",
+      "mark": "21.50"
+     },
+     "amd": {
+      "bid": "3.30",
+      "ask": "3.40",
+      "mark": "3.35"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "not_configured": [
+     "max_hold_days"
+    ],
+    "fired": [
+     {
+      "option_id": "spy",
+      "rules": [
+       "PROFIT_TARGET",
+       "TIME_STOP"
+      ],
+      "pnl_usd": "1880.00",
+      "pnl_pct": 78.3,
+      "rule_limit_price": "21.40",
+      "label": "SPY 2026-11-20 650C ×2 (long)"
+     },
+     {
+      "option_id": "amd",
+      "rules": [
+       "PROFIT_TARGET"
+      ],
+      "pnl_usd": "125.00",
+      "pnl_pct": 61.0,
+      "rule_limit_price": "3.30"
+     },
+     {
+      "option_id": "ko",
+      "rules": [
+       "STOP_LOSS",
+       "TIME_STOP"
+      ],
+      "pnl_usd": "-120.00",
+      "pnl_pct": -109.1,
+      "rule_limit_price": "2.30"
+     }
+    ],
+    "dollars_at_stake": [
+     {
+      "usd": "4280.00"
+     },
+     {
+      "usd": "330.00"
+     },
+     {
+      "usd": "230.00"
+     }
+    ],
+    "rules_not_evaluated": []
+   }
+  },
+  {
+   "name": "the same contract held in two accounts is two positions: each judged, each with its own ticket kind",
+   "why": "option_id is the instrument id; positions are keyed by account + option_id",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "50"
+    },
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     },
+     {
+      "option_id": "o1",
+      "account_last4": "M7Q5",
+      "agentic": false,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "3",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "3.30",
+      "ask": "3.40"
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "account_last4": "M7Q5",
+      "quantity_held": "3",
+      "pnl_usd": "375.00",
+      "ticket_kind": "manual: this account is read-only to agents (no review possible)"
+     },
+     {
+      "account_last4": "X4F1",
+      "quantity_held": "1",
+      "pnl_usd": "125.00"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a group whose contract is held in two accounts needs the account; with it, the spread is judged",
+   "why": "(5.10-2.05) - (4.00-1.50) = 0.55 x 100 = 55.00; 55/250 = 22%",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "20"
+    },
+    "positions": [
+     {
+      "option_id": "L",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-12-18",
+      "avg_open_price_per_share": "4.00",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     },
+     {
+      "option_id": "S",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "175",
+      "expiration": "2026-12-18",
+      "avg_open_price_per_share": "1.50",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     },
+     {
+      "option_id": "L",
+      "account_last4": "M7Q5",
+      "agentic": false,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-12-18",
+      "avg_open_price_per_share": "4.00",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "L": {
+      "bid": "5.10",
+      "ask": "5.30"
+     },
+     "S": {
+      "bid": "1.90",
+      "ask": "2.05"
+     }
+    },
+    "groups": [
+     {
+      "option_ids": [
+       "L",
+       "S"
+      ],
+      "account_last4": "X4F1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "fired": [
+     {
+      "account_last4": "M7Q5",
+      "option_id": "L",
+      "pnl_usd": "110.00"
+     },
+     {
+      "kind": "group",
+      "account_last4": "X4F1",
+      "pnl_usd": "55.00",
+      "pnl_pct": 22.0
+     }
+    ],
+    "needs_grouping": []
+   }
+  },
+  {
+   "name": "error: fractional contracts are rejected",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1.5",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_VALUE",
+      "field": "positions[0].quantity"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: a rule that is not a number is rejected",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "profit_target_pct": "fifty"
+    },
+    "positions": []
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_VALUE",
+      "field": "rules.profit_target_pct"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: an unknown exit_price_rule is rejected",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "exit_price_rule": "last"
+    },
+    "positions": []
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_VALUE",
+      "field": "rules.exit_price_rule"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: a fractional day count is rejected",
+   "input": {
+    "as_of": "2026-11-16",
+    "rules": {
+     "time_stop_dte": "2.5"
+    },
+    "positions": []
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_VALUE",
+      "field": "rules.time_stop_dte"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: the same option twice in one account is rejected (merge pages first)",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     },
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "DUPLICATE_POSITION",
+      "field": "positions"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: a group id held in two accounts without account_last4 is ambiguous",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     },
+     {
+      "option_id": "o1",
+      "account_last4": "M7Q5",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     },
+     {
+      "option_id": "S",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "groups": [
+     {
+      "option_ids": [
+       "o1",
+       "S"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "AMBIGUOUS_OPTION_ID",
+      "field": "groups[0].account_last4"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: an opening date after as_of is rejected",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-11-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "quotes": {
+     "o1": {
+      "bid": "1",
+      "ask": "1"
+     }
+    }
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_DATE",
+      "field": "opened_date"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: a group naming an unknown option is rejected",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "groups": [
+     {
+      "option_ids": [
+       "o1",
+       "zz"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "UNKNOWN_OPTION_ID",
+      "field": "groups[0].option_ids"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: a group across accounts is rejected",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "long",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     },
+     {
+      "option_id": "o2",
+      "account_last4": "M7Q5",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "short",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ],
+    "groups": [
+     {
+      "option_ids": [
+       "o1",
+       "o2"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_VALUE",
+      "field": "groups[0]"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: as_of is required",
+   "input": {
+    "positions": []
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "MISSING_FIELD",
+      "field": "as_of"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: positions must be a list",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": {}
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "MISSING_FIELD",
+      "field": "positions"
+     }
+    ]
+   }
+  },
+  {
+   "name": "error: side must be long or short",
+   "input": {
+    "as_of": "2026-11-16",
+    "positions": [
+     {
+      "option_id": "o1",
+      "account_last4": "X4F1",
+      "agentic": true,
+      "symbol": "AMD",
+      "type": "call",
+      "side": "buy",
+      "quantity": "1",
+      "strike": "165",
+      "expiration": "2026-11-27",
+      "avg_open_price_per_share": "2.05",
+      "opened_date": "2026-10-20",
+      "chain_symbol": "AMD",
+      "underlying_type": "equity"
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_VALUE",
+      "field": "positions[0].side"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,11 @@
+{
+  "conversation_id": "conv-test-1",
+  "generation_id": "gen-test-1",
+  "hook_event_name": "beforeMCPExecution",
+  "tool_name": "place_equity_order",
+  "tool_input": "{\"symbol\":\"AAPL\",\"side\":\"buy\"}",
+  "url": "https://agent.robinhood.com/mcp/trading",
+  "workspace_roots": [
+    "/tmp/rh-test/project"
+  ]
+}

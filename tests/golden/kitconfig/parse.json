@@ -1,0 +1,206 @@
+{
+  "script": "kitconfig",
+  "about": "Restricted-grammar parse results. Expected values come from tomllib (the independent oracle); kitconfig's own parser must produce the same dict on every Python version.",
+  "cases": [
+    {
+      "name": "all section templates as shipped (every value UNSET)",
+      "text": "# robinhood-skills:config  (every financial value ships UNSET; fill in only what you decided)\n[policy]\nread_scope = \"ask\"                  # ask | agentic_only | all\nmax_order_usd = \"UNSET\"\nmax_symbol_pct_household = \"UNSET\"\nsymbol_allowlist = []\nsymbol_denylist = []\nearnings_blackout_days = \"UNSET\"\nmax_orders_per_day = \"UNSET\"\nallow_options = \"UNSET\"\nallow_crypto = \"UNSET\"\nallowed_sessions = []\nmax_option_contracts = \"UNSET\"\n\n[accounts]\nretirement = []                 # last 4 of account_number, only if get_accounts does not identify retirement accounts\n\n[tax]\nmin_loss_usd = \"UNSET\"          # show harvest candidates with unrealized loss >= this (UNSET = show all)\nlookahead_days = \"45\"           # display window for long-term countdown (not a financial threshold)\nrelated_tickers = []            # e.g. [[\"VOO\",\"IVV\"]]: groups YOU consider substantially identical\ngtc_lookback_days = \"90\"        # data completeness for the buy sweep\n\n[exits.equity]\nstop_rule = \"UNSET\"        # \"pct:8\" (8% below current) | \"atr:2.0:14\" (2.0 x daily ATR(14) below current) | \"ask\"\ntarget_rule = \"UNSET\"      # \"pct:15\" | \"r:2\" (2 x stop distance above current) | \"none\" | \"ask\"\ntime_in_force = \"UNSET\"    # \"gfd\" | \"gtc\"\nbackstop_alerts = \"UNSET\"  # \"yes\" | \"no\": offer a native price_below alert at the stop level\n[exits.equity.symbols.NVDA]  # optional per-symbol overrides; prices as decimal strings\nstop = \"UNSET\"\ntarget = \"UNSET\"\n[exits.crypto]\nstop_rule = \"UNSET\"        # \"pct:<n>\" | \"ask\"\ntime_in_force = \"UNSET\"    # \"gtc\" (90 days) | \"gfd\" | \"gfw\" | \"gfm\"\n\n[options.exits]\nprofit_target_pct = \"UNSET\"\nstop_loss_pct = \"UNSET\"\ntime_stop_dte = \"UNSET\"\nmax_hold_days = \"UNSET\"\nexit_price_rule = \"UNSET\"      # \"bid\" | \"mid\": how to price a closing limit when you ask for one\n[options.monitor]\nradar_days = \"7\"               # expiry radar window (not a financial threshold)\n\n[options.criteria]\nmax_position_pct = \"UNSET\"\nmax_concurrent = \"UNSET\"             # counted with nonzero=true\nmax_cost_per_contract_usd = \"UNSET\"  # premium x 100\nreserve_cash_usd = \"UNSET\"\nprice_min = \"UNSET\"\nprice_max = \"UNSET\"\nmin_avg_volume = \"UNSET\"\nsymbols_allowlist = []               # optional\nsymbols_blocklist = []               # optional\nstructure = \"UNSET\"                  # long_call | long_put | debit_call_spread | debit_put_spread\nspread_width_min = \"UNSET\"           # spreads only; \"OFF\" for single-leg structures\nspread_width_max = \"UNSET\"\ndte_min = \"UNSET\"\ndte_max = \"UNSET\"\ndelta_min = \"UNSET\"\ndelta_max = \"UNSET\"\nmax_spread_pct = \"UNSET\"\nmin_open_interest = \"UNSET\"\niv_rank_min = \"UNSET\"                # \"OFF\" to disable; if set, enforced via a verified scanner datapoint or the run stops\niv_rank_max = \"UNSET\"\nearnings_policy = \"UNSET\"            # avoid | allow | require\nearnings_buffer_days = \"UNSET\"\nscan_sessions = \"UNSET\"              # \"regular_hours_only\" (the only supported value until non-regular windows are verified)\nsort_by = \"required_move_pct\"        # disclosed sort; not a financial threshold\n[options.entry]\nentry_price_rule = \"UNSET\"           # ask_each_time | natural | mid\ncontracts_per_entry = \"UNSET\"        # positive integer (string)\n\n[report]\nwindow_days = \"7\"\n",
+      "expected_parse": {
+        "policy": {
+          "read_scope": "ask",
+          "max_order_usd": "UNSET",
+          "max_symbol_pct_household": "UNSET",
+          "symbol_allowlist": [],
+          "symbol_denylist": [],
+          "earnings_blackout_days": "UNSET",
+          "max_orders_per_day": "UNSET",
+          "allow_options": "UNSET",
+          "allow_crypto": "UNSET",
+          "allowed_sessions": [],
+          "max_option_contracts": "UNSET"
+        },
+        "accounts": {
+          "retirement": []
+        },
+        "tax": {
+          "min_loss_usd": "UNSET",
+          "lookahead_days": "45",
+          "related_tickers": [],
+          "gtc_lookback_days": "90"
+        },
+        "exits": {
+          "equity": {
+            "stop_rule": "UNSET",
+            "target_rule": "UNSET",
+            "time_in_force": "UNSET",
+            "backstop_alerts": "UNSET",
+            "symbols": {
+              "NVDA": {
+                "stop": "UNSET",
+                "target": "UNSET"
+              }
+            }
+          },
+          "crypto": {
+            "stop_rule": "UNSET",
+            "time_in_force": "UNSET"
+          }
+        },
+        "options": {
+          "exits": {
+            "profit_target_pct": "UNSET",
+            "stop_loss_pct": "UNSET",
+            "time_stop_dte": "UNSET",
+            "max_hold_days": "UNSET",
+            "exit_price_rule": "UNSET"
+          },
+          "monitor": {
+            "radar_days": "7"
+          },
+          "criteria": {
+            "max_position_pct": "UNSET",
+            "max_concurrent": "UNSET",
+            "max_cost_per_contract_usd": "UNSET",
+            "reserve_cash_usd": "UNSET",
+            "price_min": "UNSET",
+            "price_max": "UNSET",
+            "min_avg_volume": "UNSET",
+            "symbols_allowlist": [],
+            "symbols_blocklist": [],
+            "structure": "UNSET",
+            "spread_width_min": "UNSET",
+            "spread_width_max": "UNSET",
+            "dte_min": "UNSET",
+            "dte_max": "UNSET",
+            "delta_min": "UNSET",
+            "delta_max": "UNSET",
+            "max_spread_pct": "UNSET",
+            "min_open_interest": "UNSET",
+            "iv_rank_min": "UNSET",
+            "iv_rank_max": "UNSET",
+            "earnings_policy": "UNSET",
+            "earnings_buffer_days": "UNSET",
+            "scan_sessions": "UNSET",
+            "sort_by": "required_move_pct"
+          },
+          "entry": {
+            "entry_price_rule": "UNSET",
+            "contracts_per_entry": "UNSET"
+          }
+        },
+        "report": {
+          "window_days": "7"
+        }
+      }
+    },
+    {
+      "name": "filled screener config",
+      "text": "[options.criteria]\nmax_position_pct = \"5\"\nmax_concurrent = \"3\"\nmax_cost_per_contract_usd = \"250\"\nreserve_cash_usd = \"500\"\nprice_min = \"10\"\nprice_max = \"200\"\nmin_avg_volume = \"1000000\"\nsymbols_allowlist = []\nsymbols_blocklist = [\"GME\", \"AMC\"]\nstructure = \"debit_call_spread\"\nspread_width_min = \"2.5\"\nspread_width_max = \"5\"\ndte_min = \"21\"\ndte_max = \"45\"\ndelta_min = \"0.30\"\ndelta_max = \"0.55\"\nmax_spread_pct = \"8\"\nmin_open_interest = \"500\"\niv_rank_min = \"OFF\"\niv_rank_max = \"OFF\"\nearnings_policy = \"avoid\"\nearnings_buffer_days = \"2\"\nscan_sessions = \"regular_hours_only\"\nsort_by = \"required_move_pct\"\n[options.entry]\nentry_price_rule = \"ask_each_time\"\ncontracts_per_entry = \"1\"\n[options.exits]\nprofit_target_pct = \"50\"\nstop_loss_pct = \"40\"\ntime_stop_dte = \"7\"\nmax_hold_days = \"30\"\n",
+      "expected_parse": {
+        "options": {
+          "criteria": {
+            "max_position_pct": "5",
+            "max_concurrent": "3",
+            "max_cost_per_contract_usd": "250",
+            "reserve_cash_usd": "500",
+            "price_min": "10",
+            "price_max": "200",
+            "min_avg_volume": "1000000",
+            "symbols_allowlist": [],
+            "symbols_blocklist": [
+              "GME",
+              "AMC"
+            ],
+            "structure": "debit_call_spread",
+            "spread_width_min": "2.5",
+            "spread_width_max": "5",
+            "dte_min": "21",
+            "dte_max": "45",
+            "delta_min": "0.30",
+            "delta_max": "0.55",
+            "max_spread_pct": "8",
+            "min_open_interest": "500",
+            "iv_rank_min": "OFF",
+            "iv_rank_max": "OFF",
+            "earnings_policy": "avoid",
+            "earnings_buffer_days": "2",
+            "scan_sessions": "regular_hours_only",
+            "sort_by": "required_move_pct"
+          },
+          "entry": {
+            "entry_price_rule": "ask_each_time",
+            "contracts_per_entry": "1"
+          },
+          "exits": {
+            "profit_target_pct": "50",
+            "stop_loss_pct": "40",
+            "time_stop_dte": "7",
+            "max_hold_days": "30"
+          }
+        }
+      }
+    },
+    {
+      "name": "multi-line arrays, comments inside, trailing comma, nested pairs",
+      "text": "[tax]\nrelated_tickers = [\n  [\"VOO\", \"IVV\", \"SPLG\"],   # S&P 500 funds I treat as identical\n  [\"QQQ\", \"QQQM\"],\n]\n[policy]\nsymbol_denylist = [ \"GME\" , \"AMC\", ]\nallowed_sessions = [\"regular_hours\"]\nallow_options = true\nallow_crypto = false\n",
+      "expected_parse": {
+        "tax": {
+          "related_tickers": [
+            [
+              "VOO",
+              "IVV",
+              "SPLG"
+            ],
+            [
+              "QQQ",
+              "QQQM"
+            ]
+          ]
+        },
+        "policy": {
+          "symbol_denylist": [
+            "GME",
+            "AMC"
+          ],
+          "allowed_sessions": [
+            "regular_hours"
+          ],
+          "allow_options": true,
+          "allow_crypto": false
+        }
+      }
+    },
+    {
+      "name": "string escapes, integers, booleans, header whitespace, implicit super-table",
+      "text": "[ options . monitor ]\nradar_days = 7\n[options]\n[report]\nwindow_days = +7\nnote = \"tab\\there, quote \\\" and unicode \\u00e9\"\nzero = 0\nnegative = -3\nflag = true\n",
+      "expected_parse": {
+        "options": {
+          "monitor": {
+            "radar_days": 7
+          }
+        },
+        "report": {
+          "window_days": 7,
+          "note": "tab\there, quote \" and unicode \u00e9",
+          "zero": 0,
+          "negative": -3,
+          "flag": true
+        }
+      }
+    },
+    {
+      "name": "empty document and comment-only document",
+      "text": "# nothing configured yet\n\n",
+      "expected_parse": {}
+    },
+    {
+      "name": "CRLF line endings and no trailing newline",
+      "text": "[report]\r\nwindow_days = \"14\"\r\n# end",
+      "expected_parse": {
+        "report": {
+          "window_days": "14"
+        }
+      }
+    }
+  ]
+}

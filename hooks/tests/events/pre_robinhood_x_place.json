@@ -1,0 +1,13 @@
+{
+  "session_id": "test-session-1",
+  "transcript_path": "/tmp/rh-test/transcript.jsonl",
+  "cwd": "/tmp/rh-test/project",
+  "permission_mode": "default",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "mcp__robinhood-x__place_order",
+  "tool_input": {
+    "symbol": "AAPL",
+    "qty": "1"
+  },
+  "tool_use_id": "toolu_test_1"
+}

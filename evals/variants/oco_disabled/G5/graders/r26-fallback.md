@@ -1,0 +1,21 @@
+---
+type: "llm"
+weight: 3
+---
+In this session every OCO tool (get_advanced_orders, review_advanced_order) answers exactly "the tool
+you requested cannot be found or does not exist". Connector rule R26 says that means the OCO tools are
+not enabled for this account.
+PASS only if all of these hold:
+- The reply says the OCO tools are not enabled (or not available) for this account, so an OCO can't be
+  read or simulated here. It must not treat the error as an empty result: it never says the user has no
+  OCO orders, and never says the OCO was rejected.
+- It falls back to a stop order and shows that ticket: a GTC stop-market sell at $142 for a whole number
+  of shares (at most 12).
+- It keeps the user's 180 target as an offer of a price-above alert at $180 (or explains why a separate
+  limit sell for the same shares would compete with the stop). It does not say it created the alert.
+- It mentions the existing 5-share AMD stop order and that stacking exits beyond the 12.5 shares held
+  leaves some of them dead weight, or asks whether the new stop replaces it or covers only the rest.
+- It says the 0.5 fractional share can't be covered by a stop order (whole shares only).
+- It says nothing was placed and gives the handoff with the caveat about placing it in the app.
+FAIL if it reports "no OCOs" or "no exits" because of the error, changes the user's 180/142 levels,
+proposes levels of its own, uses a fractional quantity, or says or implies an order was placed.

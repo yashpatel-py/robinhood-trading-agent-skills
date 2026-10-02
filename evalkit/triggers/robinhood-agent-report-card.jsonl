@@ -1,0 +1,22 @@
+{"query": "what did my agent do this week", "should_trigger": true, "split": "train", "expect_skill": "robinhood-agent-report-card"}
+{"query": "is my agent following my rules", "should_trigger": true, "split": "train", "expect_skill": "robinhood-agent-report-card"}
+{"query": "weekly agent report", "should_trigger": true, "split": "train", "expect_skill": "robinhood-agent-report-card"}
+{"query": "did anything else trade in my agentic account", "should_trigger": true, "split": "train", "expect_skill": "robinhood-agent-report-card"}
+{"query": "show me every order my AI agent placed on Robinhood since Monday", "should_trigger": true, "split": "train", "expect_skill": "robinhood-agent-report-card"}
+{"query": "did my trading agent get any orders rejected or cancelled last week", "should_trigger": true, "split": "train", "expect_skill": "robinhood-agent-report-card"}
+{"query": "how much slippage is my agent getting versus the quote it reviewed", "should_trigger": true, "split": "train", "expect_skill": "robinhood-agent-report-card"}
+{"query": "check my agent's audit log for blocked order attempts", "should_trigger": true, "split": "train", "expect_skill": "robinhood-agent-report-card"}
+{"query": "did anything try to prompt-inject my robinhood agent into placing a trade", "should_trigger": true, "split": "validation", "expect_skill": "robinhood-agent-report-card"}
+{"query": "were any orders in my agentic account placed by some other app or machine", "should_trigger": true, "split": "validation", "expect_skill": "robinhood-agent-report-card"}
+{"query": "give me a report card on what my claude trading agent did this month", "should_trigger": true, "split": "validation", "expect_skill": "robinhood-agent-report-card"}
+{"query": "has any agent placed orders in my IRA or my individual account", "should_trigger": true, "split": "validation", "expect_skill": "robinhood-agent-report-card"}
+{"query": "run the friday agent review for my robinhood agentic account", "should_trigger": true, "split": "validation", "expect_skill": "robinhood-agent-report-card"}
+{"query": "how are my stocks doing today", "should_trigger": false, "split": "train", "expect_skill": "robinhood-trading"}
+{"query": "what are my realized gains this year for taxes", "should_trigger": false, "split": "train", "expect_skill": "robinhood-tax-loss-harvesting"}
+{"query": "grade my own manual trading this month", "should_trigger": false, "split": "train"}
+{"query": "which of my positions have no stop", "should_trigger": false, "split": "train", "expect_skill": "robinhood-exit-guardian"}
+{"query": "show me all my open orders", "should_trigger": false, "split": "train", "expect_skill": "robinhood-trading"}
+{"query": "what's my buying power", "should_trigger": false, "split": "validation", "expect_skill": "robinhood-trading"}
+{"query": "build me a python trading bot that buys SPY every monday", "should_trigger": false, "split": "validation"}
+{"query": "explain what slippage means", "should_trigger": false, "split": "validation"}
+{"query": "check my options against my rules", "should_trigger": false, "split": "validation", "expect_skill": "robinhood-options-monitor"}

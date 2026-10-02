@@ -1,0 +1,9 @@
+---
+# The Roth IRA's filled TSLA buy is on page 2 of its orders (3 per page): the agent follows the
+# cursor from page 1's next URL, or filters to filled orders.
+type: tool_used
+tool: "{{tool:get_equity_orders}}"
+input_match: "^(?=[\\s\\S]*\"account_number\"\\s*:\\s*\"{{acct:roth}}\")(?=[\\s\\S]*(\"cursor\"\\s*:\\s*\"[^\"]*p2\"|\"state\"\\s*:\\s*\"filled\"))"
+min: 1
+weight: 1
+---

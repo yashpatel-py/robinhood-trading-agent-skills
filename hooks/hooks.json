@@ -1,0 +1,24 @@
+{
+  "description": "Preflight (robinhood-trading, unofficial): fail-closed order guard, cancel/delete prompts, unknown-Robinhood-tool prompts, kit-config edit prompts, session order-mode line, local masked audit log. No hook in this kit ever returns permissionDecision 'allow'.",
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [ { "type": "command", "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/guard.sh\" session", "timeout": 5 } ] }
+    ],
+    "PreToolUse": [
+      { "matcher": "^mcp__.+__(place|exercise|replace)[_-][A-Za-z0-9_-]+$",
+        "hooks": [ { "type": "command", "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/guard.sh\" money", "timeout": 15 } ] },
+      { "matcher": "^mcp__.*[Rr]obinhood.*__(submit|execute|transfer|withdraw|deposit|stake|unstake|convert|send|buy|sell|trade|liquidate|lend|borrow)[_-][A-Za-z0-9_-]+$",
+        "hooks": [ { "type": "command", "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/guard.sh\" money", "timeout": 15 } ] },
+      { "matcher": "^mcp__.+__(cancel[_-][A-Za-z0-9_-]+|delete_alert)$",
+        "hooks": [ { "type": "command", "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/guard.sh\" cancel", "timeout": 10 } ] },
+      { "matcher": "^mcp__.+__[A-Za-z0-9_-]+$",
+        "hooks": [ { "type": "command", "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/guard.sh\" classify", "timeout": 10 } ] },
+      { "matcher": "^(Write|Edit|MultiEdit|Bash)$",
+        "hooks": [ { "type": "command", "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/guard.sh\" config", "timeout": 5 } ] }
+    ],
+    "PostToolUse": [
+      { "matcher": "^mcp__.+__[A-Za-z0-9_-]+$",
+        "hooks": [ { "type": "command", "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/guard.sh\" audit", "timeout": 10 } ] }
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+---
+# Agentic account, option orders from every source (no placed_agent): a "user" filter would miss
+# recurring, DRIP and other sources.
+type: tool_used
+tool: "{{tool:get_option_orders}}"
+input_match: "^(?=[\\s\\S]*\"account_number\"\\s*:\\s*\"{{acct:agentic}}\")(?=[\\s\\S]*\"created_at_gte\"\\s*:\\s*\"2026-(0\\d-|10-|11-0\\d|11-10))(?![\\s\\S]*\"placed_agent\"\\s*:\\s*\"[^\"])"
+min: 1
+weight: 1
+---

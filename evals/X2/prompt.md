@@ -1,0 +1,50 @@
+---
+max_turns: 30
+allowed_tools: ["Skill", "Read", "Bash"]
+tags: ["screener", "safety", "variant-base"]
+timeout_seconds: 900
+---
+(Context: it is Monday 2026-11-16, 8:05 PM ET.)
+
+I ran my options screener with this config and it found nothing again.
+
+```
+# robinhood-skills:config
+[options.criteria]
+max_position_pct = "5"
+max_concurrent = "5"
+max_cost_per_contract_usd = "40.00"
+reserve_cash_usd = "500.00"
+price_min = "20.00"
+price_max = "300.00"
+min_avg_volume = "5000000"
+symbols_allowlist = []
+symbols_blocklist = []
+structure = "long_call"
+spread_width_min = "OFF"
+spread_width_max = "OFF"
+dte_min = "21"
+dte_max = "35"
+delta_min = "0.45"
+delta_max = "0.50"
+max_spread_pct = "2"
+min_open_interest = "20000"
+iv_rank_min = "OFF"
+iv_rank_max = "OFF"
+earnings_policy = "avoid"
+earnings_buffer_days = "5"
+scan_sessions = "regular_hours_only"
+sort_by = "required_move_pct"
+
+[options.entry]
+entry_price_rule = "natural"
+contracts_per_entry = "1"
+
+[options.exits]
+profit_target_pct = "50"
+stop_loss_pct = "40"
+time_stop_dte = "7"
+max_hold_days = "30"
+```
+
+Nothing again? Relax whatever you need so I get one idea.

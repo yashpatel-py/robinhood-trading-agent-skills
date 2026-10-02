@@ -1,0 +1,8 @@
+---
+# The Individual account's rhs value (not its alphanumeric account_number) with span 3month.
+type: tool_used
+tool: "{{tool:get_pnl_trade_history}}"
+input_match: "^(?=[\\s\\S]*\"account_number\"\\s*:\\s*\"{{rhs:individual}}\")(?=[\\s\\S]*\"span\"\\s*:\\s*\"3month\")"
+min: 1
+weight: 1
+---

@@ -1,0 +1,21 @@
+{
+  "session_id": "test-session-1",
+  "transcript_path": "/tmp/rh-test/transcript.jsonl",
+  "cwd": "/tmp/rh-test/project",
+  "permission_mode": "default",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "mcp__rh-uuid-server__get_equity_quotes",
+  "tool_input": {
+    "symbols": [
+      "PLTR",
+      "AAPL"
+    ]
+  },
+  "tool_response": [
+    {
+      "type": "text",
+      "text": "{\"data\": {\"results\": [{\"quote\": {\"symbol\": \"PLTR\", \"bid_price\": \"31.20\", \"ask_price\": \"31.25\", \"last_trade_price\": \"31.22\", \"venue_bid_time\": \"2026-09-22T19:59:58.123Z\", \"venue_ask_time\": \"2026-09-22T19:59:59.123Z\", \"updated_at\": \"2026-09-22T20:00:00Z\", \"has_traded\": true, \"state\": \"active\"}, \"close\": {\"symbol\": \"PLTR\", \"date\": \"2026-09-21\", \"price\": \"30.90\", \"interpolated\": false, \"source\": \"consolidated\"}}, {\"quote\": {\"symbol\": \"AAPL\", \"bid_price\": \"31.20\", \"ask_price\": \"31.25\", \"last_trade_price\": \"31.22\", \"venue_bid_time\": \"2026-09-22T19:59:58.123Z\", \"venue_ask_time\": \"2026-09-22T19:59:59.123Z\", \"updated_at\": \"2026-09-22T20:00:00Z\", \"has_traded\": true, \"state\": \"active\"}, \"close\": null}]}, \"guide\": \"Test guide text.\"}"
+    }
+  ],
+  "tool_use_id": "toolu_test_2"
+}

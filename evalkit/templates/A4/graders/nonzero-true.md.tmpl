@@ -1,0 +1,9 @@
+---
+# Connector rule R8: get_option_positions with nonzero=true, or closed contracts come back too. This is a
+# grader, not a mock guard: a guard failure would abort the run ungraded.
+type: tool_used
+tool: "{{tool:get_option_positions}}"
+input_match: "\"nonzero\"\\s*:\\s*(true|\"true\")"
+min: 1
+weight: 1
+---

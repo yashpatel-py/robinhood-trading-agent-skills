@@ -1,0 +1,17 @@
+{
+  "session_id": "confirm-session-1",
+  "transcript_path": "/tmp/rh-test/transcript.jsonl",
+  "cwd": "__CWD__",
+  "permission_mode": "default",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "mcp__robinhood-trading__place_crypto_order",
+  "tool_input": {
+    "rhs_account_number": "__RHS__",
+    "symbol": "ETH-USD",
+    "side": "sell",
+    "type": "market",
+    "dollar_amount": "250",
+    "ref_id": "__REF__"
+  },
+  "tool_use_id": "toolu_confirm_1"
+}

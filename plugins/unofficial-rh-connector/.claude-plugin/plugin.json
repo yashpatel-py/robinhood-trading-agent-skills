@@ -1,0 +1,11 @@
+{
+  "name": "unofficial-rh-connector",
+  "displayName": "Robinhood MCP endpoint config (unofficial helper)",
+  "version": "2.0.0",
+  "description": "Unofficial helper: adds Robinhood's official Trading MCP endpoint. Not affiliated with Robinhood Markets, Inc.",
+  "author": {
+    "name": "Yash Patel",
+    "url": "https://github.com/yashpatel-py"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,9 @@
+{
+  "description": "Preflight (robinhood-trading, unofficial) for Codex: the order guard and nothing else. It blocks MCP tools named place_*, exercise_* or replace_* on any server, and other money-moving verbs on a server whose name contains robinhood. It never returns an allow decision. Codex skips it until you review and trust it in /hooks. The Claude Code hooks in hooks/hooks.json (session line, cancel prompts, audit log, confirm mode) are deliberately not loaded in Codex.",
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "mcp__.*__(place|exercise|replace)[_-].*|mcp__.*[Rr]obinhood.*__(submit|execute|transfer|withdraw|deposit|stake|unstake|convert|send|buy|sell|trade|liquidate|lend|borrow)[_-].*",
+        "hooks": [ { "type": "command", "command": "sh \"${PLUGIN_ROOT}/hooks/guard.sh\" money --format codex" } ] }
+    ]
+  }
+}
