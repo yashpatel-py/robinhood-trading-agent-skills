@@ -10,7 +10,7 @@ Wash-sale checks across your Agentic, individual and IRA accounts · an exit or 
 the cash your options could demand at expiration · a checked ticket for every order · a record of what your agent actually did.
 In Claude Code a fail-closed hook blocks order-placing tool calls; on other surfaces the rule is advised, and the table below says which.
 
-[![skills.sh](https://skills.sh/b/yashpatel-py/robinhood-trading-agent-skills)](https://skills.sh/yashpatel-py/robinhood-trading-agent-skills)
+[![skills.sh](https://img.shields.io/badge/skills.sh-npx%20skills%20add-black)](https://skills.sh/yashpatel-py/robinhood-trading-agent-skills)
 [![release](https://img.shields.io/github/v/release/yashpatel-py/robinhood-trading-agent-skills)](../../releases)
 [![validate](https://github.com/yashpatel-py/robinhood-trading-agent-skills/actions/workflows/validate.yml/badge.svg)](../../actions/workflows/validate.yml)
 [![evals](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/yashpatel-py/robinhood-trading-agent-skills/main/docs/badges/evals.json)](docs/eval-scorecard.md)
@@ -19,6 +19,8 @@ In Claude Code a fail-closed hook blocks order-placing tool calls; on other surf
 ![connector](https://img.shields.io/badge/connector%20verified-2026--09--22%20%C2%B7%2081%20tools-blue)
 
 `npx skills add yashpatel-py/robinhood-trading-agent-skills`
+
+<!-- Once skills.sh lists the repo (after the first `npx skills add` installs), swap the static skills.sh badge above for the live counter: https://www.skills.sh/b/yashpatel-py/robinhood-trading-agent-skills -->
 
 </div>
 
@@ -118,14 +120,14 @@ for every label, and the gaps we know about: [docs/safety-model.md](docs/safety-
 
 ## The skills
 
-| Skill | The question it answers | What it protects (sandbox figures) | Installs |
-|---|---|---|---|
-| `robinhood-trading` (core) | "What do I have, what would this order cost, and is it safe to send?" | a buy of 3 AMD that would wash $123.60 of a loss taken in another account, caught before the ticket <!-- golden: amd_rebuy_wash.disallowed_usd --> | ![installs](https://shieldcn.dev/skills/installs/yashpatel-py/robinhood-trading-agent-skills/robinhood-trading.svg) |
-| `robinhood-tax-loss-harvesting` | "Will my IRA, a recurring buy or a DRIP wash this loss? What can I harvest?" | $390.00 of TSLA loss a Roth IRA buy would erase for good; clean sale date 2026-12-07 <!-- golden: tsla_wash.disallowed_usd tsla_wash.earliest_clean_sale_date --> | ![installs](https://shieldcn.dev/skills/installs/yashpatel-py/robinhood-trading-agent-skills/robinhood-tax-loss-harvesting.svg) |
-| `robinhood-exit-guardian` | "Does every position have an exit, or at least a phone alert? Did anything fire?" | $84,467.50 of positions with no working exit or alert, listed with each gap <!-- golden: protection_audit.value_unprotected_usd --> | ![installs](https://shieldcn.dev/skills/installs/yashpatel-py/robinhood-trading-agent-skills/robinhood-exit-guardian.svg) |
-| `robinhood-options-monitor` | "Did my options hit my rules? What expires, gets assigned or auto-exercises?" | a $130,000.00 auto-exercise cash need against $2,480.00 of buying power, four days out <!-- golden: spy_auto_exercise.cash_needed_usd spy_auto_exercise.buying_power_usd --> | ![installs](https://shieldcn.dev/skills/installs/yashpatel-py/robinhood-trading-agent-skills/robinhood-options-monitor.svg) |
-| `robinhood-agent-report-card` | "What did my agent actually do, and did anything else trade in my account?" | an agent-tagged order this machine never sent, and an injection attempt the guard blocked | ![installs](https://shieldcn.dev/skills/installs/yashpatel-py/robinhood-trading-agent-skills/robinhood-agent-report-card.svg) |
-| `robinhood-options-screener` | "Run my options screener." (only when you ask) | entries only inside your own saved criteria; an unset value stops the run instead of being filled in | ![installs](https://shieldcn.dev/skills/installs/yashpatel-py/robinhood-trading-agent-skills/robinhood-options-screener.svg) |
+| Skill | The question it answers | What it protects (sandbox figures) |
+|---|---|---|
+| `robinhood-trading` (core) | "What do I have, what would this order cost, and is it safe to send?" | a buy of 3 AMD that would wash $123.60 of a loss taken in another account, caught before the ticket <!-- golden: amd_rebuy_wash.disallowed_usd --> |
+| `robinhood-tax-loss-harvesting` | "Will my IRA, a recurring buy or a DRIP wash this loss? What can I harvest?" | $390.00 of TSLA loss a Roth IRA buy would erase for good; clean sale date 2026-12-07 <!-- golden: tsla_wash.disallowed_usd tsla_wash.earliest_clean_sale_date --> |
+| `robinhood-exit-guardian` | "Does every position have an exit, or at least a phone alert? Did anything fire?" | $84,467.50 of positions with no working exit or alert, listed with each gap <!-- golden: protection_audit.value_unprotected_usd --> |
+| `robinhood-options-monitor` | "Did my options hit my rules? What expires, gets assigned or auto-exercises?" | a $130,000.00 auto-exercise cash need against $2,480.00 of buying power, four days out <!-- golden: spy_auto_exercise.cash_needed_usd spy_auto_exercise.buying_power_usd --> |
+| `robinhood-agent-report-card` | "What did my agent actually do, and did anything else trade in my account?" | an agent-tagged order this machine never sent, and an injection attempt the guard blocked |
+| `robinhood-options-screener` | "Run my options screener." (only when you ask) | entries only inside your own saved criteria; an unset value stops the run instead of being filled in |
 
 Each skill works when copied alone and shares one set of connector rules, synced from `shared/`.
 
