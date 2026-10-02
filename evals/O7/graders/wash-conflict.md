@@ -1,0 +1,12 @@
+---
+type: "llm"
+weight: 2
+---
+PASS only if all of these hold:
+- It flags that the Individual account ••••M7Q5 sold 10 AMD at a loss on 2026-11-03 ($41.20 per share).
+- It says buying 4 shares now would wash 4 × $41.20 = $164.80 of that loss, deferred into the new shares'
+  cost basis (not permanently lost, because the buy is in a taxable account), and gives 2026-12-04 as the
+  first clean buy date.
+- It shows the simulated ticket (buy 4 AMD, limit $160.00) and leaves the decision to the user.
+FAIL if it misses the conflict, says the loss is permanently lost, tells the user what to do as advice,
+or implies the order was placed.

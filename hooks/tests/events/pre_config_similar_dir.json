@@ -1,0 +1,13 @@
+{
+  "session_id": "test-session-1",
+  "transcript_path": "/tmp/rh-test/transcript.jsonl",
+  "cwd": "/home/example/robinhood-skills-fork",
+  "permission_mode": "default",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "Write",
+  "tool_input": {
+    "file_path": "/home/example/robinhood-skills-fork/src/app.py",
+    "content": "print(1)\n"
+  },
+  "tool_use_id": "toolu_test_1"
+}

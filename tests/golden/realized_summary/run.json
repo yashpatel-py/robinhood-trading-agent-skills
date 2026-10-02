@@ -1,0 +1,495 @@
+{
+ "script": "realized_summary",
+ "about": "YTD realized by account: taxable total, IRA and Roth separate, per-symbol, reconciliation with get_realized_pnl, term split only when provided (build spec B.2 workflow E).",
+ "cases": [
+  {
+   "name": "spec T4: taxable +$8,412.33; Roth $1,204.00 separate and excluded; term split unavailable",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "window": "ytd",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "label": "Roth IRA"
+     }
+    ],
+    "trades": [
+     {
+      "account_last4": "X4F1",
+      "timestamp": "2026-10-02T14:00:00Z",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "30",
+      "price": "31.00",
+      "realized_gain": "462.23"
+     },
+     {
+      "account_last4": "M7Q5",
+      "timestamp": "2026-04-14T15:00:00Z",
+      "symbol": "MU",
+      "side": "sell",
+      "quantity": "50",
+      "price": "300.00",
+      "realized_gain": "8362.10"
+     },
+     {
+      "account_last4": "M7Q5",
+      "timestamp": "2026-11-03T15:12:09Z",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "10",
+      "price": "120.20",
+      "realized_gain": "-412.00"
+     },
+     {
+      "account_last4": "P0Z9",
+      "timestamp": "2026-05-20T15:00:00Z",
+      "symbol": "VTI",
+      "side": "sell",
+      "quantity": "5",
+      "price": "280.00",
+      "realized_gain": "1204.00"
+     }
+    ],
+    "aggregates": {
+     "M7Q5": "7950.10",
+     "X4F1": {
+      "data_points": [
+       {
+        "realized_gain": "462.23"
+       },
+       {
+        "realized_gain": null
+       }
+      ]
+     }
+    }
+   },
+   "expected": {
+    "ok": true,
+    "taxable_total_usd": "8412.33",
+    "taxable_gains_usd": "8824.33",
+    "taxable_losses_usd": "-412.00",
+    "by_account": [
+     {
+      "account_last4": "M7Q5",
+      "realized_usd": "7950.10",
+      "reconciles": true
+     },
+     {
+      "account_last4": "X4F1",
+      "realized_usd": "462.23",
+      "reconciles": true,
+      "aggregate_na_buckets": 1
+     }
+    ],
+    "by_symbol": [
+     {
+      "symbol": "AMD",
+      "realized_usd": "-412.00"
+     },
+     {
+      "symbol": "PLTR",
+      "realized_usd": "462.23"
+     },
+     {
+      "symbol": "MU",
+      "realized_usd": "8362.10"
+     }
+    ],
+    "retirement_excluded": [
+     {
+      "account_last4": "P0Z9",
+      "realized_usd": "1204.00"
+     }
+    ],
+    "term_split": "not provided by the connector; see Robinhood's tax center (Account > Tax center) or your 1099-B",
+    "status_line": "NO ACTION: Dollars at stake: +$8,412.33 realized year to date in taxable accounts (••••P0Z9 +$1,204.00 kept separate)"
+   }
+  },
+  {
+   "name": "a reconciliation gap is shown with its likely causes",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "label": "Roth IRA"
+     }
+    ],
+    "trades": [
+     {
+      "account_last4": "X4F1",
+      "timestamp": "2026-10-02T14:00:00Z",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "30",
+      "price": "31.00",
+      "realized_gain": "462.23"
+     },
+     {
+      "account_last4": "M7Q5",
+      "timestamp": "2026-04-14T15:00:00Z",
+      "symbol": "MU",
+      "side": "sell",
+      "quantity": "50",
+      "price": "300.00",
+      "realized_gain": "8362.10"
+     },
+     {
+      "account_last4": "M7Q5",
+      "timestamp": "2026-11-03T15:12:09Z",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "10",
+      "price": "120.20",
+      "realized_gain": "-412.00"
+     },
+     {
+      "account_last4": "P0Z9",
+      "timestamp": "2026-05-20T15:00:00Z",
+      "symbol": "VTI",
+      "side": "sell",
+      "quantity": "5",
+      "price": "280.00",
+      "realized_gain": "1204.00"
+     }
+    ],
+    "aggregates": {
+     "M7Q5": "8000.00"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "by_account": [
+     {
+      "account_last4": "M7Q5",
+      "difference_usd": "-49.90",
+      "reconciles": false
+     }
+    ]
+   }
+  },
+  {
+   "name": "rows from last year are left out of a ytd window (trade date in ET: 2026-01-01T03:00Z is still 2025-12-31)",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "label": "Roth IRA"
+     }
+    ],
+    "trades": [
+     {
+      "account_last4": "X4F1",
+      "timestamp": "2026-01-01T03:00:00Z",
+      "symbol": "AAA",
+      "realized_gain": "100.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "taxable_total_usd": "0.00",
+    "notes": [
+     "1 row(s) outside 2026 were left out (span ytd covers this calendar year)"
+    ]
+   }
+  },
+  {
+   "name": "rows with no symbol are counted apart; rows with no amount are n/a",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "label": "Roth IRA"
+     }
+    ],
+    "trades": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-06-01",
+      "symbol": "",
+      "realized_gain": "-5.00"
+     },
+     {
+      "account_last4": "X4F1",
+      "date": "2026-06-02",
+      "symbol": "AAA",
+      "realized_gain": null
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "taxable_total_usd": "-5.00",
+    "unattributed_rows": {
+     "count": 1,
+     "realized_usd": "-5.00"
+    },
+    "by_account": [
+     {
+      "account_last4": "M7Q5",
+      "trades": 0
+     },
+     {
+      "account_last4": "X4F1",
+      "rows_without_amount": 1,
+      "trades": 1
+     }
+    ]
+   }
+  },
+  {
+   "name": "a term split appears only when rows carry a term",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "label": "Roth IRA"
+     }
+    ],
+    "trades": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-06-01",
+      "symbol": "AAA",
+      "realized_gain": "10.00",
+      "term": "short"
+     },
+     {
+      "account_last4": "X4F1",
+      "date": "2026-06-02",
+      "symbol": "BBB",
+      "realized_gain": "-4.00",
+      "term": "long"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "term_split": {
+     "short_usd": "10.00",
+     "long_usd": "-4.00",
+     "rows": 2
+    }
+   }
+  },
+  {
+   "name": "classified rows are grouped by asset class",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "label": "Roth IRA"
+     }
+    ],
+    "trades": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-06-01",
+      "symbol": "AAA",
+      "realized_gain": "10.00",
+      "classification": "equity_sale"
+     },
+     {
+      "account_last4": "X4F1",
+      "date": "2026-06-02",
+      "symbol": "AAA",
+      "realized_gain": "-4.00",
+      "classification": "unclassified"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "by_asset_class": {
+     "equity": "10.00",
+     "unclassified": "-4.00"
+    }
+   }
+  },
+  {
+   "name": "a partially read account turns the status line UNKNOWN",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "label": "Agentic",
+      "read_status": "partial"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "label": "Roth IRA"
+     }
+    ],
+    "trades": [
+     {
+      "account_last4": "X4F1",
+      "timestamp": "2026-10-02T14:00:00Z",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "30",
+      "price": "31.00",
+      "realized_gain": "462.23"
+     },
+     {
+      "account_last4": "M7Q5",
+      "timestamp": "2026-04-14T15:00:00Z",
+      "symbol": "MU",
+      "side": "sell",
+      "quantity": "50",
+      "price": "300.00",
+      "realized_gain": "8362.10"
+     },
+     {
+      "account_last4": "M7Q5",
+      "timestamp": "2026-11-03T15:12:09Z",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "10",
+      "price": "120.20",
+      "realized_gain": "-412.00"
+     },
+     {
+      "account_last4": "P0Z9",
+      "timestamp": "2026-05-20T15:00:00Z",
+      "symbol": "VTI",
+      "side": "sell",
+      "quantity": "5",
+      "price": "280.00",
+      "realized_gain": "1204.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status_line": "UNKNOWN: Dollars at stake: +$8,412.33 realized year to date in taxable accounts (••••P0Z9 +$1,204.00 kept separate); incomplete: ••••X4F1"
+   }
+  },
+  {
+   "name": "a row from an account not listed is refused",
+   "op": "run",
+   "input": {
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "label": "Roth IRA"
+     }
+    ],
+    "trades": [
+     {
+      "account_last4": "ZZZZ",
+      "date": "2026-06-01",
+      "realized_gain": "1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "UNKNOWN_ACCOUNT"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,84 @@
+{
+  "script": "canon",
+  "about": "Pinned fingerprints. The canonical JSON and hash were computed by hand from the build spec's canonicalization rules (not by canon.py), so a change to canon.py that alters any fingerprint fails here and would break review/place binding across installed copies.",
+  "cases": [
+    {
+      "name": "equity limit, defaults filled, decimals normalized",
+      "tool": "review_equity_order",
+      "params": {
+        "account_number": "demo-X4F1",
+        "symbol": "pltr",
+        "side": "BUY",
+        "type": "limit",
+        "quantity": "10.00",
+        "limit_price": "31.240"
+      },
+      "family": "equity",
+      "canonical_json_hand_written": "{\"account_number\":\"demo-X4F1\",\"limit_price\":\"31.24\",\"market_hours\":\"regular_hours\",\"quantity\":\"10\",\"side\":\"buy\",\"symbol\":\"PLTR\",\"time_in_force\":\"gfd\",\"type\":\"limit\"}",
+      "fingerprint": "sha256:40f673374c6f8d808d608bb074e99660efca94380b20cf5f90d4fcb86cd8d61d",
+      "ticket_id": "40f673"
+    },
+    {
+      "name": "option debit spread, review-only keys dropped, legs sorted",
+      "tool": "review_option_order",
+      "params": {
+        "account_number": "demo-X4F1",
+        "chain_symbol": "AMD",
+        "underlying_type": "equity",
+        "quantity": "2",
+        "price": "1.50",
+        "direction": "debit",
+        "legs": [
+          {
+            "option_id": "leg-b",
+            "side": "sell",
+            "position_effect": "open"
+          },
+          {
+            "option_id": "leg-a",
+            "side": "buy",
+            "position_effect": "open",
+            "ratio_quantity": 1
+          }
+        ]
+      },
+      "family": "option",
+      "canonical_json_hand_written": "{\"account_number\":\"demo-X4F1\",\"direction\":\"debit\",\"legs\":[{\"option_id\":\"leg-a\",\"position_effect\":\"open\",\"ratio_quantity\":1,\"side\":\"buy\"},{\"option_id\":\"leg-b\",\"position_effect\":\"open\",\"ratio_quantity\":1,\"side\":\"sell\"}],\"market_hours\":\"regular_hours\",\"price\":\"1.5\",\"quantity\":\"2\",\"time_in_force\":\"gfd\",\"type\":\"limit\"}",
+      "fingerprint": "sha256:261388d45beaa90011e979800e6999bb5007cbcebdd049d29dbc922eea997918",
+      "ticket_id": "261388"
+    },
+    {
+      "name": "crypto stop_loss gets the day-only default",
+      "tool": "preview_crypto_order",
+      "params": {
+        "rhs_account_number": "demo-5555",
+        "symbol": "ETH",
+        "side": "sell",
+        "type": "stop_loss",
+        "quantity": "0.50",
+        "stop_price": "2000"
+      },
+      "family": "crypto",
+      "canonical_json_hand_written": "{\"quantity\":\"0.5\",\"rhs_account_number\":\"demo-5555\",\"side\":\"sell\",\"stop_price\":\"2000\",\"symbol\":\"ETH\",\"time_in_force\":\"gfd\",\"type\":\"stop_loss\"}",
+      "fingerprint": "sha256:c159277981c160f79539945dd805b6181e60c266774cc31359cd52e9d5403a27",
+      "ticket_id": "c15927"
+    },
+    {
+      "name": "OCO gets regular_hours",
+      "tool": "review_advanced_order",
+      "params": {
+        "account_number": "demo-X4F1",
+        "symbol": "AMD",
+        "side": "sell",
+        "quantity": "10",
+        "take_profit_limit_price": "180.00",
+        "stop_loss_stop_price": "142.00",
+        "time_in_force": "gtc"
+      },
+      "family": "oco",
+      "canonical_json_hand_written": "{\"account_number\":\"demo-X4F1\",\"market_hours\":\"regular_hours\",\"quantity\":\"10\",\"side\":\"sell\",\"stop_loss_stop_price\":\"142\",\"symbol\":\"AMD\",\"take_profit_limit_price\":\"180\",\"time_in_force\":\"gtc\"}",
+      "fingerprint": "sha256:3f998c687c7845cd12ef2506ccb1dd96aa20820ce9a56d95cf91eef02e07738c",
+      "ticket_id": "3f998c"
+    }
+  ]
+}

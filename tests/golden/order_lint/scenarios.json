@@ -1,0 +1,543 @@
+{
+ "script": "order_lint",
+ "about": "Whole-ticket scenarios with expected output subsets (hand-computed).",
+ "cases": [
+  {
+   "name": "spec example: overnight marketable buy tagged all_day_hours",
+   "input": {
+    "tool": "review_equity_order",
+    "params": {
+     "account_number": "demo-X4F1",
+     "symbol": "PLTR",
+     "side": "buy",
+     "type": "limit",
+     "quantity": "10",
+     "limit_price": "31.24",
+     "market_hours": "all_day_hours",
+     "time_in_force": "gfd"
+    },
+    "provenance": {
+     "quantity": "user",
+     "limit_price": "user_intent_marketable"
+    },
+    "context": {
+     "agentic_allowed": true,
+     "market_price": "31.20",
+     "bid": "31.18",
+     "ask": "31.24",
+     "session": "outside_regular_trading_day",
+     "user_wants_immediate": true,
+     "option_level": "option_level_3",
+     "account_type": "limited_margin",
+     "retirement": false,
+     "position_qty": "30",
+     "held_qty": "0",
+     "lots_available": {
+      "L7": "20"
+     },
+     "chain_extended_hours_state": null,
+     "min_order_quantity_increment": null,
+     "pair_halted": false
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "family": "equity",
+    "estimate": {
+     "usd": "312.40",
+     "basis": "qty\u00d7limit",
+     "worst_case_usd": null,
+     "label": "agent estimate \u2014 broker did not compute"
+    },
+    "place_tool": "place_equity_order",
+    "place_params": {
+     "account_number": "\u2022\u2022\u2022\u2022X4F1",
+     "symbol": "PLTR",
+     "side": "buy",
+     "type": "limit",
+     "quantity": "10",
+     "limit_price": "31.24",
+     "market_hours": "all_day_hours",
+     "time_in_force": "gfd"
+    }
+   },
+   "notes_contain": [
+    "marketable buy at or above the ask (31.24)"
+   ]
+  },
+  {
+   "name": "market sell after the close queues for the next open; estimated at the bid",
+   "input": {
+    "tool": "review_equity_order",
+    "params": {
+     "account_number": "demo-X4F1",
+     "symbol": "NVDA",
+     "side": "sell",
+     "type": "market",
+     "quantity": "5"
+    },
+    "provenance": {
+     "quantity": "user"
+    },
+    "context": {
+     "agentic_allowed": true,
+     "session": "outside_regular_trading_day",
+     "bid": "228.00",
+     "ask": "228.20",
+     "sellable_qty": "5"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": true,
+    "warnings": [
+     {
+      "code": "QUEUES_NEXT_OPEN",
+      "field": "market_hours"
+     }
+    ],
+    "estimate": {
+     "usd": "1140.00",
+     "basis": "qty\u00d7bid"
+    }
+   }
+  },
+  {
+   "name": "stop order sized at the trigger",
+   "input": {
+    "tool": "review_equity_order",
+    "params": {
+     "account_number": "demo-X4F1",
+     "symbol": "AMD",
+     "side": "sell",
+     "type": "stop_market",
+     "quantity": "10",
+     "stop_price": "140",
+     "time_in_force": "gtc"
+    },
+    "provenance": {
+     "quantity": "user",
+     "stop_price": "user"
+    },
+    "context": {
+     "agentic_allowed": true,
+     "session": "regular",
+     "sellable_qty": "12"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": true,
+    "estimate": {
+     "usd": "1400.00",
+     "basis": "qty\u00d7stop (trigger basis; a gap can fill far from the stop)"
+    }
+   }
+  },
+  {
+   "name": "OCO: both outcomes, and the R26 fallback note",
+   "input": {
+    "tool": "review_advanced_order",
+    "params": {
+     "account_number": "demo-X4F1",
+     "symbol": "AMD",
+     "side": "sell",
+     "quantity": "10",
+     "take_profit_limit_price": "180.00",
+     "stop_loss_stop_price": "142.00",
+     "time_in_force": "gtc"
+    },
+    "provenance": {
+     "quantity": "user",
+     "take_profit_limit_price": "user",
+     "stop_loss_stop_price": "user"
+    },
+    "context": {
+     "agentic_allowed": true,
+     "market_price": "161.40",
+     "bid": "161.38",
+     "ask": "161.42",
+     "sellable_qty": "12"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": true,
+    "family": "oco",
+    "place_tool": "place_advanced_order",
+    "estimate": {
+     "usd": "1800.00",
+     "worst_case_usd": "1420.00",
+     "outcomes": {
+      "take_profit_usd": "1800.00",
+      "stop_usd": "1420.00"
+     }
+    }
+   },
+   "notes_contain": [
+    "the tool you requested cannot be found or does not exist"
+   ]
+  },
+  {
+   "name": "option debit spread: net x 100 x qty and contracts per leg",
+   "input": {
+    "tool": "review_option_order",
+    "params": {
+     "account_number": "demo-X4F1",
+     "legs": [
+      {
+       "option_id": "opt-a",
+       "side": "buy",
+       "position_effect": "open"
+      },
+      {
+       "option_id": "opt-b",
+       "side": "sell",
+       "position_effect": "open"
+      }
+     ],
+     "quantity": "2",
+     "type": "limit",
+     "price": "2.20",
+     "direction": "debit",
+     "time_in_force": "gfd",
+     "market_hours": "regular_hours",
+     "chain_symbol": "AMD",
+     "underlying_type": "equity"
+    },
+    "provenance": {
+     "quantity": "user",
+     "price": "user"
+    },
+    "context": {
+     "agentic_allowed": true,
+     "option_level": "option_level_3",
+     "account_type": "margin",
+     "retirement": false,
+     "session": "regular"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": true,
+    "family": "option",
+    "estimate": {
+     "usd": "440.00",
+     "basis": "net \u00d7 100 \u00d7 qty (debit paid)",
+     "contracts_per_leg": [
+      "2",
+      "2"
+     ]
+    },
+    "place_tool": "place_option_order",
+    "place_params": {
+     "quantity": "2",
+     "price": "2.20",
+     "direction": "debit",
+     "type": "limit"
+    }
+   },
+   "place_params_absent": [
+    "chain_symbol",
+    "underlying_type",
+    "ref_id"
+   ]
+  },
+  {
+   "name": "crypto market buy in dollars: worst case +1%",
+   "input": {
+    "tool": "preview_crypto_order",
+    "params": {
+     "rhs_account_number": "demo-5555",
+     "symbol": "BTC",
+     "side": "buy",
+     "type": "market",
+     "dollar_amount": "100"
+    },
+    "provenance": {
+     "dollar_amount": "user"
+    },
+    "context": {
+     "agentic_allowed": true,
+     "pair_halted": false
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": true,
+    "estimate": {
+     "usd": "100.00",
+     "worst_case_usd": "101.00"
+    },
+    "place_params": {
+     "rhs_account_number": "\u2022\u2022\u2022\u20225555"
+    }
+   }
+  },
+  {
+   "name": "crypto market sell in dollars: worst case -5% and a collar warning",
+   "input": {
+    "tool": "preview_crypto_order",
+    "params": {
+     "rhs_account_number": "demo-5555",
+     "symbol": "ETH",
+     "side": "sell",
+     "type": "market",
+     "dollar_amount": "500"
+    },
+    "provenance": {
+     "dollar_amount": "user"
+    },
+    "context": {
+     "agentic_allowed": true,
+     "pair_halted": false
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": true,
+    "warnings": [
+     {
+      "code": "SELL_COLLAR_5PCT"
+     }
+    ],
+    "estimate": {
+     "usd": "500.00",
+     "worst_case_usd": "475.00"
+    }
+   }
+  },
+  {
+   "name": "crypto marketable limit from user intent",
+   "input": {
+    "tool": "preview_crypto_order",
+    "params": {
+     "rhs_account_number": "demo-5555",
+     "symbol": "BTC",
+     "side": "buy",
+     "type": "limit",
+     "quantity": "0.01",
+     "limit_price": "60010",
+     "time_in_force": "gtc"
+    },
+    "provenance": {
+     "quantity": "user",
+     "limit_price": "user_intent_marketable"
+    },
+    "context": {
+     "agentic_allowed": true,
+     "min_order_quantity_increment": "0.00000001",
+     "pair_halted": false,
+     "bid": "59990",
+     "ask": "60010",
+     "user_wants_immediate": true
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": true,
+    "estimate": {
+     "usd": "600.10"
+    }
+   }
+  },
+  {
+   "name": "user_intent_marketable without an immediate-fill request is not a user source",
+   "input": {
+    "tool": "review_equity_order",
+    "params": {
+     "account_number": "demo-X4F1",
+     "symbol": "PLTR",
+     "side": "buy",
+     "type": "limit",
+     "quantity": "10",
+     "limit_price": "31.24",
+     "time_in_force": "gfd",
+     "market_hours": "regular_hours"
+    },
+    "provenance": {
+     "quantity": "user",
+     "limit_price": "user_intent_marketable"
+    },
+    "context": {
+     "agentic_allowed": true,
+     "session": "regular",
+     "bid": "31.18",
+     "ask": "31.24",
+     "market_price": "31.20"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": false,
+    "errors": [
+     {
+      "code": "NO_USER_SOURCE",
+      "field": "limit_price"
+     }
+    ]
+   }
+  },
+  {
+   "name": "user_intent_marketable sell above the bid is not marketable",
+   "input": {
+    "tool": "review_equity_order",
+    "params": {
+     "account_number": "demo-X4F1",
+     "symbol": "PLTR",
+     "side": "sell",
+     "type": "limit",
+     "quantity": "10",
+     "limit_price": "31.24",
+     "time_in_force": "gfd",
+     "market_hours": "regular_hours"
+    },
+    "provenance": {
+     "quantity": "user",
+     "limit_price": "user_intent_marketable"
+    },
+    "context": {
+     "agentic_allowed": true,
+     "session": "regular",
+     "bid": "31.18",
+     "ask": "31.24",
+     "market_price": "31.20",
+     "user_wants_immediate": true,
+     "sellable_qty": "10"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": false,
+    "errors": [
+     {
+      "code": "NO_USER_SOURCE",
+      "field": "limit_price"
+     }
+    ],
+    "warnings": [
+     {
+      "code": "SELL_LIMIT_NOT_MARKETABLE"
+     }
+    ]
+   }
+  },
+  {
+   "name": "missing context is listed as not checked, never assumed fine",
+   "input": {
+    "tool": "review_equity_order",
+    "params": {
+     "account_number": "demo-X4F1",
+     "symbol": "KO",
+     "side": "sell",
+     "type": "limit",
+     "quantity": "5",
+     "limit_price": "70"
+    },
+    "provenance": {
+     "quantity": "user",
+     "limit_price": "user"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": true,
+    "not_checked": [
+     {
+      "check": "agentic account"
+     },
+     {
+      "check": "sellable shares"
+     },
+     {
+      "check": "session timing"
+     }
+    ]
+   }
+  },
+  {
+   "name": "exercise_option has no review twin",
+   "input": {
+    "tool": "exercise_option",
+    "params": {
+     "quantity": 1
+    }
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "UNKNOWN_TOOL",
+      "field": "tool"
+     }
+    ]
+   }
+  },
+  {
+   "name": "read tools are not order tools",
+   "input": {
+    "tool": "get_accounts",
+    "params": {}
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "UNKNOWN_TOOL"
+     }
+    ]
+   }
+  },
+  {
+   "name": "params must be an object",
+   "input": {
+    "tool": "review_equity_order",
+    "params": "buy 10 PLTR"
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_INPUT",
+      "field": "params"
+     }
+    ]
+   }
+  },
+  {
+   "name": "MCP-prefixed names are accepted",
+   "input": {
+    "tool": "mcp__rh-sandbox__review_equity_order",
+    "params": {
+     "account_number": "demo-X4F1",
+     "symbol": "PLTR",
+     "side": "buy",
+     "type": "limit",
+     "quantity": "10",
+     "limit_price": "31.24",
+     "time_in_force": "gfd",
+     "market_hours": "regular_hours"
+    },
+    "provenance": {
+     "quantity": "user",
+     "limit_price": "user"
+    },
+    "context": {
+     "agentic_allowed": true,
+     "session": "regular",
+     "bid": "31.18",
+     "ask": "31.24",
+     "market_price": "31.20"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "valid": true,
+    "tool": "review_equity_order"
+   }
+  }
+ ]
+}

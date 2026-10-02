@@ -1,0 +1,9 @@
+---
+# The trap the connector warns about: price crossing the SMA line is price_crosses_sma (indicator
+# only), never sma_crosses. 200-day = period 200 on daily bars (interval_secs 86400).
+type: tool_used
+tool: "{{tool:create_alert}}"
+input_match: "^(?=[\\s\\S]*\"symbol\"\\s*:\\s*\"NVDA\")(?=[\\s\\S]*\"condition_type\"\\s*:\\s*\"price_crosses_sma\")(?=[\\s\\S]*\"period\"\\s*:\\s*\"?200(\\.0+)?\"?\\s*[,}])(?=[\\s\\S]*\"interval_secs\"\\s*:\\s*\"?86400(\\.0+)?\"?\\s*[,}])"
+min: 1
+weight: 2
+---

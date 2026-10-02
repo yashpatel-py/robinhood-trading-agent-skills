@@ -1,0 +1,22 @@
+{"query": "whats my buying power rn", "should_trigger": true, "split": "train"}
+{"query": "how did my trades do the last 90 days, realized only", "should_trigger": true, "split": "train"}
+{"query": "I want to put $2k into PLTR, what would that look like", "should_trigger": true, "split": "train"}
+{"query": "find me mid-caps with RSI under 30", "should_trigger": true, "split": "train"}
+{"query": "what's the analyst target on TSLA", "should_trigger": true, "split": "train"}
+{"query": "what did Pelosi disclose buying", "should_trigger": true, "split": "train"}
+{"query": "alert me if RSI goes over 70 on the hourly", "should_trigger": true, "split": "train"}
+{"query": "pull the debt schedule from TSLA's last 10-K", "should_trigger": true, "split": "train"}
+{"query": "show me the June SPY chain around the money", "should_trigger": true, "split": "validation"}
+{"query": "what orders do I have open right now", "should_trigger": true, "split": "validation"}
+{"query": "cancel my open AMD limit order", "should_trigger": true, "split": "validation"}
+{"query": "is my AAPL position up or down today in dollars", "should_trigger": true, "split": "validation"}
+{"query": "can my agentic account trade call spreads yet", "should_trigger": true, "split": "validation"}
+{"query": "prepare the Q3 P&L for the board deck", "should_trigger": false, "split": "train"}
+{"query": "reconcile the brokerage cash account to the GL", "should_trigger": false, "split": "train"}
+{"query": "what's my buying power on Zerodha", "should_trigger": false, "split": "train"}
+{"query": "explain what delta means", "should_trigger": false, "split": "train"}
+{"query": "harvest my TSLA loss before year end", "should_trigger": false, "expect_skill": "robinhood-tax-loss-harvesting", "split": "train"}
+{"query": "write a Python backtest for an MA crossover", "should_trigger": false, "split": "validation"}
+{"query": "what's the difference between a 10-K and a 10-Q", "should_trigger": false, "split": "validation"}
+{"query": "set up a covered call on Schwab", "should_trigger": false, "split": "validation"}
+{"query": "which of my positions have no stop", "should_trigger": false, "expect_skill": "robinhood-exit-guardian", "split": "validation"}

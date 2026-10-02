@@ -1,0 +1,93 @@
+# Every push and pull request: the whole kit must stay consistent, tested and leak-free.
+# Build spec §G.3, with the v2.0.0 changes: confirm mode ships wired but off (no optional/
+# package), so its steps are the confirm-gate tests plus an explicit "confirm mode off means
+# every place_* call is denied" check. release.yml reuses this workflow (workflow_call).
+# Nothing here calls a model or the network beyond installing tools; paid evals live in evals.yml.
+name: validate
+on:
+  push:
+  pull_request:
+  workflow_call:
+permissions: { contents: read }
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy: { matrix: { python: ["3.9", "3.12"] } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ matrix.python }}" }
+      - name: Frontmatter, layout, SKILL.md size
+        run: python3 tools/validate_skills.py
+      - name: Shared files in sync
+        run: python3 tools/sync_shared.py --check && python3 tools/gen_rules_tables.py --check
+      - name: Connector drift (tools, params, classes, param-facts, guard coverage)
+        run: python3 tools/check_drift.py
+      - name: Versions equal across manifests (and tag on tags)
+        env:
+          TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+        run: python3 tools/check_versions.py "$TAG"
+      - name: Unit tests (scripts, golden)
+        run: python3 -m unittest discover -s tests -v
+      - name: Hook tests (default build)
+        run: sh hooks/tests/test_guard.sh && python3 -m unittest hooks/tests/test_audit_log.py -v
+      - name: Hook fail-closed without Python
+        run: sh hooks/tests/test_guard.sh --no-python
+      - name: Confirm-gate tests (confirm mode is wired, off by default)
+        run: python3 -m unittest hooks/tests/test_confirm_gate.py -v
+      - name: Confirm mode off means every place_* call is denied
+        # order_mode unset or simulate_only: the guard must exit 2 for every money tool on every
+        # server-name shape, and never print an allow decision.
+        run: |
+          state="$(mktemp -d)"
+          fail=0
+          for mode in unset simulate_only; do
+            for server in robinhood-trading plugin_unofficial-rh-connector_robinhood 00000000-0000-4000-8000-000000000000 rh-sandbox; do
+              for tool in place_equity_order place_option_order place_crypto_order place_advanced_order exercise_option replace_option_order; do
+                event="{\"session_id\":\"ci\",\"hook_event_name\":\"PreToolUse\",\"permission_mode\":\"default\",\"tool_name\":\"mcp__${server}__${tool}\",\"tool_input\":{\"symbol\":\"PLTR\",\"quantity\":\"1\"}}"
+                if [ "$mode" = unset ]; then
+                  if out="$(printf '%s' "$event" | env -u CLAUDE_PLUGIN_OPTION_ORDER_MODE ROBINHOOD_SKILLS_STATE="$state" sh hooks/guard.sh money 2>/dev/null)"; then rc=0; else rc=$?; fi
+                else
+                  if out="$(printf '%s' "$event" | CLAUDE_PLUGIN_OPTION_ORDER_MODE="$mode" ROBINHOOD_SKILLS_STATE="$state" sh hooks/guard.sh money 2>/dev/null)"; then rc=0; else rc=$?; fi
+                fi
+                if [ "$rc" -ne 2 ] || printf '%s' "$out" | grep -q '"allow"'; then
+                  echo "::error::order_mode=$mode mcp__${server}__${tool}: guard exit $rc (expected 2, no allow)"
+                  fail=1
+                fi
+              done
+            done
+          done
+          rm -rf "$state"
+          exit "$fail"
+      - name: Evals generated files up to date
+        run: >-
+          python3 evalkit/gen_evals.py --anchor 2026-11-16T20:05:00-05:00 --variant all --check
+          && python3 evalkit/gen_evals.py --golden --check
+          && python3 tools/make_audit_fixture.py --check
+      - name: README numbers match golden demo output
+        run: python3 tools/check_readme.py
+      - name: Leak scan and no-network scan
+        run: python3 tools/leak_scan.py && python3 tools/no_network_check.py
+      - name: Release build dry run
+        run: python3 tools/build_release.py --dry-run
+  shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck (POSIX sh)
+        run: |
+          command -v shellcheck >/dev/null 2>&1 || { sudo apt-get update -qq && sudo apt-get install -y shellcheck; }
+          shellcheck -s sh hooks/guard.sh hooks/tests/test_guard.sh
+  plugin-validate:
+    runs-on: ubuntu-latest
+    continue-on-error: true   # flip to false once a CI run confirms `claude plugin validate` works unauthenticated
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: claude plugin validate --strict (marketplace, plugin, connector helper)
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          claude plugin validate . --strict
+          claude plugin validate .claude-plugin/plugin.json --strict
+          claude plugin validate plugins/unofficial-rh-connector --strict

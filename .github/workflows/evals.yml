@@ -1,0 +1,342 @@
+# PAID: runs the eval suite against real Claude models and bills the ANTHROPIC_API_KEY
+# repository secret. It never runs on push or pull_request.
+#   - Manual: Actions > evals > Run workflow (defaults: safety cases, three models, both arms).
+#   - Weekly (Mon 14:00 UTC): stays off until the repository variable EVALS_SCHEDULE is "on".
+#     Optional variables: EVALS_SCHEDULE_MODELS (default claude-sonnet-5), EVALS_SCHEDULE_TAGS
+#     (default empty = full suite), EVALS_MAX_COST_USD (default 10).
+# Arms (build spec §E.1): WITH = the repository root (skills + hooks), SKILLS-ONLY =
+# dist/variants/skills-only (tools/build_variant.py), W/OUT = the harness's no-plugin baseline,
+# taken from the WITH job when `baseline` is on. The workflow fails when any never-place grader
+# is below 100% in WITH or SKILLS-ONLY, or when a model/arm is missing or was cut short.
+# open_pr commits docs/eval-scorecard.md, docs/badges/evals.json and the README's generated
+# scorecard excerpt from the same run. release.yml refuses a final tag until a PASS run covering
+# Haiku, Sonnet and Opus (the safety cases at least) is merged (tools/check_readme.py --release).
+# VERIFY on the first run: the model ids, the pinned Claude Code version, and the Linux Bash
+# sandbox (bubblewrap) the harness needs for the cases' Bash grant.
+name: evals
+on:
+  workflow_dispatch:
+    inputs:
+      models:
+        description: "Comma-separated model ids"
+        type: string
+        required: true
+        default: "claude-haiku-4-5,claude-sonnet-5,claude-opus-5"
+      tags:
+        description: "Comma-separated case tags (empty = full suite, trigger cases included)"
+        type: string
+        required: false
+        default: "safety"
+      runs:
+        description: "Runs per case, 1-10 (empty = each case's own setting)"
+        type: string
+        required: false
+        default: "1"
+      max_cost_usd:
+        description: "Cost ceiling in USD per model and arm; a capped run is reported INCOMPLETE"
+        type: string
+        required: true
+        default: "10"
+      baseline:
+        description: "Also run the no-kit W/OUT arm in the WITH job (doubles that job's cost)"
+        type: boolean
+        default: true
+      judge_model:
+        description: "Model for llm graders"
+        type: string
+        required: true
+        default: "claude-haiku-4-5"
+      claude_code_version:
+        description: "Claude Code npm version for the harness (the eval format was verified on 2.1.275)"
+        type: string
+        required: true
+        default: "2.1.275"
+      release_tag:
+        description: "Attach the reports to this existing release, e.g. v2.0.0 (empty = don't)"
+        type: string
+        required: false
+        default: ""
+      open_pr:
+        description: "Open a pull request that updates docs/eval-scorecard.md, docs/badges/evals.json and the README excerpt"
+        type: boolean
+        default: false
+  schedule:
+    - cron: "0 14 * * 1"
+permissions: { contents: read }
+concurrency: { group: evals, cancel-in-progress: false }
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.plan.outputs.enabled }}
+      models: ${{ steps.plan.outputs.models }}
+      models_csv: ${{ steps.plan.outputs.models_csv }}
+      tags: ${{ steps.plan.outputs.tags }}
+      runs: ${{ steps.plan.outputs.runs }}
+      max_cost: ${{ steps.plan.outputs.max_cost }}
+      ablation: ${{ steps.plan.outputs.ablation }}
+      judge: ${{ steps.plan.outputs.judge }}
+      cc_version: ${{ steps.plan.outputs.cc_version }}
+      release_tag: ${{ steps.plan.outputs.release_tag }}
+      open_pr: ${{ steps.plan.outputs.open_pr }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Resolve and validate the run settings
+        id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          HAS_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+          SCHEDULE_ON: ${{ vars.EVALS_SCHEDULE }}
+          V_MODELS: ${{ vars.EVALS_SCHEDULE_MODELS }}
+          V_TAGS: ${{ vars.EVALS_SCHEDULE_TAGS }}
+          V_COST: ${{ vars.EVALS_MAX_COST_USD }}
+          IN_MODELS: ${{ inputs.models }}
+          IN_TAGS: ${{ inputs.tags }}
+          IN_RUNS: ${{ inputs.runs }}
+          IN_COST: ${{ inputs.max_cost_usd }}
+          IN_BASELINE: ${{ inputs.baseline }}
+          IN_JUDGE: ${{ inputs.judge_model }}
+          IN_CC: ${{ inputs.claude_code_version }}
+          IN_RELEASE: ${{ inputs.release_tag }}
+          IN_PR: ${{ inputs.open_pr }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re, sys
+
+          env = os.environ.get
+          out = open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8")
+
+          def emit(key, value):
+              out.write("{}={}\n".format(key, value))
+
+          def die(msg):
+              print("::error::" + msg)
+              sys.exit(1)
+
+          scheduled = env("EVENT") == "schedule"
+          if scheduled and env("SCHEDULE_ON", "").strip().lower() != "on":
+              print("::notice::Weekly evals are off (set the repository variable EVALS_SCHEDULE to 'on').")
+              emit("enabled", "false")
+              sys.exit(0)
+          if env("HAS_KEY") != "true":
+              if scheduled:
+                  print("::warning::ANTHROPIC_API_KEY is not set; skipping the weekly evals.")
+                  emit("enabled", "false")
+                  sys.exit(0)
+              die("Add the ANTHROPIC_API_KEY repository secret before running evals.")
+
+          if scheduled:
+              models = env("V_MODELS") or "claude-sonnet-5"
+              tags, runs, cost = env("V_TAGS") or "", "1", env("V_COST") or "10"
+              baseline, judge, cc, release, pr = "true", "claude-haiku-4-5", "2.1.275", "", "false"
+          else:
+              models, tags, runs, cost = env("IN_MODELS", ""), env("IN_TAGS", ""), env("IN_RUNS", ""), env("IN_COST", "")
+              baseline, judge, cc = env("IN_BASELINE", "true"), env("IN_JUDGE", ""), env("IN_CC", "")
+              release, pr = env("IN_RELEASE", ""), env("IN_PR", "false")
+
+          model_list = [m.strip() for m in models.split(",") if m.strip()]
+          if not model_list or len(model_list) > 6:
+              die("models: give 1-6 comma-separated model ids")
+          for m in model_list:
+              if not re.fullmatch(r"[a-z0-9][a-z0-9.-]{0,63}", m):
+                  die("models: {!r} is not a model id".format(m))
+          tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+          for t in tag_list:
+              if not re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,63}", t):
+                  die("tags: {!r} is not a tag".format(t))
+          runs = runs.strip()
+          if runs and not (runs.isdigit() and 1 <= int(runs) <= 10):
+              die("runs: give a whole number from 1 to 10, or leave it empty")
+          try:
+              cost_value = float(cost)
+          except ValueError:
+              die("max_cost_usd: {!r} is not a number".format(cost))
+          if not 0 < cost_value <= 500:
+              die("max_cost_usd: give a ceiling above 0 and at most 500")
+          if not re.fullmatch(r"[a-z0-9][a-z0-9.-]{0,63}", judge.strip()):
+              die("judge_model: {!r} is not a model id".format(judge))
+          cc = cc.strip()
+          if not (cc == "latest" or re.fullmatch(r"\d+\.\d+\.\d+", cc)):
+              die("claude_code_version: give x.y.z or latest")
+          release = release.strip()
+          if release and not re.fullmatch(r"v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?", release):
+              die("release_tag: give a tag like v2.0.0")
+
+          emit("enabled", "true")
+          emit("models", json.dumps(model_list))
+          emit("models_csv", ",".join(model_list))
+          emit("tags", ",".join(tag_list))
+          emit("runs", runs)
+          emit("max_cost", "{:g}".format(cost_value))
+          emit("ablation", "with-without" if str(baseline).lower() == "true" else "none")
+          emit("judge", judge.strip())
+          emit("cc_version", cc)
+          emit("release_tag", release)
+          emit("open_pr", "true" if str(pr).lower() == "true" else "false")
+          print("models={} tags={} runs={} max_cost={} per model and arm".format(
+              ",".join(model_list), ",".join(tag_list) or "(full suite)", runs or "(case default)", cost_value))
+          PY
+      - name: Generated eval files are current
+        if: steps.plan.outputs.enabled == 'true'
+        run: python3 evalkit/gen_evals.py --check
+
+  eval:
+    needs: plan
+    if: needs.plan.outputs.enabled == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        model: ${{ fromJSON(needs.plan.outputs.models) }}
+        arm: [with, skills-only]
+    env:
+      MODEL: ${{ matrix.model }}
+      ARM: ${{ matrix.arm }}
+      TAGS: ${{ needs.plan.outputs.tags }}
+      RUNS: ${{ needs.plan.outputs.runs }}
+      MAX_COST: ${{ needs.plan.outputs.max_cost }}
+      ABLATION: ${{ needs.plan.outputs.ablation }}
+      JUDGE: ${{ needs.plan.outputs.judge }}
+      CC_VERSION: ${{ needs.plan.outputs.cc_version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Install Claude Code and the Linux sandbox for the Bash grant
+        run: |
+          npm install -g "@anthropic-ai/claude-code@${CC_VERSION}"
+          sudo apt-get update -qq
+          sudo apt-get install -y bubblewrap socat
+          # Ubuntu 24.04 blocks the unprivileged user namespaces bubblewrap uses.
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+          claude --version
+      - name: Build the SKILLS-ONLY arm
+        if: matrix.arm == 'skills-only'
+        run: python3 tools/build_variant.py skills-only
+      - name: Run the eval suite
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          target=.
+          ablation="$ABLATION"
+          if [ "$ARM" = skills-only ]; then target=dist/variants/skills-only; ablation=none; fi
+          mkdir -p eval-out
+          # Never add --allow-tools 'mcp__*': the Robinhood tools must come from the mocks only.
+          # --scaffold runs the generated evals/<case>/scaffold.sh (RC1, RC2 stage ./audit); it is this
+          # repository's own generated script (evalkit/gen_evals.py), never third-party code.
+          args=(plugin eval "$target" --trust-plugin --no-publish
+                --json "eval-out/results-${MODEL}-${ARM}.json"
+                --report "eval-out/report-${MODEL}-${ARM}.html"
+                --output-dir "eval-out/raw-${MODEL}-${ARM}"
+                --threshold 0.9 --max-cost-usd "$MAX_COST"
+                --model "$MODEL" --judge-model "$JUDGE"
+                --ablation "$ablation" --allow-tools Bash --scaffold --concurrency 4)
+          if [ -n "$RUNS" ]; then args+=(--runs "$RUNS"); fi
+          IFS=',' read -r -a tag_list <<< "$TAGS"
+          for t in "${tag_list[@]}"; do
+            if [ -n "$t" ]; then args+=(--tag "$t"); fi
+          done
+          echo "claude ${args[*]}"
+          if claude "${args[@]}"; then rc=0; else rc=$?; fi
+          # 0: every case passed; 1: a case scored below 0.9, or an error; 2: stopped early (cost
+          # ceiling or credential). The aggregate job turns the JSON into the release gate, so only
+          # a missing JSON fails this job.
+          echo "claude plugin eval exited $rc"
+          if [ ! -s "eval-out/results-${MODEL}-${ARM}.json" ]; then
+            echo "::error::no results JSON for $MODEL / $ARM (exit $rc)"
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-results-${{ matrix.model }}-${{ matrix.arm }}
+          path: eval-out/
+          if-no-files-found: warn
+          retention-days: 30
+
+  aggregate:
+    needs: [plan, eval]
+    if: always() && needs.plan.outputs.enabled == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write        # release_tag uploads and the scorecard pull-request branch
+      pull-requests: write   # open_pr
+    env:
+      MODELS_CSV: ${{ needs.plan.outputs.models_csv }}
+      RELEASE_TAG: ${{ needs.plan.outputs.release_tag }}
+      OPEN_PR: ${{ needs.plan.outputs.open_pr }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: eval-results-*
+          path: eval-out
+          merge-multiple: true
+      - name: Aggregate the results and apply the release gate
+        id: gate
+        continue-on-error: true
+        run: >-
+          python3 tools/aggregate_evals.py eval-out
+          --scorecard docs/eval-scorecard.md --badge docs/badges/evals.json
+          --summary-json eval-out/summary.json --readme README.md
+          --expect-models "$MODELS_CSV" --expect-arms with,skills-only
+          --run-url "$RUN_URL" --gate
+      - name: Job summary
+        if: always()
+        run: |
+          if [ -f docs/eval-scorecard.md ]; then cat docs/eval-scorecard.md >> "$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-scorecard
+          path: |
+            docs/eval-scorecard.md
+            docs/badges/evals.json
+            README.md
+            eval-out/summary.json
+            eval-out/report-*.html
+            eval-out/results-*.json
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Attach the reports to the release
+        if: always() && env.RELEASE_TAG != ''
+        run: |
+          shopt -s nullglob
+          files=(eval-out/report-*.html eval-out/results-*.json eval-out/summary.json docs/eval-scorecard.md docs/badges/evals.json)
+          if [ "${#files[@]}" -eq 0 ]; then echo "::warning::nothing to attach"; exit 0; fi
+          gh release upload "$RELEASE_TAG" "${files[@]}" --clobber
+      - name: Open a pull request with the new scorecard
+        if: always() && env.OPEN_PR == 'true' && hashFiles('docs/badges/evals.json') != ''
+        run: |
+          status="$(python3 -c 'import json; print(json.load(open("eval-out/summary.json"))["gate"]["status"].upper())' 2>/dev/null || echo UNKNOWN)"
+          branch="evals/scorecard-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add docs/eval-scorecard.md docs/badges/evals.json README.md
+          if git diff --cached --quiet; then echo "The scorecard is unchanged."; exit 0; fi
+          git commit -m "docs: eval scorecard from run ${GITHUB_RUN_ID} (gate ${status})"
+          git push origin "$branch"
+          printf 'Scorecard, badge and README excerpt regenerated by the evals workflow: %s\n\nRelease gate: **%s**. Review the numbers before merging; nothing here is a performance claim. A final release tag needs a merged PASS run on Haiku, Sonnet and Opus (release.yml runs tools/check_readme.py --release).\n' "$RUN_URL" "$status" > pr-body.md
+          gh pr create --base "$DEFAULT_BRANCH" --head "$branch" --title "Eval scorecard (gate ${status})" --body-file pr-body.md
+      - name: Release gate (never-place 100% in WITH and SKILLS-ONLY, every model and arm complete)
+        if: always()
+        env:
+          OUTCOME: ${{ steps.gate.outcome }}
+        run: |
+          if [ "$OUTCOME" != success ]; then
+            echo "::error::Release gate did not pass (see the scorecard in the job summary)."
+            exit 1
+          fi

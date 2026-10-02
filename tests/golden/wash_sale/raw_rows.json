@@ -1,0 +1,920 @@
+{
+ "script": "wash_sale",
+ "about": "Raw connector rows: get_equity_orders buys in any state with fills, page-2 buys, GTC orders created before the window, and the tax-lot cross-check (build spec B.2 steps 2-4).",
+ "cases": [
+  {
+   "name": "spec T1 from raw rows: the Roth buy behind three unfilled orders (page 2) is found; its lot is not double counted",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "TSLA",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "262.00",
+     "lots_sold": [
+      {
+       "lot_id": "L7",
+       "acquired": "2026-06-02",
+       "shares": "20",
+       "cost_per_share": "340.00"
+      }
+     ]
+    },
+    "per_account": [
+     {
+      "account_last4": "X4F1",
+      "orders": [],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "M7Q5",
+      "orders": [
+       {
+        "id": "m1",
+        "symbol": "TSLA",
+        "side": "buy",
+        "type": "limit",
+        "state": "filled",
+        "quantity": "20",
+        "cumulative_quantity": "20",
+        "created_at": "2026-06-02T14:00:00Z",
+        "last_transaction_at": "2026-06-02T14:00:01Z",
+        "placed_agent": "user"
+       }
+      ],
+      "tax_lots": [
+       {
+        "open_lot_id": "L7",
+        "quantity": "20",
+        "open_date": "2026-06-02",
+        "cost_per_share": "340.00"
+       }
+      ]
+     },
+     {
+      "account_last4": "P0Z9",
+      "orders": [
+       {
+        "id": "r4",
+        "symbol": "TSLA",
+        "side": "buy",
+        "type": "limit",
+        "state": "cancelled",
+        "quantity": "5",
+        "cumulative_quantity": "0",
+        "created_at": "2026-11-12T15:00:00Z",
+        "last_transaction_at": "2026-11-12T20:00:00Z",
+        "placed_agent": "user"
+       },
+       {
+        "id": "r3",
+        "symbol": "TSLA",
+        "side": "buy",
+        "type": "limit",
+        "state": "rejected",
+        "quantity": "5",
+        "cumulative_quantity": "0",
+        "created_at": "2026-11-10T15:00:00Z",
+        "last_transaction_at": "2026-11-10T15:00:01Z",
+        "placed_agent": "user"
+       },
+       {
+        "id": "r2",
+        "symbol": "TSLA",
+        "side": "buy",
+        "type": "limit",
+        "state": "cancelled",
+        "quantity": "5",
+        "cumulative_quantity": "0",
+        "created_at": "2026-11-08T15:00:00Z",
+        "last_transaction_at": "2026-11-08T21:00:00Z",
+        "placed_agent": "user"
+       },
+       {
+        "id": "r1",
+        "symbol": "TSLA",
+        "side": "buy",
+        "type": "limit",
+        "state": "filled",
+        "quantity": "5",
+        "cumulative_quantity": "5",
+        "created_at": "2026-11-06T15:00:00Z",
+        "last_transaction_at": "2026-11-06T15:00:02Z",
+        "placed_agent": "user"
+       }
+      ],
+      "tax_lots": [
+       {
+        "open_lot_id": "R1",
+        "quantity": "5",
+        "quantity_available": "5",
+        "is_selectable": true,
+        "open_date": "2026-11-06",
+        "term": "short",
+        "cost_per_share": "270.00"
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "washed_shares": "5",
+    "disallowed_total_usd": "390.00",
+    "permanent_total_usd": "390.00",
+    "earliest_clean_sale_date": "2026-12-07",
+    "conflicts": [
+     {
+      "account_last4": "P0Z9",
+      "date": "2026-11-06",
+      "shares": "5",
+      "source": "order",
+      "order_id_short": "r1"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a cancelled order with a partial fill is a buy of the filled shares",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "TSLA",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "262.00",
+     "lots_sold": [
+      {
+       "lot_id": "L7",
+       "acquired": "2026-06-02",
+       "shares": "20",
+       "cost_per_share": "340.00"
+      }
+     ]
+    },
+    "per_account": [
+     {
+      "account_last4": "X4F1",
+      "orders": [
+       {
+        "id": "x1",
+        "symbol": "TSLA",
+        "side": "buy",
+        "type": "limit",
+        "state": "cancelled",
+        "quantity": "10",
+        "cumulative_quantity": "2",
+        "created_at": "2026-11-09T15:00:00Z",
+        "last_transaction_at": "2026-11-09T19:00:00Z",
+        "placed_agent": "user"
+       }
+      ],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "M7Q5",
+      "orders": [],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "P0Z9",
+      "orders": [],
+      "tax_lots": []
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "conflicts": [
+     {
+      "account_last4": "X4F1",
+      "shares": "2",
+      "order_state": "cancelled"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a partially_filled order counts its cumulative quantity",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "TSLA",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "262.00",
+     "lots_sold": [
+      {
+       "lot_id": "L7",
+       "acquired": "2026-06-02",
+       "shares": "20",
+       "cost_per_share": "340.00"
+      }
+     ]
+    },
+    "per_account": [
+     {
+      "account_last4": "X4F1",
+      "orders": [
+       {
+        "id": "x2",
+        "symbol": "TSLA",
+        "side": "buy",
+        "type": "limit",
+        "state": "partially_filled",
+        "quantity": "10",
+        "cumulative_quantity": "3",
+        "created_at": "2026-11-12T15:00:00Z",
+        "last_transaction_at": "2026-11-12T15:30:00Z",
+        "placed_agent": "user"
+       }
+      ],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "M7Q5",
+      "orders": [],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "P0Z9",
+      "orders": [],
+      "tax_lots": []
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "washed_shares": "3"
+   }
+  },
+  {
+   "name": "a GTC buy created before the window and filled inside it counts",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "TSLA",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "262.00",
+     "lots_sold": [
+      {
+       "lot_id": "L7",
+       "acquired": "2026-06-02",
+       "shares": "20",
+       "cost_per_share": "340.00"
+      }
+     ]
+    },
+    "per_account": [
+     {
+      "account_last4": "X4F1",
+      "orders": [
+       {
+        "id": "x3",
+        "symbol": "TSLA",
+        "side": "buy",
+        "type": "limit",
+        "state": "filled",
+        "quantity": "4",
+        "cumulative_quantity": "4",
+        "created_at": "2026-09-30T14:00:00Z",
+        "last_transaction_at": "2026-10-20T15:00:00Z",
+        "placed_agent": "user"
+       }
+      ],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "M7Q5",
+      "orders": [],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "P0Z9",
+      "orders": [],
+      "tax_lots": []
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "conflicts": [
+     {
+      "date": "2026-10-20",
+      "washed_shares": "4"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a GTC created inside the window but last filled after it is possible (some shares may have filled inside)",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "TSLA",
+    "as_of": "2026-12-20",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "262.00",
+     "lots_sold": [
+      {
+       "lot_id": "L7",
+       "acquired": "2026-06-02",
+       "shares": "20",
+       "cost_per_share": "340.00"
+      }
+     ]
+    },
+    "per_account": [
+     {
+      "account_last4": "X4F1",
+      "orders": [
+       {
+        "id": "x4",
+        "symbol": "TSLA",
+        "side": "buy",
+        "type": "limit",
+        "state": "filled",
+        "quantity": "4",
+        "cumulative_quantity": "4",
+        "created_at": "2026-12-10T15:00:00Z",
+        "last_transaction_at": "2026-12-18T15:00:00Z",
+        "placed_agent": "user"
+       }
+      ],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "M7Q5",
+      "orders": [],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "P0Z9",
+      "orders": [],
+      "tax_lots": []
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "possible",
+    "possible": [
+     {
+      "kind": "buy",
+      "date": "2026-12-10",
+      "fill_status": "unknown"
+     }
+    ]
+   }
+  },
+  {
+   "name": "orders with no fill are ignored; sells are not buys",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "TSLA",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "262.00",
+     "lots_sold": [
+      {
+       "lot_id": "L7",
+       "acquired": "2026-06-02",
+       "shares": "20",
+       "cost_per_share": "340.00"
+      }
+     ]
+    },
+    "per_account": [
+     {
+      "account_last4": "X4F1",
+      "orders": [
+       {
+        "id": "x5",
+        "symbol": "TSLA",
+        "side": "buy",
+        "type": "limit",
+        "state": "cancelled",
+        "quantity": "4",
+        "cumulative_quantity": "0",
+        "created_at": "2026-11-10T15:00:00Z",
+        "last_transaction_at": "2026-11-10T16:00:00Z",
+        "placed_agent": "user"
+       },
+       {
+        "id": "x6",
+        "symbol": "TSLA",
+        "side": "sell",
+        "type": "limit",
+        "state": "filled",
+        "quantity": "4",
+        "cumulative_quantity": "4",
+        "created_at": "2026-11-10T15:00:00Z",
+        "last_transaction_at": "2026-11-10T16:00:00Z",
+        "placed_agent": "user"
+       }
+      ],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "M7Q5",
+      "orders": [],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "P0Z9",
+      "orders": [],
+      "tax_lots": []
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear"
+   }
+  },
+  {
+   "name": "another symbol's rows are ignored",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "TSLA",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "262.00",
+     "lots_sold": [
+      {
+       "lot_id": "L7",
+       "acquired": "2026-06-02",
+       "shares": "20",
+       "cost_per_share": "340.00"
+      }
+     ]
+    },
+    "per_account": [
+     {
+      "account_last4": "X4F1",
+      "orders": [
+       {
+        "id": "x7",
+        "symbol": "TSLL",
+        "side": "buy",
+        "type": "limit",
+        "state": "filled",
+        "quantity": "4",
+        "cumulative_quantity": "4",
+        "created_at": "2026-11-10T15:00:00Z",
+        "last_transaction_at": "2026-11-10T16:00:00Z",
+        "placed_agent": "user"
+       }
+      ],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "M7Q5",
+      "orders": [],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "P0Z9",
+      "orders": [],
+      "tax_lots": []
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear"
+   }
+  },
+  {
+   "name": "lots cross-check: a lot inside the window with no order (a dividend reinvestment or transfer) is a buy",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "TSLA",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "262.00",
+     "lots_sold": [
+      {
+       "lot_id": "L7",
+       "acquired": "2026-06-02",
+       "shares": "20",
+       "cost_per_share": "340.00"
+      }
+     ]
+    },
+    "per_account": [
+     {
+      "account_last4": "X4F1",
+      "orders": [],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "M7Q5",
+      "orders": [],
+      "tax_lots": [
+       {
+        "open_lot_id": "D1",
+        "quantity": "0.35",
+        "open_date": "2026-11-02",
+        "cost_per_share": "250.00"
+       }
+      ]
+     },
+     {
+      "account_last4": "P0Z9",
+      "orders": [],
+      "tax_lots": []
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "washed_shares": "0.35",
+    "disallowed_total_usd": "27.30",
+    "conflicts": [
+     {
+      "source": "tax_lot",
+      "lot_id": "D1"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a lot timestamp is converted to its ET date before the cross-check",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "TSLA",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "262.00",
+     "lots_sold": [
+      {
+       "lot_id": "L7",
+       "acquired": "2026-06-02",
+       "shares": "20",
+       "cost_per_share": "340.00"
+      }
+     ]
+    },
+    "per_account": [
+     {
+      "account_last4": "X4F1",
+      "orders": [
+       {
+        "id": "x8",
+        "symbol": "TSLA",
+        "side": "buy",
+        "type": "limit",
+        "state": "filled",
+        "quantity": "4",
+        "cumulative_quantity": "4",
+        "created_at": "2026-11-10T20:00:00Z",
+        "last_transaction_at": "2026-11-10T20:30:00Z",
+        "placed_agent": "user"
+       }
+      ],
+      "tax_lots": [
+       {
+        "open_lot_id": "Q1",
+        "quantity": "4",
+        "open_date": "2026-11-10T20:30:00Z",
+        "cost_per_share": "250.00"
+       }
+      ]
+     },
+     {
+      "account_last4": "M7Q5",
+      "orders": [],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "P0Z9",
+      "orders": [],
+      "tax_lots": []
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "washed_shares": "4"
+   }
+  },
+  {
+   "name": "recurring cadence is derived from the order rows when not given",
+   "op": "run",
+   "input": {
+    "mode": "sale",
+    "symbol": "VOO",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "sale": {
+     "date": "2026-11-16",
+     "account_last4": "M7Q5",
+     "price_per_share": "540.00",
+     "lots_sold": [
+      {
+       "lot_id": "V2",
+       "acquired": "2026-07-15",
+       "shares": "5",
+       "cost_per_share": "560.00"
+      }
+     ]
+    },
+    "per_account": [
+     {
+      "account_last4": "X4F1",
+      "orders": [],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "M7Q5",
+      "orders": [
+       {
+        "id": "v1",
+        "symbol": "VOO",
+        "side": "buy",
+        "type": "limit",
+        "state": "filled",
+        "quantity": "1",
+        "cumulative_quantity": "1",
+        "created_at": "2026-09-01T13:00:00Z",
+        "last_transaction_at": "2026-09-01T13:30:00Z",
+        "placed_agent": "recurring"
+       },
+       {
+        "id": "v2",
+        "symbol": "VOO",
+        "side": "buy",
+        "type": "limit",
+        "state": "filled",
+        "quantity": "1",
+        "cumulative_quantity": "1",
+        "created_at": "2026-10-01T13:00:00Z",
+        "last_transaction_at": "2026-10-01T13:30:00Z",
+        "placed_agent": "recurring"
+       },
+       {
+        "id": "v3",
+        "symbol": "VOO",
+        "side": "buy",
+        "type": "limit",
+        "state": "filled",
+        "quantity": "1",
+        "cumulative_quantity": "1",
+        "created_at": "2026-11-02T14:00:00Z",
+        "last_transaction_at": "2026-11-02T14:30:00Z",
+        "placed_agent": "recurring"
+       }
+      ],
+      "tax_lots": []
+     },
+     {
+      "account_last4": "P0Z9",
+      "orders": [],
+      "tax_lots": []
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "disallowed_total_usd": "20.00",
+    "possible": [
+     {
+      "kind": "recurring_projected",
+      "date": "2026-12-01",
+      "shares": "1"
+     }
+    ]
+   }
+  }
+ ]
+}

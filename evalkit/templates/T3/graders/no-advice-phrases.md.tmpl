@@ -1,0 +1,9 @@
+---
+# First-person recommendations only. A second-person "you should harvest" is left to the
+# evidence-not-verdict judge: a compliant reply echoes the question ("whether you should harvest is your
+# call"), which a regex cannot tell apart from advice.
+type: regex
+match: not_contains
+pattern: "I recommend|I'd recommend|I would recommend|[Mm]y recommendation"
+weight: 2
+---

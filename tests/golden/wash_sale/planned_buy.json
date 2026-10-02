@@ -1,0 +1,1338 @@
+{
+ "script": "wash_sale",
+ "about": "Planned-buy mode: a buy of a stock sold at a loss in the last 30 days (build spec B.7.9; overrides O1 on trade-history rows).",
+ "cases": [
+  {
+   "name": "spec: AMD loss sale 2026-11-03 -> clean buy 2026-12-04; buying 3 washes 3 x $41.20 = $123.60",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "as_of": "2026-11-16",
+    "symbol": "AMD",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "planned_buy": {
+     "date": "2026-11-16",
+     "account_last4": "X4F1",
+     "shares": "3"
+    },
+    "realized_losses": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-03",
+      "shares": "10",
+      "realized_usd": "-412.00",
+      "classification": "equity_sale"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "window": {
+     "start": "2026-10-17",
+     "end": "2026-12-16"
+    },
+    "washed_shares": "3",
+    "disallowed_total_usd": "123.60",
+    "permanent_total_usd": "0.00",
+    "earliest_clean_buy_date": "2026-12-04",
+    "do_not_buy_until": "2026-12-04",
+    "first_trading_day_after": "2026-12-04",
+    "rewash_until": "2026-12-16",
+    "conflicts": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-03",
+      "washed_shares": "3",
+      "disallowed_loss_usd": "123.60",
+      "permanent": false,
+      "direction": "after",
+      "buy_account_last4": "X4F1"
+     }
+    ],
+    "status_line": "CONFLICT: Dollars at stake: $123.60 of AMD loss deferred into replacement basis if bought before 2026-12-04"
+   }
+  },
+  {
+   "name": "the same buy in the Roth is permanent",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "as_of": "2026-11-16",
+    "symbol": "AMD",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "planned_buy": {
+     "date": "2026-11-16",
+     "account_last4": "P0Z9",
+     "shares": "3"
+    },
+    "realized_losses": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-03",
+      "shares": "10",
+      "realized_usd": "-412.00",
+      "classification": "equity_sale"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "permanent_total_usd": "123.60",
+    "conflicts": [
+     {
+      "permanent": true
+     }
+    ]
+   }
+  },
+  {
+   "name": "buying more shares than were sold washes only the loss shares",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "as_of": "2026-11-16",
+    "symbol": "AMD",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "planned_buy": {
+     "date": "2026-11-16",
+     "account_last4": "X4F1",
+     "shares": "25"
+    },
+    "realized_losses": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-03",
+      "shares": "10",
+      "realized_usd": "-412.00",
+      "classification": "equity_sale"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "washed_shares": "10",
+    "disallowed_total_usd": "412.00"
+   }
+  },
+  {
+   "name": "a loss sale 31 days before the buy is outside the window -> clear",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "as_of": "2026-12-04",
+    "symbol": "AMD",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "planned_buy": {
+     "date": "2026-12-04",
+     "account_last4": "X4F1",
+     "shares": "3"
+    },
+    "realized_losses": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-03",
+      "shares": "10",
+      "realized_usd": "-412.00",
+      "classification": "equity_sale"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear",
+    "washed_shares": "0",
+    "earliest_clean_buy_date": null
+   }
+  },
+  {
+   "name": "a loss sale exactly 30 days before the buy is inside -> conflict",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "as_of": "2026-12-03",
+    "symbol": "AMD",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "planned_buy": {
+     "date": "2026-12-03",
+     "account_last4": "X4F1",
+     "shares": "3"
+    },
+    "realized_losses": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-03",
+      "shares": "10",
+      "realized_usd": "-412.00",
+      "classification": "equity_sale"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "earliest_clean_buy_date": "2026-12-04"
+   }
+  },
+  {
+   "name": "overrides O1: an unclassified trade-history loss row makes the result unknown, never clear",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "as_of": "2026-11-16",
+    "symbol": "AMD",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "planned_buy": {
+     "date": "2026-11-16",
+     "account_last4": "X4F1",
+     "shares": "3"
+    },
+    "realized_losses": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-09",
+      "shares": "1",
+      "realized_usd": "-75.00",
+      "classification": "unclassified"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "unknown",
+    "unknowns": [
+     {
+      "kind": "unclassified_loss",
+      "date": "2026-11-09"
+     }
+    ],
+    "earliest_clean_buy_date": null,
+    "earliest_clean_buy_date_if_unclassified_are_sales": "2026-12-10"
+   }
+  },
+  {
+   "name": "a row with no classification is treated as unclassified",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "as_of": "2026-11-16",
+    "symbol": "AMD",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "planned_buy": {
+     "date": "2026-11-16",
+     "account_last4": "X4F1",
+     "shares": "3"
+    },
+    "realized_losses": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-03",
+      "shares": "10",
+      "realized_usd": "-412.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "unknown"
+   }
+  },
+  {
+   "name": "a loss sold inside the Roth cannot be washed",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "as_of": "2026-11-16",
+    "symbol": "AMD",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "planned_buy": {
+     "date": "2026-11-16",
+     "account_last4": "X4F1",
+     "shares": "3"
+    },
+    "realized_losses": [
+     {
+      "account_last4": "P0Z9",
+      "date": "2026-11-03",
+      "shares": "10",
+      "realized_usd": "-412.00",
+      "classification": "equity_sale"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear"
+   }
+  },
+  {
+   "name": "a gain row is not a loss sale",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "as_of": "2026-11-16",
+    "symbol": "AMD",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "planned_buy": {
+     "date": "2026-11-16",
+     "account_last4": "X4F1",
+     "shares": "3"
+    },
+    "realized_losses": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-03",
+      "shares": "10",
+      "realized_usd": "150.00",
+      "classification": "equity_sale"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear"
+   }
+  },
+  {
+   "name": "raw rows: pnl rows are classified against filled equity sells; the option close under AMD stays unknown",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "symbol": "AMD",
+    "as_of": "2026-11-16",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "planned_buy": {
+     "date": "2026-11-16",
+     "account_last4": "X4F1",
+     "shares": "3"
+    },
+    "per_account": [
+     {
+      "account_last4": "M7Q5",
+      "orders": [
+       {
+        "id": "am1",
+        "symbol": "AMD",
+        "side": "sell",
+        "state": "filled",
+        "quantity": "10",
+        "cumulative_quantity": "10",
+        "average_price": "120.20",
+        "created_at": "2026-11-03T15:12:01Z",
+        "last_transaction_at": "2026-11-03T15:12:09Z",
+        "placed_agent": "user"
+       }
+      ],
+      "pnl_rows": [
+       {
+        "timestamp": "2026-11-03T15:12:09Z",
+        "symbol": "AMD",
+        "side": "sell",
+        "quantity": "10",
+        "price": "120.20",
+        "realized_gain": "-412.00"
+       },
+       {
+        "timestamp": "2026-11-09T18:40:00Z",
+        "symbol": "AMD",
+        "side": "sell",
+        "quantity": "1",
+        "price": "3.30",
+        "realized_gain": "-75.00"
+       },
+       {
+        "timestamp": "2026-11-09T19:00:00Z",
+        "symbol": "",
+        "side": "",
+        "quantity": "1",
+        "price": "0.40",
+        "realized_gain": "-5.00"
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "disallowed_total_usd": "123.60",
+    "unknowns": [
+     {
+      "kind": "unclassified_loss",
+      "date": "2026-11-09",
+      "realized_usd": "-75.00"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a dollar-amount buy is sized from the price as an estimate",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "as_of": "2026-11-16",
+    "symbol": "AMD",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "planned_buy": {
+     "date": "2026-11-16",
+     "account_last4": "X4F1",
+     "dollar_amount": "322.80",
+     "price_per_share": "161.40"
+    },
+    "realized_losses": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-03",
+      "shares": "10",
+      "realized_usd": "-412.00",
+      "classification": "equity_sale"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "buy_shares": "2",
+    "washed_shares": "2",
+    "disallowed_total_usd": "82.40"
+   }
+  },
+  {
+   "name": "December look-back: a Roth buy on 12-05 with a harvest declared for 12-31 washes it PERMANENTLY -> conflict $390.00, never clear",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "TSLA",
+    "as_of": "2026-12-05",
+    "planned_buy": {
+     "date": "2026-12-05",
+     "account_last4": "P0Z9",
+     "shares": "5"
+    },
+    "planned_sales": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-12-31",
+      "price_per_share": "262.00",
+      "lots": [
+       {
+        "lot_id": "L7",
+        "shares": "20",
+        "cost_per_share": "340.00",
+        "acquired": "2026-06-02"
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "disallowed_total_usd": "390.00",
+    "permanent_total_usd": "390.00",
+    "washed_shares": "5",
+    "conflicts": [
+     {
+      "source": "planned_sale",
+      "date": "2026-12-31",
+      "direction": "before",
+      "washed_shares": "5",
+      "permanent": true
+     }
+    ],
+    "earliest_clean_buy_date": "2027-01-31",
+    "latest_clean_buy_date": null,
+    "sell_clean_from": "2027-01-05",
+    "rewash_until": "2027-01-04",
+    "status_line": "CONFLICT: Dollars at stake: $390.00 of TSLA loss permanently disallowed if you make this buy and sell as planned on 2026-12-31 (clean: buy from 2027-01-31, or sell from 2027-01-05)"
+   }
+  },
+  {
+   "name": "a declared harvest more than 31 days out still leaves a clean buy date before it",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "TSLA",
+    "as_of": "2026-11-10",
+    "planned_buy": {
+     "date": "2026-12-05",
+     "account_last4": "X4F1",
+     "shares": "5"
+    },
+    "planned_sales": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-12-31",
+      "price_per_share": "262.00",
+      "lots": [
+       {
+        "lot_id": "L7",
+        "shares": "20",
+        "cost_per_share": "340.00",
+        "acquired": "2026-06-02"
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "permanent_total_usd": "0.00",
+    "latest_clean_buy_date": "2026-11-30",
+    "status_line": "CONFLICT: Dollars at stake: $390.00 of TSLA loss deferred into replacement basis if you make this buy and sell as planned on 2026-12-31 (clean: buy by 2026-11-30, or buy from 2027-01-31, or sell from 2027-01-05)"
+   }
+  },
+  {
+   "name": "no declared harvest, but an open taxable lot below cost at the buy's price -> possible with the dollars, never clear",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "TSLA",
+    "as_of": "2026-12-05",
+    "planned_buy": {
+     "date": "2026-12-05",
+     "account_last4": "P0Z9",
+     "shares": "5",
+     "price_per_share": "262.00"
+    },
+    "per_account": [
+     {
+      "account_last4": "M7Q5",
+      "tax_lots": [
+       {
+        "open_lot_id": "L7",
+        "open_date": "2026-06-02",
+        "quantity": "20",
+        "cost_per_share": "340.00"
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "possible",
+    "possible_max_additional_disallowed_usd": "390.00",
+    "possible": [
+     {
+      "kind": "open_lot_below_cost",
+      "lot_id": "L7",
+      "account_last4": "M7Q5",
+      "up_to_disallowed_usd": "390.00",
+      "permanent": true
+     }
+    ],
+    "status_line": "POSSIBLE: Dollars at stake: up to $390.00 of TSLA loss if you sell your below-cost TSLA lots at a loss through 2027-01-04: this buy would wash it, permanently (an IRA or Roth buy)"
+   }
+  },
+  {
+   "name": "an open lot with basis pending, or with no price given, is possible (never clear)",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "TSLA",
+    "as_of": "2026-12-05",
+    "planned_buy": {
+     "date": "2026-12-05",
+     "account_last4": "X4F1",
+     "shares": "5"
+    },
+    "per_account": [
+     {
+      "account_last4": "M7Q5",
+      "tax_lots": [
+       {
+        "open_lot_id": "L7",
+        "open_date": "2026-06-02",
+        "quantity": "20",
+        "cost_per_share": "340.00"
+       },
+       {
+        "open_lot_id": "L9",
+        "open_date": "2026-11-02",
+        "quantity": "3"
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "possible",
+    "possible": [
+     {
+      "kind": "open_lot_unpriced",
+      "lot_id": "L7"
+     },
+     {
+      "kind": "open_lot_basis_pending",
+      "lot_id": "L9"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a lot above cost and a lot in the Roth are not harvest exposure -> clear, and the line still names the look-ahead",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "TSLA",
+    "as_of": "2026-12-05",
+    "planned_buy": {
+     "date": "2026-12-05",
+     "account_last4": "P0Z9",
+     "shares": "5",
+     "price_per_share": "262.00"
+    },
+    "per_account": [
+     {
+      "account_last4": "M7Q5",
+      "tax_lots": [
+       {
+        "open_lot_id": "G1",
+        "open_date": "2025-06-02",
+        "quantity": "20",
+        "cost_per_share": "200.00"
+       }
+      ]
+     },
+     {
+      "account_last4": "P0Z9",
+      "tax_lots": [
+       {
+        "open_lot_id": "R1",
+        "open_date": "2026-06-02",
+        "quantity": "20",
+        "cost_per_share": "340.00"
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear",
+    "status_line": "CLEAR: Dollars at stake: none found for TSLA in any of your Robinhood accounts; no loss sale of TSLA in the 30 days before, but a loss sale through 2027-01-04 would be washed by this buy, permanently (an IRA or Roth buy)"
+   }
+  },
+  {
+   "name": "a declared harvest in the Roth cannot be washed; one outside the window is ignored",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "TSLA",
+    "as_of": "2026-12-05",
+    "planned_buy": {
+     "date": "2026-12-05",
+     "account_last4": "X4F1",
+     "shares": "5"
+    },
+    "planned_sales": [
+     {
+      "account_last4": "P0Z9",
+      "date": "2026-12-31",
+      "shares": "20",
+      "loss_per_share": "78.00"
+     },
+     {
+      "account_last4": "M7Q5",
+      "date": "2027-02-01",
+      "shares": "20",
+      "loss_per_share": "78.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear",
+    "conflicts": []
+   }
+  },
+  {
+   "name": "a declared harvest before the buy is washed like a past loss sale (direction after)",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "TSLA",
+    "as_of": "2026-12-01",
+    "planned_buy": {
+     "date": "2026-12-20",
+     "account_last4": "X4F1",
+     "shares": "5"
+    },
+    "planned_sales": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-12-10",
+      "shares": "20",
+      "cost_per_share": "340.00",
+      "price_per_share": "262.00"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "disallowed_total_usd": "390.00",
+    "conflicts": [
+     {
+      "direction": "after",
+      "source": "planned_sale"
+     }
+    ],
+    "earliest_clean_buy_date": "2027-01-10"
+   }
+  },
+  {
+   "name": "overnight loss sale (Tue 21:00 ET, trade date may be Wed): a Roth buy 31 ET days later straddles the window edge -> unknown, never clear",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "AMD",
+    "as_of": "2026-11-20",
+    "planned_buy": {
+     "date": "2026-12-11",
+     "account_last4": "P0Z9",
+     "shares": "3"
+    },
+    "pnl_rows": [
+     {
+      "account_last4": "M7Q5",
+      "timestamp": "2026-11-11T02:00:00Z",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "10",
+      "price": "120.20",
+      "realized_gain": "-412.00"
+     }
+    ],
+    "orders": [
+     {
+      "account_last4": "M7Q5",
+      "id": "o1",
+      "symbol": "AMD",
+      "side": "sell",
+      "state": "filled",
+      "cumulative_quantity": "10",
+      "average_price": "120.20",
+      "created_at": "2026-11-11T01:59:00Z",
+      "last_transaction_at": "2026-11-11T02:00:00Z"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "unknown",
+    "unknowns": [
+     {
+      "kind": "ambiguous_trade_date",
+      "date": "2026-11-10",
+      "alt_date": "2026-11-11"
+     }
+    ],
+    "earliest_clean_buy_date_if_unclassified_are_sales": "2026-12-12"
+   }
+  },
+  {
+   "name": "overnight loss sale: a buy 30 ET days later is inside; the clean date uses the later trade date (12-12, not 12-11)",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "AMD",
+    "as_of": "2026-11-20",
+    "planned_buy": {
+     "date": "2026-12-10",
+     "account_last4": "P0Z9",
+     "shares": "3"
+    },
+    "pnl_rows": [
+     {
+      "account_last4": "M7Q5",
+      "timestamp": "2026-11-11T02:00:00Z",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "10",
+      "price": "120.20",
+      "realized_gain": "-412.00"
+     }
+    ],
+    "orders": [
+     {
+      "account_last4": "M7Q5",
+      "id": "o1",
+      "symbol": "AMD",
+      "side": "sell",
+      "state": "filled",
+      "cumulative_quantity": "10",
+      "average_price": "120.20",
+      "created_at": "2026-11-11T01:59:00Z",
+      "last_transaction_at": "2026-11-11T02:00:00Z"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "disallowed_total_usd": "123.60",
+    "permanent_total_usd": "123.60",
+    "earliest_clean_buy_date": "2026-12-12",
+    "do_not_buy_until": "2026-12-12"
+   }
+  },
+  {
+   "name": "a planned call purchase after a loss sale: an option to acquire may wash it -> possible with the dollars, never clear",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "TSLA",
+    "as_of": "2026-11-25",
+    "planned_buy": {
+     "date": "2026-11-25",
+     "account_last4": "X4F1",
+     "instrument": "option",
+     "contracts": "2",
+     "structure": "long_call",
+     "description": "TSLA 2026-12-18 300C"
+    },
+    "realized_losses": [
+     {
+      "account_last4": "X4F1",
+      "date": "2026-11-16",
+      "shares": "20",
+      "realized_usd": "-1560.00",
+      "classification": "equity_sale"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "possible",
+    "conflicts": [],
+    "buy_contracts": "2",
+    "possible_max_additional_disallowed_usd": "1560.00",
+    "possible": [
+     {
+      "kind": "option_to_acquire",
+      "date": "2026-11-16",
+      "up_to_disallowed_usd": "1560.00",
+      "direction": "after"
+     }
+    ],
+    "status_line": "POSSIBLE: Dollars at stake: up to $1,560.00 of TSLA loss if this option counts as acquiring TSLA (an option to acquire can wash a loss sale; not evaluated)"
+   }
+  },
+  {
+   "name": "a planned short put with no loss sale and no lot below cost is clear",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "TSLA",
+    "as_of": "2026-11-25",
+    "planned_buy": {
+     "date": "2026-11-25",
+     "account_last4": "X4F1",
+     "instrument": "option",
+     "contracts": "1",
+     "structure": "short_put"
+    }
+   },
+   "expected": {
+    "ok": true,
+    "status": "clear",
+    "possible": []
+   }
+  },
+  {
+   "name": "planned_buy mode reads option_buys as other buys that may already have washed the loss (not silently dropped)",
+   "op": "run",
+   "input": {
+    "mode": "planned_buy",
+    "accounts": [
+     {
+      "last4": "X4F1",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Agentic"
+     },
+     {
+      "last4": "M7Q5",
+      "type": "taxable",
+      "read_status": "complete",
+      "label": "Individual"
+     },
+     {
+      "last4": "P0Z9",
+      "type": "retirement",
+      "read_status": "complete",
+      "label": "Roth IRA"
+     }
+    ],
+    "symbol": "AMD",
+    "as_of": "2026-11-16",
+    "planned_buy": {
+     "date": "2026-11-16",
+     "account_last4": "X4F1",
+     "shares": "3"
+    },
+    "realized_losses": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-03",
+      "shares": "10",
+      "realized_usd": "-412.00",
+      "classification": "equity_sale"
+     }
+    ],
+    "option_buys": [
+     {
+      "account_last4": "M7Q5",
+      "date": "2026-11-05",
+      "contracts": "1",
+      "description": "AMD 2026-12-18 120C"
+     }
+    ]
+   },
+   "expected": {
+    "ok": true,
+    "status": "conflict",
+    "other_buys_near_loss_sales": [
+     {
+      "kind": "option",
+      "date": "2026-11-05",
+      "near_loss_sale": "2026-11-03"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,10 @@
+{
+  "session_id": "test-session-1",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "mcp__robinhood__get_equity_quotes",
+  "tool_input": {
+    "symbols": [
+      "AAPL"
+    ]
+  }
+}

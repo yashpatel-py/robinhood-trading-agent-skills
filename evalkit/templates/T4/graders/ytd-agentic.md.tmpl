@@ -1,0 +1,8 @@
+---
+# Each account's year to date, by its rhs value.
+type: tool_used
+tool: "{{tool:get_pnl_trade_history}}"
+input_match: "^(?=[\\s\\S]*\"account_number\"\\s*:\\s*\"{{rhs:agentic}}\")(?=[\\s\\S]*\"span\"\\s*:\\s*\"ytd\")"
+min: 1
+weight: 1
+---

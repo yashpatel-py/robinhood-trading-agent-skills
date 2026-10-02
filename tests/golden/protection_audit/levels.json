@@ -1,0 +1,555 @@
+{
+ "script": "protection_audit",
+ "about": "protection_audit.py levels: rule arithmetic, ask for UNSET/ask, and checks on the user's own levels. It never proposes a level.",
+ "cases": [
+  {
+   "name": "spec B.3 example: pct:8 / r:2",
+   "input": {
+    "rules": {
+     "stop_rule": "pct:8",
+     "target_rule": "r:2"
+    },
+    "symbol_overrides": {
+     "NVDA": {
+      "stop": "195.00"
+     }
+    },
+    "prices": {
+     "AMD": "161.40"
+    },
+    "atr": {
+     "AMD": "6.20"
+    }
+   },
+   "expect": {
+    "ok": true,
+    "levels": {
+     "AMD": {
+      "stop": "148.49",
+      "target": "187.22",
+      "provenance": "user_config",
+      "rule": "pct:8 / r:2",
+      "stop_pct_below": 8.0,
+      "target_pct_above": 16.0
+     },
+     "NVDA": {
+      "stop": "195.00",
+      "target": null,
+      "missing": [
+       "price"
+      ]
+     }
+    },
+    "missing_inputs": {
+     "NVDA": [
+      "price"
+     ]
+    }
+   }
+  },
+  {
+   "name": "UNSET rules ask; nothing is computed",
+   "input": {
+    "rules": {
+     "stop_rule": "UNSET",
+     "target_rule": "UNSET"
+    },
+    "prices": {
+     "AMD": "161.40",
+     "KO": "72.05"
+    }
+   },
+   "expect": {
+    "ok": true,
+    "ask": [
+     "stop",
+     "target"
+    ],
+    "levels": {
+     "AMD": {
+      "stop": null,
+      "target": null,
+      "provenance": null,
+      "ask": [
+       "stop",
+       "target"
+      ]
+     },
+     "KO": {
+      "stop": null,
+      "target": null,
+      "ask": [
+       "stop",
+       "target"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "'ask' rules ask",
+   "input": {
+    "rules": {
+     "stop_rule": "ask",
+     "target_rule": "ask"
+    },
+    "prices": {
+     "AMD": "161.40"
+    }
+   },
+   "expect": {
+    "ok": true,
+    "ask": [
+     "stop",
+     "target"
+    ],
+    "levels": {
+     "AMD": {
+      "stop": null,
+      "target": null
+     }
+    }
+   }
+  },
+  {
+   "name": "no rules at all: the stop is asked for; an unrequested target is not computed or asked",
+   "input": {
+    "prices": {
+     "AMD": "161.40"
+    }
+   },
+   "expect": {
+    "ok": true,
+    "ask": [
+     "stop"
+    ],
+    "levels": {
+     "AMD": {
+      "stop": null,
+      "target": null,
+      "ask": [
+       "stop"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "stop rule only (crypto style): no target",
+   "input": {
+    "rules": {
+     "stop_rule": "pct:10"
+    },
+    "prices": {
+     "ETH": "3000.00"
+    }
+   },
+   "expect": {
+    "ok": true,
+    "levels": {
+     "ETH": {
+      "stop": "2700.00",
+      "target": null,
+      "rule": "pct:10"
+     }
+    }
+   }
+  },
+  {
+   "name": "target_rule none",
+   "input": {
+    "rules": {
+     "stop_rule": "pct:10",
+     "target_rule": "none"
+    },
+    "prices": {
+     "KO": "72.05"
+    }
+   },
+   "expect": {
+    "ok": true,
+    "levels": {
+     "KO": {
+      "stop": "64.85",
+      "target": null,
+      "rule": "pct:10 / no target"
+     }
+    }
+   }
+  },
+  {
+   "name": "atr rule: computed, missing ATR, wrong ATR period",
+   "input": {
+    "rules": {
+     "stop_rule": "atr:2.0:14",
+     "target_rule": "pct:15"
+    },
+    "prices": {
+     "NVDA": "228.10",
+     "AMD": "161.40",
+     "KO": "72.05"
+    },
+    "atr": {
+     "NVDA": {
+      "value": "9.80",
+      "period": 14
+     },
+     "KO": {
+      "value": "1.10",
+      "period": 20
+     }
+    }
+   },
+   "expect": {
+    "ok": true,
+    "missing_inputs": {
+     "AMD": [
+      "atr(14)"
+     ]
+    },
+    "levels": {
+     "NVDA": {
+      "stop": "208.50",
+      "target": "262.32",
+      "rule": "atr:2.0:14 / pct:15",
+      "stop_pct_below": 8.6
+     },
+     "AMD": {
+      "stop": null,
+      "target": "185.61",
+      "missing": [
+       "atr(14)"
+      ]
+     },
+     "KO": {
+      "stop": null,
+      "target": "82.86",
+      "errors": [
+       {
+        "code": "ATR_PERIOD_MISMATCH",
+        "msg": "the rule uses ATR(14) but ATR(20) was given"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "atr rule with a non-default period: ATR(p) as {value, period} computes; a bare number is refused, never read as ATR(p); a string period is accepted",
+   "input": {
+    "rules": {
+     "stop_rule": "atr:2.0:20"
+    },
+    "prices": {
+     "NVDA": "228.10",
+     "AMD": "161.40",
+     "KO": "72.05",
+     "PLTR": "31.20"
+    },
+    "atr": {
+     "NVDA": {
+      "value": "9.80",
+      "period": 20
+     },
+     "AMD": "6.20",
+     "KO": {
+      "value": "1.10",
+      "period": "20"
+     }
+    }
+   },
+   "expect": {
+    "ok": true,
+    "missing_inputs": {
+     "PLTR": [
+      "atr(20)"
+     ]
+    },
+    "levels": {
+     "NVDA": {
+      "stop": "208.50",
+      "target": null,
+      "rule": "atr:2.0:20",
+      "provenance": "user_config"
+     },
+     "AMD": {
+      "stop": null,
+      "target": null,
+      "errors": [
+       {
+        "code": "ATR_PERIOD_UNSTATED"
+       }
+      ]
+     },
+     "KO": {
+      "stop": "69.85",
+      "target": null,
+      "rule": "atr:2.0:20"
+     },
+     "PLTR": {
+      "stop": null,
+      "target": null,
+      "missing": [
+       "atr(20)"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "r:k target waits for the user's stop",
+   "input": {
+    "rules": {
+     "stop_rule": "ask",
+     "target_rule": "r:2"
+    },
+    "prices": {
+     "AMD": "161.40"
+    }
+   },
+   "expect": {
+    "ok": true,
+    "ask": [
+     "stop",
+     "target"
+    ],
+    "levels": {
+     "AMD": {
+      "stop": null,
+      "target": null,
+      "warnings": [
+       {
+        "code": "TARGET_NEEDS_STOP"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "the user's own levels are checked, never changed",
+   "input": {
+    "rules": {
+     "stop_rule": "ask",
+     "target_rule": "ask"
+    },
+    "override_source": "user",
+    "symbol_overrides": {
+     "AMD": {
+      "stop": "142",
+      "target": "180"
+     },
+     "PLTR": {
+      "stop": "31.15",
+      "target": "31.25"
+     },
+     "KO": {
+      "stop": "75",
+      "target": "70"
+     }
+    },
+    "prices": {
+     "AMD": "161.40",
+     "PLTR": "31.20",
+     "KO": "72.05"
+    }
+   },
+   "expect": {
+    "ok": true,
+    "levels": {
+     "AMD": {
+      "stop": "142",
+      "target": "180",
+      "provenance": "user",
+      "rule": "your stop / your target"
+     },
+     "PLTR": {
+      "stop": "31.15",
+      "target": "31.25",
+      "warnings": [
+       {
+        "code": "OCO_MIN_DISTANCE",
+        "msg": "the stop is less than 0.25% from the market; an OCO would be rejected"
+       },
+       {
+        "code": "OCO_MIN_DISTANCE",
+        "msg": "the target is less than 0.25% from the market; an OCO would be rejected"
+       }
+      ]
+     },
+     "KO": {
+      "errors": [
+       {
+        "code": "STOP_NOT_BELOW_PRICE"
+       },
+       {
+        "code": "TARGET_NOT_ABOVE_PRICE"
+       },
+       {
+        "code": "TARGET_NOT_ABOVE_STOP"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "per-field provenance when a rule and the user's number mix",
+   "input": {
+    "rules": {
+     "stop_rule": "pct:8",
+     "target_rule": "r:2"
+    },
+    "override_source": "user",
+    "symbol_overrides": {
+     "AMD": {
+      "target": "200",
+      "stop": "UNSET"
+     }
+    },
+    "prices": {
+     "AMD": "161.40"
+    }
+   },
+   "expect": {
+    "ok": true,
+    "levels": {
+     "AMD": {
+      "stop": "148.49",
+      "target": "200",
+      "provenance": "user",
+      "provenance_by_field": {
+       "stop": "user_config",
+       "target": "user"
+      },
+      "rule": "pct:8 / your target"
+     }
+    }
+   }
+  },
+  {
+   "name": "sub-dollar prices keep 4 decimals",
+   "input": {
+    "rules": {
+     "stop_rule": "pct:7"
+    },
+    "prices": {
+     "XYZ": "0.8765"
+    }
+   },
+   "expect": {
+    "ok": true,
+    "levels": {
+     "XYZ": {
+      "stop": "0.8151"
+     }
+    }
+   }
+  },
+  {
+   "name": "a $0.10 gap and 0.25% distance are flagged for OCOs",
+   "input": {
+    "rules": {
+     "stop_rule": "pct:0.1",
+     "target_rule": "pct:0.2"
+    },
+    "prices": {
+     "PLTR": "31.20"
+    }
+   },
+   "expect": {
+    "ok": true,
+    "levels": {
+     "PLTR": {
+      "stop": "31.17",
+      "target": "31.26",
+      "warnings": [
+       {
+        "code": "OCO_MIN_DISTANCE"
+       },
+       {
+        "code": "OCO_MIN_DISTANCE"
+       },
+       {
+        "code": "OCO_MIN_GAP"
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "name": "error: pct must be under 100",
+   "input": {
+    "rules": {
+     "stop_rule": "pct:100"
+    },
+    "prices": {
+     "A": "1"
+    }
+   },
+   "expect": {
+    "ok": false,
+    "error_code": "BAD_RULE"
+   }
+  },
+  {
+   "name": "error: r is not a stop rule",
+   "input": {
+    "rules": {
+     "stop_rule": "r:2"
+    },
+    "prices": {
+     "A": "1"
+    }
+   },
+   "expect": {
+    "ok": false,
+    "error_code": "BAD_RULE"
+   }
+  },
+  {
+   "name": "error: atr is not a target rule",
+   "input": {
+    "rules": {
+     "stop_rule": "pct:8",
+     "target_rule": "atr:1:14"
+    },
+    "prices": {
+     "A": "1"
+    }
+   },
+   "expect": {
+    "ok": false,
+    "error_code": "BAD_RULE"
+   }
+  },
+  {
+   "name": "error: prices are required",
+   "input": {
+    "rules": {
+     "stop_rule": "pct:8"
+    }
+   },
+   "expect": {
+    "ok": false,
+    "error_code": "MISSING_FIELD"
+   }
+  },
+  {
+   "name": "error: prices must be positive",
+   "input": {
+    "rules": {
+     "stop_rule": "pct:8"
+    },
+    "prices": {
+     "A": "-1"
+    }
+   },
+   "expect": {
+    "ok": false,
+    "error_code": "NOT_POSITIVE"
+   }
+  }
+ ]
+}

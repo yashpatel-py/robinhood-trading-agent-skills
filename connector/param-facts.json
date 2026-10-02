@@ -1,0 +1,1489 @@
+{
+  "$comment": "Claims the kit makes about connector parameters, each tied to the schema text that backs it. tools/check_drift.py (check 4) fails when a claim disappears from its file (claim_regex) or when the snapshot text at schema_path no longer contains every must_contain string. Optional fields: param and enum give the machine-readable allowed values (used for eval expect guards); note says what the fact protects. file may be a list, in which case the claim must appear in at least one of them.",
+  "version": 1,
+  "snapshot_captured_at": "2026-09-21",
+  "facts": [
+    {
+      "id": "fields-pnl-history-span",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)\\{account_number,\\s+span,\\s+trades\\[\\]\\{timestamp,\\s+symbol,\\s+side,\\s+quantity,\\s+price,\\s+realized_gain\\}",
+      "tool": "get_pnl_trade_history",
+      "schema_path": "inputSchema.properties.span.description",
+      "must_contain": [
+        "week (default), month, 3month, ytd, or all",
+        "no arbitrary date range"
+      ],
+      "param": "span",
+      "enum": [
+        "week",
+        "month",
+        "3month",
+        "ytd",
+        "all"
+      ],
+      "note": "Trade history echoes span; only these presets exist (no custom dates). Eval guard: span is required and one of the enum."
+    },
+    {
+      "id": "fields-pnl-history-cursor",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)empty\\s+`next_cursor`\\s+=\\s+last\\s+page",
+      "tool": "get_pnl_trade_history",
+      "schema_path": "inputSchema.properties.cursor.description",
+      "must_contain": [
+        "next_cursor"
+      ],
+      "note": "Trade history pages by next_cursor until it comes back empty."
+    },
+    {
+      "id": "fields-pnl-history-asset-mix",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)Option\\s+closes\\s+appear\\s+under\\s+the\\s+\\*underlying\\*\\s+ticker",
+      "tool": "get_pnl_trade_history",
+      "schema_path": "description",
+      "must_contain": [
+        "equities, options, crypto, prediction markets"
+      ],
+      "note": "Rows mix equities, options, crypto and prediction markets with no asset-class field, so a row is never assumed to be a share sale."
+    },
+    {
+      "id": "fields-rhs-distinct",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)keep\\s+the\\s+per-tool\\s+rule\\s+from\\s+the\\s+schemas",
+      "tool": "get_crypto_positions",
+      "schema_path": "inputSchema.properties.rhs_account_number.description",
+      "must_contain": [
+        "distinct from the alphanumeric 'account_number'"
+      ],
+      "note": "The two account-number fields matched on the capture accounts, so the per-tool key/value rule comes from the schemas."
+    },
+    {
+      "id": "fields-closes-error",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)`closes_error`\\s+replaces\\s+`close`\\s+above\\s+20\\s+symbols",
+      "tool": "get_equity_quotes",
+      "schema_path": "inputSchema.properties.symbols.description",
+      "must_contain": [
+        "Above 20 symbols",
+        "closes_error"
+      ],
+      "note": "Official closes only come back for 20 or fewer symbols."
+    },
+    {
+      "id": "fields-option-quote-close",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)close\\{instrument_id,\\s+symbol,\\s+date,\\s+price,\\s+interpolated,\\s+source\\}",
+      "tool": "get_option_quotes",
+      "schema_path": "inputSchema.properties.instrument_ids.description",
+      "must_contain": [
+        "Above 20",
+        "closes_error"
+      ],
+      "note": "Option quote batches of 20 or fewer keep the prior-session close."
+    },
+    {
+      "id": "fields-mark-read-ids",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)`mark_alerts_read`\\s+takes\\s+`alert_log_id`s,\\s+never\\s+`alert_id`s",
+      "tool": "mark_alerts_read",
+      "schema_path": "inputSchema.properties.alert_log_ids.description",
+      "must_contain": [
+        "alert_log_id (never alert_id)",
+        "At most 100 per call"
+      ],
+      "note": "mark_alerts_read takes fired-event ids from get_alert_log, at most 100 per call."
+    },
+    {
+      "id": "fields-alert-log-cursor",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)next_cursor,\\s+total_unread_count",
+      "tool": "get_alert_log",
+      "schema_path": "inputSchema.properties.cursor.description",
+      "must_contain": [
+        "next_cursor",
+        "repeat the same asset_class, since, and limit"
+      ],
+      "note": "Alert-log pages by next_cursor with the same filters on every page."
+    },
+    {
+      "id": "fields-crypto-alert-symbol",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)Crypto\\s+alerts\\s+carry\\s+the\\s+base\\s+code\\s+\\(BTC\\)",
+      "tool": "create_alert",
+      "schema_path": "inputSchema.properties.symbol.description",
+      "must_contain": [
+        "e.g. AAPL or BTC"
+      ],
+      "note": "Crypto alerts use the base asset code, not the pair."
+    },
+    {
+      "id": "fields-placed-agent",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)placed_agent,\\s+created_at,\\s+last_transaction_at",
+      "tool": "get_equity_orders",
+      "schema_path": "inputSchema.properties.placed_agent.description",
+      "must_contain": [
+        "'agentic' (MCP)",
+        "'recurring'",
+        "'drip'"
+      ],
+      "note": "Order source filter used by the report card and the wash sweep (agentic, user, recurring, DRIP)."
+    },
+    {
+      "id": "fields-tax-lot-fields",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)tax_lots\\[\\]\\{open_lot_id,\\s+quantity,\\s+quantity_available",
+      "tool": "review_equity_order",
+      "schema_path": "inputSchema.properties.tax_lots",
+      "must_contain": [
+        "open_lot_id comes from get_equity_tax_lots",
+        "quantity_available",
+        "at most 30 lots"
+      ],
+      "note": "Specified-lot sells pass open_lot_id and quantity (at most quantity_available), 30 lots at most."
+    },
+    {
+      "id": "fields-extended-hours-state",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)late_close_state,\\s+extended_hours_state,\\s+settle_on_open\\s+\\(bool\\)",
+      "tool": "review_option_order",
+      "schema_path": "inputSchema.properties.market_hours.description",
+      "must_contain": [
+        "extended_hours_state='enabled'"
+      ],
+      "note": "Option chains carry extended_hours_state, which gates the CURB sessions."
+    },
+    {
+      "id": "fields-settle-on-open",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)settle_on_open\\s+\\(bool\\)",
+      "tool": "get_option_instruments",
+      "schema_path": "description",
+      "must_contain": [
+        "settle_on_open"
+      ],
+      "note": "AM/PM settlement is read from each chain's settle_on_open."
+    },
+    {
+      "id": "fields-politician-lag",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)always\\s+attribute.{0,120}?\"Tip\\s+Ranks\".{0,120}?lag\\s+up\\s+to\\s+45\\s+days",
+      "tool": "get_politician_trades",
+      "schema_path": "description",
+      "must_contain": [
+        "Tip Ranks",
+        "amounts are ranges",
+        "up to 45 days"
+      ],
+      "note": "Politician trades are attributed to Tip Ranks, shown as ranges, and lag by up to 45 days."
+    },
+    {
+      "id": "fields-sec-index-next",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)filings\\[\\]\\{filing_id,\\s+form_type,\\s+description,\\s+date_filed\\},\\s+next\\}",
+      "tool": "get_sec_filing_index",
+      "schema_path": "inputSchema.properties.cursor.description",
+      "must_contain": [
+        "prior response's next field"
+      ],
+      "note": "The SEC filing index pages by its next field."
+    },
+    {
+      "id": "fields-instruments-next",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)strike_price,\\s+type,\\s+state,\\s+tradability,\\s+trade_value_multiplier,\\s+min_ticks\\{\\.\\.\\.\\}\\}`,\\s+`next`",
+      "tool": "get_option_instruments",
+      "schema_path": "inputSchema.properties.cursor.description",
+      "must_contain": [
+        "next URL"
+      ],
+      "note": "Option instruments page by the cursor inside the next URL."
+    },
+    {
+      "id": "fields-agentic-allowed",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)`agentic_allowed`\\s+\\(bool\\)",
+      "tool": "get_accounts",
+      "schema_path": "description",
+      "must_contain": [
+        "agentic_allowed field",
+        "Exactly one account is tradable by you"
+      ],
+      "note": "Exactly one account has agentic_allowed=true; it is the only tradable account."
+    },
+    {
+      "id": "fields-index-state",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)\\*\\*`state`\\s+was\\s+an\\s+empty\\s+string\\*\\*",
+      "tool": "get_index_quotes",
+      "schema_path": "description",
+      "must_contain": [
+        "state, and timestamps"
+      ],
+      "note": "The schema promises an index state, but the live capture returned it empty; it is never used as a session signal."
+    },
+    {
+      "id": "fields-buying-power",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)buying_power\\{buying_power,\\s+unleveraged_buying_power,\\s+display_currency\\}",
+      "tool": "get_accounts",
+      "schema_path": "description",
+      "must_contain": [
+        "Does NOT return reliable buying power",
+        "route buying-power questions through get_portfolio"
+      ],
+      "note": "Buying power comes from get_portfolio, never get_accounts."
+    },
+    {
+      "id": "fields-order-checks",
+      "file": "connector/FIELDS.md",
+      "claim_regex": "(?is)\\*\\*`order_checks`\\s+is\\s+an\\s+object\\*\\*",
+      "tool": "review_option_order",
+      "schema_path": "description",
+      "must_contain": [
+        "Surface order_checks alerts verbatim"
+      ],
+      "note": "Review alerts (order_checks) are shown verbatim."
+    },
+    {
+      "id": "inv-money-tools",
+      "file": "shared/invariants.md",
+      "claim_regex": "(?is)`place_equity_order`,\\s+`place_option_order`,\\s+`place_crypto_order`,\\s+`place_advanced_order`,\\s+`exercise_option`",
+      "tool": "place_advanced_order",
+      "schema_path": "description",
+      "must_contain": [
+        "with real money"
+      ],
+      "note": "place_advanced_order places a live OCO; it belongs on the never-call list (audit C7)."
+    },
+    {
+      "id": "inv-pnl-history-rhs",
+      "file": "shared/invariants.md",
+      "claim_regex": "(?is)`get_pnl_trade_history`.{0,40}?take\\s+the\\s+key\\s+`account_number`\\s+with\\s+the.{0,40}?rhs",
+      "tool": "get_pnl_trade_history",
+      "schema_path": "inputSchema.properties.account_number.description",
+      "must_contain": [
+        "the rhs_account_number from get_accounts"
+      ],
+      "note": "Trade history takes key account_number with the rhs_account_number value (audit C1)."
+    },
+    {
+      "id": "inv-realized-pnl-rhs",
+      "file": "shared/invariants.md",
+      "claim_regex": "(?is)`get_realized_pnl`.{0,60}?take\\s+the\\s+key\\s+`account_number`\\s+with\\s+the.{0,60}?rhs",
+      "tool": "get_realized_pnl",
+      "schema_path": "inputSchema.properties.account_number.description",
+      "must_contain": [
+        "the rhs_account_number from get_accounts"
+      ],
+      "note": "Realized P&L takes key account_number with the rhs_account_number value (audit M1)."
+    },
+    {
+      "id": "inv-cancel-oco-both-legs",
+      "file": "shared/invariants.md",
+      "claim_regex": "(?is)`cancel_advanced_order`\\s+cancels\\s+both\\s+legs",
+      "tool": "cancel_advanced_order",
+      "schema_path": "description",
+      "must_contain": [
+        "cancelling all of its legs"
+      ],
+      "note": "Cancelling an OCO cancels both legs."
+    },
+    {
+      "id": "inv-cancel-exercise-all",
+      "file": "shared/invariants.md",
+      "claim_regex": "(?is)`cancel_option_exercise`\\s+cancels\\s+every\\s+queued\\s+exercise\\s+for\\s+that\\s+option",
+      "tool": "cancel_option_exercise",
+      "schema_path": "description",
+      "must_contain": [
+        "Cancel all queued exercise requests for an option position"
+      ],
+      "note": "cancel_option_exercise cancels every queued exercise for the option, not one."
+    },
+    {
+      "id": "inv-delete-alert-two-step",
+      "file": "shared/invariants.md",
+      "claim_regex": "(?is)`delete_alert`\\s+is\\s+two-step",
+      "tool": "delete_alert",
+      "schema_path": "description",
+      "must_contain": [
+        "a call without confirm deletes nothing and returns a preview",
+        "There is no undo"
+      ],
+      "note": "delete_alert previews first and deletes only with confirm=true; there is no undo."
+    },
+    {
+      "id": "inv-review-simulates",
+      "file": "shared/invariants.md",
+      "claim_regex": "(?is)`review_\\*`\\s+and\\s+`preview_\\*`\\s+only\\s+simulate",
+      "tool": "review_equity_order",
+      "schema_path": "description",
+      "must_contain": [
+        "Simulate a stock order without placing it"
+      ],
+      "note": "review_equity_order simulates; it places nothing."
+    },
+    {
+      "id": "inv-preview-simulates",
+      "file": "shared/invariants.md",
+      "claim_regex": "(?is)`review_\\*`\\s+and\\s+`preview_\\*`\\s+only\\s+simulate",
+      "tool": "preview_crypto_order",
+      "schema_path": "description",
+      "must_contain": [
+        "Simulate a crypto order without placing it"
+      ],
+      "note": "preview_crypto_order simulates; it places nothing."
+    },
+    {
+      "id": "rules-replace-option-order-absent",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)replace_option_order.{0,60}?not\\s+exposed",
+      "tool": "review_option_order",
+      "schema_path": "description",
+      "must_contain": [
+        "replace_option_order"
+      ],
+      "note": "review_option_order names replace_option_order, which the connector does not expose."
+    },
+    {
+      "id": "rules-never-default-size",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)1\\s+share.{0,20}?\\$100",
+      "tool": "review_equity_order",
+      "schema_path": "description",
+      "must_contain": [
+        "Never substitute a default such as 1 share or $100"
+      ],
+      "note": "Size always comes from the user."
+    },
+    {
+      "id": "rules-marketable-limit",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)marketable\\s+limit.{0,80}?ask.{0,80}?bid",
+      "tool": "review_equity_order",
+      "schema_path": "description",
+      "must_contain": [
+        "prefer a marketable limit at the current ask over a plain market"
+      ],
+      "note": "Immediate fills use a marketable limit rather than a market order."
+    },
+    {
+      "id": "rules-review-rejects-nonagentic",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)reject.{0,20}?non-agentic",
+      "tool": "review_equity_order",
+      "schema_path": "inputSchema.properties.account_number.description",
+      "must_contain": [
+        "non-agentic accounts are rejected"
+      ],
+      "note": "Reviews run only against the Agentic account; there is no broker simulation for other accounts."
+    },
+    {
+      "id": "rules-oco-cancel-uuid",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)advanced-order\\s+UUID.{0,20}?get_advanced_orders",
+      "tool": "cancel_advanced_order",
+      "schema_path": "inputSchema.properties.order_id.description",
+      "must_contain": [
+        "Advanced-order UUID from get_advanced_orders"
+      ],
+      "note": "cancel_advanced_order takes the advanced-order id, not a leg's id."
+    },
+    {
+      "id": "rules-exercise-cancel-queued",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)cancel_option_exercise.{0,160}?queued",
+      "tool": "cancel_option_exercise",
+      "schema_path": "description",
+      "must_contain": [
+        "Only cancels events in state=queued"
+      ],
+      "note": "An exercise can be cancelled only while queued."
+    },
+    {
+      "id": "rules-exercise-irrevocable",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)cancel_option_exercise.{0,160}?queued",
+      "tool": "exercise_option",
+      "schema_path": "description",
+      "must_contain": [
+        "irrevocable once state moves past queued"
+      ],
+      "note": "An exercise is irrevocable once it moves past queued."
+    },
+    {
+      "id": "rules-delete-alert-confirm",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)confirm:\\s+true.{0,20}?first\\s+call",
+      "tool": "delete_alert",
+      "schema_path": "inputSchema.properties.confirm.description",
+      "must_contain": [
+        "Set true only after the user approved the preview",
+        "Omitted or false = preview only"
+      ],
+      "note": "confirm: true is sent only on the second call, after the user approves the preview."
+    },
+    {
+      "id": "rules-pause-alert",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)update_alert\\W{0,4}\\{\\s*enabled:\\s*false\\s*\\}",
+      "tool": "delete_alert",
+      "schema_path": "description",
+      "must_contain": [
+        "update_alert (enabled=false)"
+      ],
+      "note": "Pausing an alert is update_alert with enabled false, not a delete."
+    },
+    {
+      "id": "rules-mark-read-cap",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)alert_log_ids.{0,80}?at\\s+most\\s+100",
+      "tool": "mark_alerts_read",
+      "schema_path": "inputSchema.properties.alert_log_ids.description",
+      "must_contain": [
+        "At most 100 per call"
+      ],
+      "note": "mark_alerts_read takes at most 100 ids per call."
+    },
+    {
+      "id": "rules-mark-read-all-through",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)all_through.{0,40}?every\\s+symbol",
+      "tool": "mark_alerts_read",
+      "schema_path": "inputSchema.properties.all_through.description",
+      "must_contain": [
+        "across all symbols",
+        "Never a future timestamp"
+      ],
+      "note": "all_through clears every symbol up to that instant and never takes a future time."
+    },
+    {
+      "id": "rules-scan-replace",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)updates\\s+are.{0,10}?replace",
+      "tool": "update_scan_filters",
+      "schema_path": "description",
+      "must_contain": [
+        "REPLACE semantics"
+      ],
+      "note": "Scan filter updates replace the whole set."
+    },
+    {
+      "id": "rules-cortex-read-only",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)cortex-managed\\s+scans\\s+are\\s+read-only",
+      "tool": "get_scans",
+      "schema_path": "description",
+      "must_contain": [
+        "Cortex-managed scans are read-only via MCP"
+      ],
+      "note": "Cortex-managed scans cannot be modified through MCP."
+    },
+    {
+      "id": "rules-create-watchlist-direct",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)create_watchlist.{0,40}?directly",
+      "tool": "create_watchlist",
+      "schema_path": "description",
+      "must_contain": [
+        "When the user has already specified the name, call this directly"
+      ],
+      "note": "create_watchlist runs without an extra confirmation when the user named the list."
+    },
+    {
+      "id": "rules-nonzero",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)get_option_positions.{0,20}?nonzero:\\s+true",
+      "tool": "get_option_positions",
+      "schema_path": "inputSchema.properties.nonzero.description",
+      "must_contain": [
+        "True to return only currently-open positions"
+      ],
+      "param": "nonzero",
+      "enum": [
+        true
+      ],
+      "note": "Current option holdings need nonzero: true (audit C3). Eval guard: nonzero is true."
+    },
+    {
+      "id": "rules-page-next-url",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)cursor.{0,20}?query\\s+param.{0,20}?next.{0,20}?URL",
+      "tool": "get_equity_positions",
+      "schema_path": "inputSchema.properties.cursor.description",
+      "must_contain": [
+        "pass the cursor query param from the prior response's next URL"
+      ],
+      "note": "Positions, lots, orders, instruments and currency pairs page by the cursor inside the next URL."
+    },
+    {
+      "id": "rules-page-next-field",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)SEC\\s+filing\\s+index.{0,20}?next.{0,20}?field",
+      "tool": "get_sec_filing_index",
+      "schema_path": "inputSchema.properties.cursor.description",
+      "must_contain": [
+        "pass the value from the prior response's next field"
+      ],
+      "note": "The SEC filing index pages by its next field."
+    },
+    {
+      "id": "rules-page-next-offset",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)SEC\\s+facts\\s+catalog.{0,20}?next_offset",
+      "tool": "get_sec_filing_facts_catalog",
+      "schema_path": "inputSchema.properties.offset.description",
+      "must_contain": [
+        "next_offset"
+      ],
+      "note": "The SEC facts catalog pages by next_offset."
+    },
+    {
+      "id": "rules-page-next-cursor",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)trade\\s+history,\\s+news,\\s+alerts,\\s+alert\\s+log.{0,20}?next_cursor",
+      "tool": "get_equity_news",
+      "schema_path": "inputSchema.properties.cursor.description",
+      "must_contain": [
+        "next_cursor"
+      ],
+      "note": "Trade history, news, alerts and the alert log page by next_cursor."
+    },
+    {
+      "id": "rules-alert-log-cursor-filters",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)alert-log\\s+cursor.{0,40}?same.{0,40}?asset_class.{0,40}?since.{0,40}?limit",
+      "tool": "get_alert_log",
+      "schema_path": "inputSchema.properties.cursor.description",
+      "must_contain": [
+        "repeat the same asset_class, since, and limit"
+      ],
+      "note": "An alert-log cursor is reused with the same filters."
+    },
+    {
+      "id": "rules-equity-states",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)equity\\W+new\\W+queued\\W+confirmed\\W+unconfirmed\\W+partially_filled\\W+filled\\W+cancelled\\W+rejected\\W+failed\\W+voided",
+      "tool": "get_equity_orders",
+      "schema_path": "inputSchema.properties.state.description",
+      "must_contain": [
+        "new, queued, confirmed, unconfirmed, partially_filled, filled, cancelled, rejected, failed, voided"
+      ],
+      "param": "state",
+      "enum": [
+        "new",
+        "queued",
+        "confirmed",
+        "unconfirmed",
+        "partially_filled",
+        "filled",
+        "cancelled",
+        "rejected",
+        "failed",
+        "voided"
+      ],
+      "note": "Equity order state filter takes a single value from this list."
+    },
+    {
+      "id": "rules-option-states",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)options\\W+queued\\W+confirmed\\W+partially_filled\\W+filled\\W+rejected\\W+cancelled\\W+failed\\W+voided\\W+pending_cancelled",
+      "tool": "get_option_orders",
+      "schema_path": "inputSchema.properties.state.description",
+      "must_contain": [
+        "queued, confirmed, partially_filled, filled, rejected, cancelled, failed, voided, pending_cancelled"
+      ],
+      "param": "state",
+      "enum": [
+        "queued",
+        "confirmed",
+        "partially_filled",
+        "filled",
+        "rejected",
+        "cancelled",
+        "failed",
+        "voided",
+        "pending_cancelled"
+      ],
+      "note": "Option order state filter takes a single value from this list."
+    },
+    {
+      "id": "rules-crypto-states",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)canceled.{0,80}?state_group.{0,80}?open.{0,80}?closed",
+      "tool": "get_crypto_orders",
+      "schema_path": "inputSchema.properties",
+      "must_contain": [
+        "filled, canceled, rejected",
+        "'open' or 'closed'"
+      ],
+      "param": "state_group",
+      "enum": [
+        "open",
+        "closed"
+      ],
+      "note": "Crypto spells canceled with one l and offers state_group open or closed."
+    },
+    {
+      "id": "rules-created-at-utc",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)naive.{0,30}?UTC",
+      "tool": "get_equity_orders",
+      "schema_path": "inputSchema.properties.created_at_gte.description",
+      "must_contain": [
+        "naive values are interpreted as UTC"
+      ],
+      "note": "created_at_gte without an offset is read as UTC."
+    },
+    {
+      "id": "rules-my-orders-parallel",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)get_equity_orders.{0,30}?get_option_orders.{0,30}?get_crypto_orders.{0,30}?get_advanced_orders.{0,30}?parallel",
+      "tool": "get_equity_orders",
+      "schema_path": "description",
+      "must_contain": [
+        "call get_equity_orders, get_option_orders, get_crypto_orders, and get_advanced_orders in parallel"
+      ],
+      "note": "A broad orders request reads all four order families so OCO groups are not missed."
+    },
+    {
+      "id": "rules-realized-spans",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)get_realized_pnl.{0,40}?span.{0,20}?day,\\s*week,\\s*month,\\s*3month\\s*\\(default\\),\\s*year,\\s*all",
+      "tool": "get_realized_pnl",
+      "schema_path": "inputSchema.properties.span.description",
+      "must_contain": [
+        "day, week, month, 3month, year, or all",
+        "Defaults to 3month",
+        "Mutually exclusive with start_date/end_date"
+      ],
+      "param": "span",
+      "enum": [
+        "day",
+        "week",
+        "month",
+        "3month",
+        "year",
+        "all"
+      ],
+      "note": "Realized P&L presets; the default is 3month (audit C4)."
+    },
+    {
+      "id": "rules-realized-dates",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)start_date.{0,20}?end_date.{0,20}?not\\s+both",
+      "tool": "get_realized_pnl",
+      "schema_path": "inputSchema.properties.start_date.description",
+      "must_contain": [
+        "Use with end_date instead of span"
+      ],
+      "note": "Custom dates replace span; they never go together."
+    },
+    {
+      "id": "rules-history-spans",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)get_pnl_trade_history.{0,40}?span.{0,20}?week\\s*\\(default\\),\\s*month,\\s*3month,\\s*ytd,\\s*all",
+      "tool": "get_pnl_trade_history",
+      "schema_path": "inputSchema.properties.span.description",
+      "must_contain": [
+        "week (default), month, 3month, ytd, or all"
+      ],
+      "param": "span",
+      "enum": [
+        "week",
+        "month",
+        "3month",
+        "ytd",
+        "all"
+      ],
+      "note": "Trade-history presets; the default is week, unlike realized P&L (audit C4)."
+    },
+    {
+      "id": "rules-history-no-dates",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)no\\s+custom\\s+dates",
+      "tool": "get_pnl_trade_history",
+      "schema_path": "inputSchema.properties.span.description",
+      "must_contain": [
+        "no arbitrary date range"
+      ],
+      "note": "Trade history has presets only."
+    },
+    {
+      "id": "rules-history-prediction-markets",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)prediction-market.{0,60}?asset_classes",
+      "tool": "get_realized_pnl",
+      "schema_path": "inputSchema.properties.asset_classes.description",
+      "must_contain": [
+        "one or more of equity, option, crypto"
+      ],
+      "note": "Realized P&L filters cover equity, option and crypto only, while trade history also includes prediction markets."
+    },
+    {
+      "id": "rules-closes-20-equity",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)20.{0,60}?closes_error",
+      "tool": "get_equity_quotes",
+      "schema_path": "inputSchema.properties.symbols.description",
+      "must_contain": [
+        "Above 20 symbols, quotes still return but closes is omitted with closes_error set"
+      ],
+      "note": "Equity quote batches of 20 or fewer keep the official close."
+    },
+    {
+      "id": "rules-closes-20-option",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)20.{0,60}?closes_error",
+      "tool": "get_option_quotes",
+      "schema_path": "inputSchema.properties.instrument_ids.description",
+      "must_contain": [
+        "Above 20, quotes still return but closes is omitted with closes_error set"
+      ],
+      "note": "Option quote batches of 20 or fewer keep the official close."
+    },
+    {
+      "id": "rules-crypto-previous-close",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)previous\\s+close.{0,40}?midnight",
+      "tool": "get_crypto_quotes",
+      "schema_path": "inputSchema.properties.timezone.description",
+      "must_contain": [
+        "anchored to midnight US Eastern"
+      ],
+      "note": "Crypto's previous close is a midnight boundary, US Eastern by default."
+    },
+    {
+      "id": "rules-crypto-timezone",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)timezone.{0,10}?only\\s+if\\s+the\\s+user\\s+stated\\s+it",
+      "tool": "get_crypto_quotes",
+      "schema_path": "inputSchema.properties.timezone.description",
+      "must_contain": [
+        "Pass ONLY when the user's timezone is known from context"
+      ],
+      "note": "Never guess the timezone parameter."
+    },
+    {
+      "id": "rules-crypto-unhyphenated",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)without\\s+the\\s+hyphen",
+      "tool": "get_crypto_quotes",
+      "schema_path": "inputSchema.properties.symbols.description",
+      "must_contain": [
+        "comes back unhyphenated"
+      ],
+      "note": "Crypto quote symbols come back as BTCUSD, not BTC-USD."
+    },
+    {
+      "id": "rules-indexes-string",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)get_indexes\\W{0,4}\\{\\s*symbols:\\s*\"SPX\"\\s*\\}",
+      "tool": "get_indexes",
+      "schema_path": "inputSchema.properties.symbols",
+      "must_contain": [
+        "Comma-separated list of index symbols",
+        "\"type\":\"string\""
+      ],
+      "note": "get_indexes takes a comma-separated string, not an array."
+    },
+    {
+      "id": "rules-queue-next-open",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)queue\\s+for\\s+the\\s+next\\s+open.{0,120}?rejected",
+      "tool": "review_equity_order",
+      "schema_path": "description",
+      "must_contain": [
+        "placed after hours as regular_hours they queue for the next regular open"
+      ],
+      "note": "After-hours market and stop orders tagged regular_hours queue for the next open."
+    },
+    {
+      "id": "rules-other-session-rejected",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)queue\\s+for\\s+the\\s+next\\s+open.{0,120}?rejected",
+      "tool": "review_equity_order",
+      "schema_path": "inputSchema.properties.market_hours.description",
+      "must_contain": [
+        "rejected if tagged to another session"
+      ],
+      "note": "Market and stop orders tagged to a non-regular session are rejected."
+    },
+    {
+      "id": "rules-fractional-regular",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)fractional\\s+and\\s+dollar-amount\\s+orders\\s+are\\s+regular\\s+hours\\s+only",
+      "tool": "review_equity_order",
+      "schema_path": "description",
+      "must_contain": [
+        "Fractional and dollar-based orders only place in regular_hours"
+      ],
+      "note": "Fractional and dollar-amount orders run in regular hours only."
+    },
+    {
+      "id": "rules-equity-sessions",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)extended_hours.{0,40}?pre-\\s+and\\s+post-market.{0,40}?all_day_hours.{0,40}?24\\s+Hour\\s+Market",
+      "tool": "review_equity_order",
+      "schema_path": "inputSchema.properties.market_hours.description",
+      "must_contain": [
+        "'regular_hours' (default, 9:30–16:00 ET)",
+        "'extended_hours' (pre-/post-market)",
+        "'all_day_hours' (the 24 Hour Market / overnight session)"
+      ],
+      "param": "market_hours",
+      "enum": [
+        "regular_hours",
+        "extended_hours",
+        "all_day_hours"
+      ],
+      "note": "Equity sessions and what each means."
+    },
+    {
+      "id": "rules-oco-regular-only",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)OCO\\s+orders\\s+are\\s+regular\\s+hours\\s+only",
+      "tool": "review_advanced_order",
+      "schema_path": "inputSchema.properties.market_hours.description",
+      "must_contain": [
+        "the only session OCO supports"
+      ],
+      "param": "market_hours",
+      "enum": [
+        "regular_hours"
+      ],
+      "note": "OCO orders run in regular hours only."
+    },
+    {
+      "id": "rules-option-sessions",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)regular_curb_hours.{0,80}?regular_curb_overnight_hours.{0,80}?extended_hours_state='enabled'",
+      "tool": "review_option_order",
+      "schema_path": "inputSchema.properties.market_hours.description",
+      "must_contain": [
+        "'regular_hours' (default), 'regular_curb_hours', or 'regular_curb_overnight_hours'",
+        "CURB requires an index chain with extended_hours_state='enabled'"
+      ],
+      "param": "market_hours",
+      "enum": [
+        "regular_hours",
+        "regular_curb_hours",
+        "regular_curb_overnight_hours"
+      ],
+      "note": "Option sessions; CURB only on index chains with extended hours enabled."
+    },
+    {
+      "id": "rules-curb-place-time",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)CURB.{0,40}?place\\s+time",
+      "tool": "review_option_order",
+      "schema_path": "inputSchema.properties.market_hours.description",
+      "must_contain": [
+        "rejection surfaces at place time"
+      ],
+      "note": "A CURB rejection appears only when placing."
+    },
+    {
+      "id": "rules-search-asset-types",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)search\\W{0,4}\\{\\s*query,\\s*asset_type:\\s*instrument\\|currency_pair\\|market_index\\s*\\}",
+      "tool": "search",
+      "schema_path": "inputSchema.properties.asset_type.description",
+      "must_contain": [
+        "\"instrument\"",
+        "\"currency_pair\"",
+        "\"market_index\""
+      ],
+      "param": "asset_type",
+      "enum": [
+        "instrument",
+        "currency_pair",
+        "market_index"
+      ],
+      "note": "search resolves instruments, crypto pairs or indexes by asset_type."
+    },
+    {
+      "id": "rules-arrays-wrapped",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)form_type:\\s*\\[\\s*\"10-K\"\\s*\\]",
+      "tool": "get_sec_filing_index",
+      "schema_path": "inputSchema.properties.form_type",
+      "must_contain": [
+        "\"array\"",
+        "['10-K']"
+      ],
+      "note": "Array parameters take a list even for one value."
+    },
+    {
+      "id": "rules-integer-exercise-quantity",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)exercise_option\\.quantity.{0,30}?ratio_quantity.{0,30}?integers",
+      "tool": "exercise_option",
+      "schema_path": "inputSchema.properties.quantity",
+      "must_contain": [
+        "\"type\":\"integer\""
+      ],
+      "note": "exercise_option.quantity is an integer, unlike the other quantities."
+    },
+    {
+      "id": "rules-integer-ratio-quantity",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)exercise_option\\.quantity.{0,30}?ratio_quantity.{0,30}?integers",
+      "tool": "review_option_order",
+      "schema_path": "inputSchema.properties.legs.items.properties.ratio_quantity",
+      "must_contain": [
+        "\"type\":\"integer\""
+      ],
+      "note": "ratio_quantity is an integer."
+    },
+    {
+      "id": "rules-numeric-strings",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)numeric\\s+inputs\\s+are\\s+strings",
+      "tool": "review_equity_order",
+      "schema_path": "inputSchema.properties.limit_price",
+      "must_contain": [
+        "\"type\":\"string\""
+      ],
+      "note": "Prices and quantities are decimal strings."
+    },
+    {
+      "id": "rules-retry-same-ref-id",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)retry.{0,20}?same.{0,20}?ref_id",
+      "tool": "place_equity_order",
+      "schema_path": "inputSchema.properties.ref_id.description",
+      "must_contain": [
+        "re-send on retry"
+      ],
+      "note": "A retry after a transport error reuses the same ref_id."
+    },
+    {
+      "id": "rules-earnings-window",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)[−-]31\\s*to\\s*\\+?31\\s*days",
+      "tool": "get_earnings_calendar",
+      "schema_path": "inputSchema.properties.days.description",
+      "must_contain": [
+        "between -31 and 31",
+        "windows wider than 31 days are rejected"
+      ],
+      "note": "The earnings calendar spans at most 31 days either way."
+    },
+    {
+      "id": "rules-earnings-high-cap",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)high_market_cap.{0,40}?\\$1B",
+      "tool": "get_earnings_calendar",
+      "schema_path": "inputSchema.properties.filter.description",
+      "must_contain": [
+        "market cap over $1B"
+      ],
+      "note": "high_market_cap hides names under $1B."
+    },
+    {
+      "id": "rules-earnings-results-8q",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)8\\s+trailing\\s+quarters",
+      "tool": "get_earnings_results",
+      "schema_path": "description",
+      "must_contain": [
+        "Returns the trailing up to 8 quarters"
+      ],
+      "note": "get_earnings_results covers up to 8 trailing quarters."
+    },
+    {
+      "id": "rules-level-2",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)L2.{0,10}?long\\s+calls\\s+and\\s+puts,\\s+covered\\s+calls,\\s+cash-secured\\s+puts",
+      "tool": "get_option_level_upgrade_info",
+      "schema_path": "description",
+      "must_contain": [
+        "option_level_2 enables long calls/puts, covered calls, and cash-secured puts",
+        "option_level_2 has no account-type requirement"
+      ],
+      "note": "Level 2 strategies, available on any account type."
+    },
+    {
+      "id": "rules-level-3",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)L3.{0,160}?requires\\s+margin\\s+or\\s+limited\\s+margin",
+      "tool": "get_option_level_upgrade_info",
+      "schema_path": "description",
+      "must_contain": [
+        "option_level_3 additionally requires a margin or limited-margin account"
+      ],
+      "note": "Level 3 needs a margin or limited-margin account."
+    },
+    {
+      "id": "rules-multileg-cash-retirement",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)not\\s+available\\s+on\\s+cash\\s+or\\s+retirement\\s+accounts",
+      "tool": "review_option_order",
+      "schema_path": "description",
+      "must_contain": [
+        "Multi-leg is not available on cash or retirement accounts through this tool"
+      ],
+      "note": "No multi-leg option orders in cash or retirement accounts."
+    },
+    {
+      "id": "rules-level-0",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)option_level_0.{0,40}?options\\s+review",
+      "tool": "review_option_order",
+      "schema_path": "description",
+      "must_contain": [
+        "If option_level is empty or option_level_0, do NOT call"
+      ],
+      "note": "No options review without an options level."
+    },
+    {
+      "id": "rules-limited-margin-route",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)get_limited_margin_upgrade_info.{0,120}?get_accounts.{0,120}?get_option_level_upgrade_info",
+      "tool": "get_option_level_upgrade_info",
+      "schema_path": "description",
+      "must_contain": [
+        "switch to a margin/limited-margin account via get_limited_margin_upgrade_info, then re-fetch get_accounts"
+      ],
+      "note": "Cash account wanting L3: limited margin first, re-read accounts, then the options upgrade."
+    },
+    {
+      "id": "rules-upgrade-not-when-enough",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)never\\s+call\\s+the\\s+upgrade\\s+tool\\s+when\\s+the\\s+level\\s+is\\s+already\\s+enough",
+      "tool": "get_option_level_upgrade_info",
+      "schema_path": "description",
+      "must_contain": [
+        "Do NOT call when the account already has the required level or higher"
+      ],
+      "note": "No upgrade link when the level already suffices."
+    },
+    {
+      "id": "rules-crypto-onboarding",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)get_crypto_account_onboarding_info.{0,40}?open\\s+a\\s+crypto\\s+account",
+      "tool": "get_crypto_account_onboarding_info",
+      "schema_path": "description",
+      "must_contain": [
+        "open a crypto account"
+      ],
+      "note": "The onboarding tool only returns the link."
+    },
+    {
+      "id": "rules-crypto-stop-names",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)stop_loss.{0,40}?stop_limit.{0,40}?stop\\s+order.{0,40}?stop\\s+limit\\s+order",
+      "tool": "preview_crypto_order",
+      "schema_path": "inputSchema.properties.type.description",
+      "must_contain": [
+        "'stop_loss' is a 'stop order' and 'stop_limit' a 'stop limit order'"
+      ],
+      "note": "Crypto stop types are named by their app names when speaking to the user."
+    },
+    {
+      "id": "rules-crypto-units",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)coin\\s+units.{0,20}?shares",
+      "tool": "preview_crypto_order",
+      "schema_path": "inputSchema.properties.quantity.description",
+      "must_contain": [
+        "NEVER call a crypto quantity 'shares'"
+      ],
+      "note": "Crypto quantities are coins, never shares."
+    },
+    {
+      "id": "rules-crypto-lots-absent",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)get_crypto_tax_lots.{0,20}?specific-lot\\s+crypto\\s+sells",
+      "tool": "preview_crypto_order",
+      "schema_path": "inputSchema.properties.tax_lots.description",
+      "must_contain": [
+        "get_crypto_tax_lots",
+        "at most 50 lots"
+      ],
+      "note": "Crypto tax_lots (at most 50) need get_crypto_tax_lots, which is absent, so specific-lot crypto sells happen in the app."
+    },
+    {
+      "id": "rules-cap-price-book",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)price\\s+book\\W{0,6}4\\b",
+      "tool": "get_equity_price_book",
+      "schema_path": "inputSchema.properties.symbols.description",
+      "must_contain": [
+        "max 4 per call"
+      ],
+      "note": "Price book: at most 4 symbols per call."
+    },
+    {
+      "id": "rules-cap-tradability",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)tradability\\W{0,6}10\\b",
+      "tool": "get_equity_tradability",
+      "schema_path": "inputSchema.properties.symbols.description",
+      "must_contain": [
+        "max 10 per call"
+      ],
+      "note": "Tradability: at most 10 symbols per call."
+    },
+    {
+      "id": "rules-cap-historicals",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)historicals\\W{0,6}10\\b",
+      "tool": "get_equity_historicals",
+      "schema_path": "inputSchema.properties.symbols.description",
+      "must_contain": [
+        "Up to 10 per call"
+      ],
+      "note": "Equity historicals: at most 10 symbols per call."
+    },
+    {
+      "id": "rules-cap-fundamentals",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)fundamentals\\W{0,6}10\\b",
+      "tool": "get_equity_fundamentals",
+      "schema_path": "inputSchema.properties.symbols.description",
+      "must_contain": [
+        "max 10 per call"
+      ],
+      "note": "Fundamentals: at most 10 symbols per call."
+    },
+    {
+      "id": "rules-cap-financials",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)financials\\W{0,6}20\\b",
+      "tool": "get_financials",
+      "schema_path": "inputSchema.properties.symbols.description",
+      "must_contain": [
+        "max 20 per call"
+      ],
+      "note": "Financials: at most 20 symbols per call."
+    },
+    {
+      "id": "rules-cap-analyst-ratings",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)analyst\\s+ratings\\W{0,6}75\\b",
+      "tool": "get_equity_analyst_ratings",
+      "schema_path": "inputSchema.properties.symbols.description",
+      "must_contain": [
+        "max 75 per call"
+      ],
+      "note": "Analyst ratings: at most 75 symbols per call."
+    },
+    {
+      "id": "rules-cap-alert-log",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)alert\\s+log\\W{0,6}100\\b",
+      "tool": "get_alert_log",
+      "schema_path": "inputSchema.properties.limit.description",
+      "must_contain": [
+        "1-100"
+      ],
+      "note": "Alert log: at most 100 events per page."
+    },
+    {
+      "id": "rules-cap-currency-pairs",
+      "file": "shared/connector-rules.md",
+      "claim_regex": "(?is)currency\\s+pairs\\W{0,6}700\\b",
+      "tool": "get_currency_pairs",
+      "schema_path": "inputSchema.properties.limit.description",
+      "must_contain": [
+        "[1, 700]"
+      ],
+      "note": "Currency pairs: at most 700 per page."
+    },
+    {
+      "id": "lint-oco-distance",
+      "file": "shared/scripts/order_lint.py",
+      "claim_regex": "MIN_DISTANCE_0_25PCT",
+      "tool": "review_advanced_order",
+      "schema_path": "description",
+      "must_contain": [
+        "at least 0.25% away from the current market price"
+      ],
+      "note": "Each OCO leg sits at least 0.25% from the market."
+    },
+    {
+      "id": "lint-oco-gap",
+      "file": "shared/scripts/order_lint.py",
+      "claim_regex": "MIN_GAP_0_10",
+      "tool": "review_advanced_order",
+      "schema_path": "description",
+      "must_contain": [
+        "at least $0.10 apart from each other"
+      ],
+      "note": "OCO legs are at least $0.10 apart."
+    },
+    {
+      "id": "lint-oco-side-order",
+      "file": "shared/scripts/order_lint.py",
+      "claim_regex": "SIDE_ORDER",
+      "tool": "review_advanced_order",
+      "schema_path": "description",
+      "must_contain": [
+        "take_profit_limit_price must be ABOVE stop_loss_stop_price"
+      ],
+      "note": "A sell OCO has take-profit above stop."
+    },
+    {
+      "id": "lint-oco-whole-shares",
+      "file": "shared/scripts/order_lint.py",
+      "claim_regex": "WHOLE_SHARES",
+      "tool": "review_advanced_order",
+      "schema_path": "inputSchema.properties.quantity.description",
+      "must_contain": [
+        "Whole-share quantity"
+      ],
+      "note": "OCO quantities are whole shares."
+    },
+    {
+      "id": "lint-equity-lots-30",
+      "file": "shared/scripts/order_lint.py",
+      "claim_regex": "TAX_LOTS_MAX_30",
+      "tool": "review_equity_order",
+      "schema_path": "inputSchema.properties.tax_lots.description",
+      "must_contain": [
+        "at most 30 lots"
+      ],
+      "note": "At most 30 lots per specified-lot sell."
+    },
+    {
+      "id": "lint-equity-dollar-market",
+      "file": "shared/scripts/order_lint.py",
+      "claim_regex": "DOLLAR_REQUIRES_MARKET",
+      "tool": "review_equity_order",
+      "schema_path": "inputSchema.properties.dollar_amount.description",
+      "must_contain": [
+        "Only valid with type=market"
+      ],
+      "note": "dollar_amount only with market orders."
+    },
+    {
+      "id": "lint-crypto-tif-stops",
+      "file": "shared/scripts/order_lint.py",
+      "claim_regex": "TIF_STOP_VALUES",
+      "tool": "preview_crypto_order",
+      "schema_path": "inputSchema.properties.time_in_force.description",
+      "must_contain": [
+        "'gtc' (good for 90 days), 'gfd' (good for day), 'gfw' (good for 7 days), or 'gfm' (good for 30 days)"
+      ],
+      "param": "time_in_force",
+      "enum": [
+        "gtc",
+        "gfd",
+        "gfw",
+        "gfm"
+      ],
+      "note": "Crypto stop orders take gtc, gfd, gfw or gfm."
+    },
+    {
+      "id": "lint-crypto-tif-market-limit",
+      "file": "shared/scripts/order_lint.py",
+      "claim_regex": "TIF_MARKET_LIMIT_GTC_ONLY",
+      "tool": "preview_crypto_order",
+      "schema_path": "inputSchema.properties.time_in_force.description",
+      "must_contain": [
+        "market and limit: 'gtc' (good till canceled) only"
+      ],
+      "note": "Crypto market and limit orders are gtc only."
+    },
+    {
+      "id": "lint-crypto-ioc",
+      "file": "shared/scripts/order_lint.py",
+      "claim_regex": "IOC_NEVER",
+      "tool": "preview_crypto_order",
+      "schema_path": "inputSchema.properties.time_in_force.description",
+      "must_contain": [
+        "'ioc' is NEVER supported for crypto orders"
+      ],
+      "note": "No ioc for crypto."
+    },
+    {
+      "id": "lint-crypto-tif-defaults",
+      "file": "shared/scripts/order_lint.py",
+      "claim_regex": "STOP_TIF_DEFAULTS_TO_DAY",
+      "tool": "preview_crypto_order",
+      "schema_path": "inputSchema.properties.time_in_force.description",
+      "must_contain": [
+        "defaults to gtc for market and limit, and gfd for stop_loss and stop_limit"
+      ],
+      "note": "A crypto stop without a time in force lasts one day."
+    },
+    {
+      "id": "lint-crypto-sell-collar",
+      "file": "shared/scripts/order_lint.py",
+      "claim_regex": "SELL_COLLAR_5PCT",
+      "tool": "preview_crypto_order",
+      "schema_path": "inputSchema.properties.dollar_amount.description",
+      "must_contain": [
+        "worst case up to ~5% less"
+      ],
+      "note": "A dollar-sized crypto market sell can come back up to about 5% light."
+    },
+    {
+      "id": "lint-option-legs",
+      "file": "shared/scripts/order_lint.py",
+      "claim_regex": "LEGS_1_TO_4",
+      "tool": "review_option_order",
+      "schema_path": "inputSchema.properties.legs.description",
+      "must_contain": [
+        "1 to 4 legs"
+      ],
+      "note": "Option orders carry 1 to 4 legs."
+    },
+    {
+      "id": "lint-option-multileg-limit",
+      "file": "shared/scripts/order_lint.py",
+      "claim_regex": "MULTI_LEG_LIMIT_ONLY",
+      "tool": "review_option_order",
+      "schema_path": "inputSchema.properties.type.description",
+      "must_contain": [
+        "Only 'limit' is available with 2 or more legs"
+      ],
+      "note": "Multi-leg option orders are limit only."
+    },
+    {
+      "id": "lint-option-direction",
+      "file": "shared/scripts/order_lint.py",
+      "claim_regex": "DIRECTION_REQUIRED_MULTI",
+      "tool": "review_option_order",
+      "schema_path": "inputSchema.properties.direction.description",
+      "must_contain": [
+        "Required with 2 or more legs"
+      ],
+      "param": "direction",
+      "enum": [
+        "debit",
+        "credit"
+      ],
+      "note": "Multi-leg orders state debit or credit."
+    },
+    {
+      "id": "lint-option-ratio",
+      "file": "shared/scripts/order_lint.py",
+      "claim_regex": "RATIO_NOT_LOWEST_TERMS",
+      "tool": "review_option_order",
+      "schema_path": "inputSchema.properties.legs.items.properties.ratio_quantity.description",
+      "must_contain": [
+        "lowest terms (1:2, not 2:4)"
+      ],
+      "note": "Leg ratios are in lowest terms."
+    },
+    {
+      "id": "lint-option-stop-market",
+      "file": "shared/scripts/order_lint.py",
+      "claim_regex": "STOP_MARKET_SELL_TO_CLOSE_ONLY",
+      "tool": "review_option_order",
+      "schema_path": "description",
+      "must_contain": [
+        "stop_market is sell-to-close only with stop_price below the current ask"
+      ],
+      "note": "Option stop_market is sell-to-close only."
+    },
+    {
+      "id": "lint-option-curb",
+      "file": "shared/scripts/order_lint.py",
+      "claim_regex": "CURB_REQUIRES_INDEX_ENABLED",
+      "tool": "review_option_order",
+      "schema_path": "inputSchema.properties.market_hours.description",
+      "must_contain": [
+        "CURB requires an index chain with extended_hours_state='enabled'"
+      ],
+      "note": "CURB needs an index chain with extended hours enabled."
+    },
+    {
+      "id": "alert-interval-secs",
+      "file": "shared/scripts/alert_spec.py",
+      "claim_regex": "(?s)^(?=.*\\b300\\b)(?=.*\\b600\\b)(?=.*\\b3600\\b)(?=.*\\b86400\\b)(?=.*\\b604800\\b)(?=.*\\b2592000\\b)",
+      "tool": "create_alert",
+      "schema_path": "inputSchema.properties.indicator.properties.interval_secs.description",
+      "must_contain": [
+        "one of 300 (5m), 600 (10m), 3600 (1h), 86400 (1d), 604800 (1w), or 2592000 (30d)"
+      ],
+      "param": "indicator.interval_secs",
+      "enum": [
+        300,
+        600,
+        3600,
+        86400,
+        604800,
+        2592000
+      ],
+      "note": "Alert bar sizes in seconds."
+    },
+    {
+      "id": "alert-vwap-300",
+      "file": "shared/scripts/alert_spec.py",
+      "claim_regex": "(?i)vwap[^\\n]{0,160}\\b300\\b|\\b300\\b[^\\n]{0,160}vwap",
+      "tool": "create_alert",
+      "schema_path": "inputSchema.properties.indicator.properties.interval_secs.description",
+      "must_contain": [
+        "vwap conditions support 300 only"
+      ],
+      "note": "VWAP alerts use 5-minute bars only."
+    },
+    {
+      "id": "alert-price-crosses-sma",
+      "file": "shared/scripts/alert_spec.py",
+      "claim_regex": "price_crosses_sma",
+      "tool": "create_alert",
+      "schema_path": "description",
+      "must_contain": [
+        "price_crosses_sma, never sma_crosses"
+      ],
+      "note": "Price crossing the SMA line is price_crosses_sma, not sma_crosses."
+    },
+    {
+      "id": "alert-asset-class",
+      "file": "shared/scripts/alert_spec.py",
+      "claim_regex": "AMBIGUOUS_CRYPTO_TICKER",
+      "tool": "create_alert",
+      "schema_path": "inputSchema.properties.asset_class.description",
+      "must_contain": [
+        "equity or crypto",
+        "resolved as an equity first, then as crypto"
+      ],
+      "param": "asset_class",
+      "enum": [
+        "equity",
+        "crypto"
+      ],
+      "note": "Without asset_class a crypto ticker resolves as an equity first; always pass it. Eval guard: asset_class is equity or crypto."
+    },
+    {
+      "id": "monitor-index-no-manual-exercise",
+      "file": "skills/robinhood-options-monitor/scripts/expiry_risk.py",
+      "claim_regex": "INDEX_NO_MANUAL_EXERCISE",
+      "tool": "exercise_option",
+      "schema_path": "description",
+      "must_contain": [
+        "Index options cannot be manually exercised"
+      ],
+      "note": "Index options cannot be exercised by hand."
+    },
+    {
+      "id": "core-financials-four-metrics",
+      "file": "skills/robinhood-trading/SKILL.md",
+      "claim_regex": "(?is)get_financials.{0,20}?only\\s+4\\s+metrics",
+      "tool": "get_financials",
+      "schema_path": "description",
+      "must_contain": [
+        "revenue, gross profit, net income, and net margin"
+      ],
+      "note": "get_financials returns 4 metrics only (audit M21)."
+    },
+    {
+      "id": "core-financials-limit-40",
+      "file": [
+        "skills/robinhood-trading/SKILL.md",
+        "skills/robinhood-trading/references/research.md"
+      ],
+      "claim_regex": "(?is)get_financials\\W{0,4}\\{[^}]*limit(?:\\s*(?:≤|<=)\\s*40|[^}]*\\}.{0,300}?`limit`[^.;)]{0,40}\\bmax(?:imum)?\\s*40\\b)",
+      "tool": "get_financials",
+      "schema_path": "inputSchema.properties.limit.description",
+      "must_contain": [
+        "values above 40 are capped to 40"
+      ],
+      "note": "get_financials returns at most 40 periods per symbol."
+    }
+  ]
+}

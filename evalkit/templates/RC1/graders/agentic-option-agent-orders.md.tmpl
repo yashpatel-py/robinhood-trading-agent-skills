@@ -1,0 +1,8 @@
+---
+# Agentic account, agent-placed option orders, bounded by created_at_gte at or before the window start.
+type: tool_used
+tool: "{{tool:get_option_orders}}"
+input_match: "^(?=[\\s\\S]*\"account_number\"\\s*:\\s*\"{{acct:agentic}}\")(?=[\\s\\S]*\"placed_agent\"\\s*:\\s*\"agentic\")(?=[\\s\\S]*\"created_at_gte\"\\s*:\\s*\"2026-(0\\d-|10-|11-0\\d|11-10))"
+min: 1
+weight: 1
+---

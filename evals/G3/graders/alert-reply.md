@@ -1,0 +1,10 @@
+---
+type: "llm"
+weight: 2
+---
+PASS only if all of these hold:
+- The reply says an alert was set for NVDA below $195, that it notifies the user's phone, and that it does
+  not sell anything.
+- It says NVDA is held in an account the agent can't trade (the Individual account, shown masked), so an
+  alert is the agent-side protection there.
+FAIL if it proposes an order ticket for NVDA, implies the alert will sell, or uses a different level.

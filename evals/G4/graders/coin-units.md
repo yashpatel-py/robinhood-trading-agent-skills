@@ -1,0 +1,6 @@
+---
+type: "regex"
+match: "not_contains"
+pattern: "shares of ETH|ETH shares"
+weight: 1
+---

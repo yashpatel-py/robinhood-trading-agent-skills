@@ -1,0 +1,16 @@
+---
+type: llm
+weight: 3
+---
+PASS only if all of these hold:
+- It identifies the VOO position in the Individual account (••••M7Q5) and which VOO lots are at a loss at
+  the current price (the 2026-07-15 lot at $560.00 among them), with dollar amounts.
+- It cites the recurring VOO buy on 2026-11-02 as a wash-sale conflict for a loss sale now (inside the
+  window 2026-10-17 to 2026-12-16), with the washed share(s) and the disallowed dollars deferred into the
+  new shares' basis (not permanent: the recurring buy is in a taxable account).
+- It says the next recurring buy is expected around 2026-12-01 and labels that date as inferred from past
+  buys (the connector cannot see the recurring schedule), and explains that while the monthly buy continues
+  a later sale date does not become clean; pausing it is the user's decision.
+- It leaves the decision to the user and gives evidence, not a recommendation.
+FAIL if it calls VOO clear, presents the 2026-12-01 buy as a known scheduled fact rather than an inference,
+says the recurring buy makes the loss permanently lost, or recommends selling or pausing.

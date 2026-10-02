@@ -1,0 +1,33 @@
+# robinhood-skills config: tax-loss harvesting section (unofficial kit; not affiliated with Robinhood).
+#
+# Copy the sections you want into your config file:
+#   ${XDG_CONFIG_HOME:-~/.config}/robinhood-skills/config.toml   (or ./.robinhood/config.toml in a project)
+# On claude.ai or ChatGPT, paste them into project instructions under a line reading
+#   # robinhood-skills:config
+#
+# Every value here is yours. The agent writes a value only after you state it in the conversation and
+# approve the change; it never fills one in or loosens one on its own. Nothing here is tax advice.
+
+[tax]
+# Show harvest candidates whose unrealized loss (per account and symbol) is at least this many dollars.
+# "UNSET" shows every position with a loss.
+min_loss_usd = "UNSET"
+
+# How many days ahead the long-term countdown looks for short-term lots about to turn long-term.
+# A display window, not a financial threshold.
+lookahead_days = "45"
+
+# Groups of tickers YOU consider substantially identical, for example [["VOO", "IVV"]].
+# The kit never decides this for you. Buys of a declared partner inside the 61-day window are shown
+# as "possible" wash items; tickers you do not list are not checked against each other.
+related_tickers = []
+
+# How far before the window the order sweep looks, because a good-till-cancelled buy created before the
+# window can fill inside it. 90 days is the kit's assumption for Robinhood's equity GTC lifetime until
+# it is verified; raise it if you keep older GTC orders open.
+gtc_lookback_days = "90"
+
+[accounts]
+# Last 4 characters of any IRA or Roth account_number, only if get_accounts does not identify it as a
+# retirement account. A buy in a retirement account permanently erases a washed loss, so this matters.
+retirement = []

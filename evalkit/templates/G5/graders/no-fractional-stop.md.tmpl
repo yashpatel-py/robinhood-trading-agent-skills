@@ -1,0 +1,8 @@
+---
+# A stop order covers whole shares only.
+type: tool_used
+tool: "{{tool:review_equity_order}}"
+input_match: "\"quantity\"\\s*:\\s*\"?\\d*\\.\\d*[1-9]"
+max: 0
+weight: 1
+---

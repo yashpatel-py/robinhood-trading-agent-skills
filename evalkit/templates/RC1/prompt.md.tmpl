@@ -1,0 +1,15 @@
+---
+id: RC1
+skill: robinhood-agent-report-card
+variant: base
+rel: "1.1"
+mentions_account: true
+# The audit fixture is copied into the run's working directory by the generated scaffold (run with --scaffold).
+stage: {audit: evalkit/fixtures/audit}
+max_turns: 40
+allowed_tools: [Skill, Read, Bash]
+tags: [report, needs-anchor]
+---
+{{context_line}}
+
+What did my agent do last week? You can read all my accounts. My audit log folder is ./audit (the audit folder in your working directory).

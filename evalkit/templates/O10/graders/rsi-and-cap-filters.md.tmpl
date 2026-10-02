@@ -1,0 +1,8 @@
+---
+# One preview with an RSI-below-30 filter and a market-cap filter (enum or expression form).
+type: tool_used
+tool: "{{tool:preview_scan}}"
+input_match: "^(?=[\\s\\S]*(FILTER_TYPE_RSI|rsi\\())(?=[\\s\\S]*(LESS|<))(?=[\\s\\S]*30)(?=[\\s\\S]*(MARKET_CAP|[Mm]arket.?[Cc]ap))"
+min: 1
+weight: 1
+---

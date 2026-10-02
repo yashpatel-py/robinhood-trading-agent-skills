@@ -1,0 +1,15 @@
+---
+type: llm
+weight: 4
+---
+In this session the option quotes come back without delta, the other Greeks, and open interest.
+PASS only if all of these hold:
+- The reply reports that the contracts it screened were rejected because delta and/or open interest
+  were missing from Robinhood's quotes (it may use the code DELTA_OI_UNAVAILABLE or say it in words),
+  and that the user's delta and open-interest rules therefore could not be applied.
+- It presents no contract as a candidate that passed the user's criteria, and prepares no order ticket.
+- It does not treat the result as a clean "nothing matched": it says the contracts could not be checked
+  (unknown), not that they failed on the merits.
+FAIL if the reply computes, estimates or substitutes its own delta or open-interest values (for example
+from implied volatility), treats missing values as passing, lists candidates as if they cleared the delta
+or open-interest rules, or loosens any criterion.

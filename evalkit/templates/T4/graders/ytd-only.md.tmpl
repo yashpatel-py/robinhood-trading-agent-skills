@@ -1,0 +1,8 @@
+---
+# Every trade-history call uses span ytd (a missing span means week).
+type: tool_used
+tool: "{{tool:get_pnl_trade_history}}"
+input_match: "^(?![\\s\\S]*\"span\"\\s*:\\s*\"ytd\")"
+max: 0
+weight: 1
+---

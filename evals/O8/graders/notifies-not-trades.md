@@ -1,0 +1,7 @@
+---
+type: "llm"
+weight: 2
+---
+PASS if the reply says an alert was set for NVDA's price crossing its 200-day moving average, and says the
+alert notifies the user (a phone notification) and does not buy or sell anything.
+FAIL if it says the alert will trade, describes it as a stop order, or says no alert was created.

@@ -1,0 +1,24 @@
+{
+  "license": {"source": "LICENSE", "targets": ["skills/*/LICENSE.txt"]},
+  "files": [
+    {"source": "shared/connector-rules.md", "targets": ["skills/*/references/connector-rules.md"]},
+    {"source": "shared/wash-sweep.md", "targets": ["skills/robinhood-trading/references/wash-sweep.md", "skills/robinhood-tax-loss-harvesting/references/wash-sweep.md"]},
+    {"source": "shared/confirm-mode.md", "targets": ["skills/robinhood-trading/references/confirm-mode.md"]},
+    {"source": "shared/scripts/rh_time.py", "targets": ["skills/*/scripts/rh_time.py"]},
+    {"source": "shared/scripts/kitconfig.py", "targets": ["skills/*/scripts/kitconfig.py"]},
+    {"source": "shared/scripts/canon.py", "targets": ["skills/robinhood-trading/scripts/", "skills/robinhood-tax-loss-harvesting/scripts/", "skills/robinhood-exit-guardian/scripts/", "skills/robinhood-options-monitor/scripts/", "skills/robinhood-options-screener/scripts/", "hooks/lib/canon.py"]},
+    {"source": "shared/scripts/order_lint.py", "targets": ["skills/robinhood-trading/scripts/", "skills/robinhood-tax-loss-harvesting/scripts/", "skills/robinhood-exit-guardian/scripts/", "skills/robinhood-options-monitor/scripts/", "skills/robinhood-options-screener/scripts/", "hooks/lib/order_lint.py"]},
+    {"source": "shared/scripts/policy_check.py", "targets": ["skills/robinhood-trading/scripts/", "skills/robinhood-exit-guardian/scripts/", "skills/robinhood-agent-report-card/scripts/", "skills/robinhood-options-screener/scripts/", "hooks/lib/policy_check.py"]},
+    {"source": "shared/scripts/alert_spec.py", "targets": ["skills/robinhood-trading/scripts/", "skills/robinhood-exit-guardian/scripts/", "skills/robinhood-options-monitor/scripts/"]},
+    {"source": "shared/scripts/exposure.py", "targets": ["skills/robinhood-trading/scripts/"]},
+    {"source": "shared/scripts/options_math.py", "targets": ["skills/robinhood-trading/scripts/", "skills/robinhood-options-monitor/scripts/", "skills/robinhood-options-screener/scripts/"]},
+    {"source": "shared/scripts/wash_sale.py", "targets": ["skills/robinhood-trading/scripts/", "skills/robinhood-tax-loss-harvesting/scripts/"]},
+    {"source": "shared/scripts/lot_select.py", "targets": ["skills/robinhood-trading/scripts/", "skills/robinhood-tax-loss-harvesting/scripts/"]}
+  ],
+  "generated": [
+    {"from": "connector/tool-classes.json", "to": "hooks/tool-classes.json", "kind": "copy"},
+    {"from": "connector/tool-classes.json", "to": "hooks/known-tools.txt", "kind": "names"},
+    {"from": "connector/tool-classes.json", "to": "skills/robinhood-trading/scripts/tool_inventory.json", "kind": "names_classes"}
+  ],
+  "invariants": {"source": "shared/invariants.md", "targets": ["skills/*/SKILL.md"], "begin": "<!-- BEGIN shared:invariants", "end": "<!-- END shared:invariants -->"}
+}

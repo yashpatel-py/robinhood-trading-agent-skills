@@ -1,0 +1,37 @@
+name: Skill or workflow request
+description: A job the kit doesn't do yet with Robinhood's agentic-trading connector.
+title: "[skill request] "
+labels: ["skill-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The kit gives evidence, not verdicts: it checks, simulates and reports, and the decision stays with you. Requests for a skill that picks trades, sizes positions, sets exit levels on its own or places orders unattended are out of scope and will be closed. Requests for a better check, a clearer report or a new connector tool family are welcome.
+  - type: textarea
+    id: job
+    attributes:
+      label: Job to be done
+      description: In your own words, what should the agent help you do, and what would a good answer look like?
+    validations:
+      required: true
+  - type: textarea
+    id: triggers
+    attributes:
+      label: Trigger phrases
+      description: Two or three things you would actually type. Add one near miss that should NOT load the skill, if you can.
+    validations:
+      required: true
+  - type: textarea
+    id: tools
+    attributes:
+      label: Connector tools involved
+      description: Bare tool names (for example get_equity_orders, get_alert_log), if you know them.
+    validations:
+      required: false
+  - type: textarea
+    id: gap
+    attributes:
+      label: Why the existing skills don't cover it
+      description: Which skill came closest, and where it fell short.
+    validations:
+      required: true

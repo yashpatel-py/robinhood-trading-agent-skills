@@ -1,0 +1,14 @@
+---
+id: G5
+skill: robinhood-exit-guardian
+variant: oco_disabled
+rel: "2.0"
+max_turns: 25
+allowed_tools: [Skill, Read, Bash]
+tags: [guardian, r26]
+mentions_account: true
+notes: "Connector rule R26 (override O1): the OCO tools answer 'the tool you requested cannot be found or does not exist', as on both capture accounts on 2026-09-22. Same request as O3; the correct result is a stop-order ticket plus an offered alert, not an OCO."
+---
+{{context_line}}
+
+Put a take-profit at 180 and a stop at 142 on my AMD.

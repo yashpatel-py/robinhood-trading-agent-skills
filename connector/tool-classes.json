@@ -1,0 +1,192 @@
+{
+  "$comment": "Hand-assigned class for every tool in connector/tools.snapshot.json (spec section C.3). The per-tool entries are the tools list; the other keys document the values and feed the generated connector-rules tables (R4, R15). Edit this file by hand; tools/sync_shared.py copies it to hooks/tool-classes.json, hooks/known-tools.txt and skills/robinhood-trading/scripts/tool_inventory.json. tools/check_drift.py verifies coverage, the money set, the review/place twins, account_param and paginates against the snapshot. Unofficial; not affiliated with Robinhood Markets, Inc.",
+  "version": 1,
+  "snapshot_captured_at": "2026-09-21",
+  "classes": {
+    "read": "Reads account, market, research, order, scanner, watchlist or alert data. Free to call; account reads still follow the read-scope rule (connector-rules R3).",
+    "enroll_link": "Returns an enrollment or upgrade link and changes nothing. Call only when the rule for that link applies (R16).",
+    "simulate": "Simulates without placing or saving (review_*, preview_*). Free, but only while the user is discussing that order or scan.",
+    "write_confirm": "Changes non-money state on the Robinhood profile (scans, watchlists, alerts, read marks). One-line confirmation first (R7), except `mark_alerts_read` on exactly the `alert_log_ids` just relayed: call it without asking, scheduled passes included, and say so in one line afterwards.",
+    "cancel": "Cancels an order or exercise, or deletes an alert. Explicit yes first, after stating which protection it removes (R6).",
+    "money": "Places, exercises or replaces an order with real money. Never called in simulate-only mode; the plugin hook blocks it (R1)."
+  },
+  "field_values": {
+    "family": "the connector/schemas/<family>.md file that holds the tool's verbatim description and input schema",
+    "account_param": {
+      "account_number": "key account_number, value = the alphanumeric account_number from get_accounts",
+      "account_number=rhs_value": "key account_number, value = the numeric rhs_account_number from get_accounts",
+      "rhs_account_number": "key rhs_account_number, value = rhs_account_number from get_accounts",
+      "null": "no account parameter (profile-wide or market data)"
+    },
+    "paginates": {
+      "next_url": "pass the cursor query parameter taken from the response's next URL",
+      "next": "pass the value of the response's next field",
+      "next_cursor": "pass the response's next_cursor (empty or null on the last page)",
+      "next_offset": "pass the response's next_offset as offset",
+      "null": "single page"
+    },
+    "place_twin": "on a simulate tool: the money tool it previews",
+    "review_twin": "on a money tool: the simulate tool that previews it; exercise_option has none"
+  },
+  "absent_referenced": [
+    {
+      "name": "replace_option_order",
+      "referenced_by": [
+        "review_option_order"
+      ],
+      "note": "Not exposed. To change an option order, cancel it and submit a new one; the user carries the fill risk in between."
+    },
+    {
+      "name": "get_crypto_tax_lots",
+      "referenced_by": [
+        "preview_crypto_order",
+        "place_crypto_order"
+      ],
+      "note": "Not exposed, so crypto tax_lots cannot be filled in; specific-lot crypto sells are done in the app."
+    },
+    {
+      "name": "get_market_hours",
+      "referenced_by": [],
+      "note": "Does not exist and never did; session logic comes from the clock rules in rh_time.py."
+    },
+    {
+      "name": "get_quotes",
+      "referenced_by": [
+        "get_watchlist_items"
+      ],
+      "note": "Not exposed; price watchlist items with the quote tool for their object_type."
+    }
+  ],
+  "not_in_published_list": {
+    "source": "Robinhood support article 'Trading with your agent' (robinhood.com/us/en/support/articles/trading-with-your-agent/), 57 published tools, read 2026-09-21",
+    "tools": [
+      "cancel_advanced_order",
+      "cancel_option_exercise",
+      "create_alert",
+      "delete_alert",
+      "exercise_option",
+      "get_advanced_orders",
+      "get_alert_log",
+      "get_alerts",
+      "get_crypto_account_onboarding_info",
+      "get_equity_analyst_ratings",
+      "get_equity_news",
+      "get_index_historicals",
+      "get_limited_margin_upgrade_info",
+      "get_politician_trades",
+      "get_scanner_datapoints",
+      "get_sec_filing",
+      "get_sec_filing_facts",
+      "get_sec_filing_facts_catalog",
+      "get_sec_filing_index",
+      "mark_alerts_read",
+      "place_advanced_order",
+      "preview_scan",
+      "review_advanced_order",
+      "update_alert"
+    ]
+  },
+  "older_docs_disagree": {
+    "tools": [
+      "preview_scan",
+      "get_scanner_datapoints"
+    ],
+    "note": "Live on 2026-09-21 although v1 of this kit called them unavailable."
+  },
+  "availability_notes": [
+    {
+      "tools": [
+        "get_advanced_orders",
+        "review_advanced_order",
+        "place_advanced_order",
+        "cancel_advanced_order"
+      ],
+      "observed": "2026-09-22",
+      "error_text": "the tool you requested cannot be found or does not exist",
+      "note": "get_advanced_orders and review_advanced_order returned this error on both capture accounts although the client lists them. Treat the OCO family as possibly not enabled for the account (connector rule R26): never report 'no OCO orders' from this error; fall back to resting stop orders, a reviewed stop order, or native alerts."
+    }
+  ],
+  "tools": [
+    {"name": "get_accounts", "family": "accounts", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_portfolio", "family": "accounts", "class": "read", "account_param": "account_number", "paginates": null},
+    {"name": "get_equity_positions", "family": "accounts", "class": "read", "account_param": "account_number", "paginates": "next_url"},
+    {"name": "get_option_positions", "family": "accounts", "class": "read", "account_param": "account_number", "paginates": "next_url"},
+    {"name": "get_crypto_positions", "family": "accounts", "class": "read", "account_param": "rhs_account_number", "paginates": "next_url"},
+    {"name": "get_realized_pnl", "family": "accounts", "class": "read", "account_param": "account_number=rhs_value", "paginates": null},
+    {"name": "get_pnl_trade_history", "family": "accounts", "class": "read", "account_param": "account_number=rhs_value", "paginates": "next_cursor"},
+    {"name": "get_equity_tax_lots", "family": "accounts", "class": "read", "account_param": "account_number", "paginates": "next_url"},
+    {"name": "get_option_level_upgrade_info", "family": "accounts", "class": "enroll_link", "account_param": "account_number", "paginates": null},
+    {"name": "get_limited_margin_upgrade_info", "family": "accounts", "class": "enroll_link", "account_param": "account_number", "paginates": null},
+    {"name": "get_crypto_account_onboarding_info", "family": "accounts", "class": "enroll_link", "account_param": null, "paginates": null},
+    {"name": "get_equity_quotes", "family": "marketdata", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_equity_price_book", "family": "marketdata", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_equity_historicals", "family": "marketdata", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_equity_technical_indicators", "family": "marketdata", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_equity_tradability", "family": "marketdata", "class": "read", "account_param": "account_number", "paginates": null},
+    {"name": "get_indexes", "family": "marketdata", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_index_quotes", "family": "marketdata", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_index_historicals", "family": "marketdata", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_option_chains", "family": "marketdata", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_option_instruments", "family": "marketdata", "class": "read", "account_param": null, "paginates": "next_url"},
+    {"name": "get_option_quotes", "family": "marketdata", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_option_historicals", "family": "marketdata", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_crypto_quotes", "family": "marketdata", "class": "read", "account_param": "rhs_account_number", "paginates": null},
+    {"name": "get_currency_pairs", "family": "marketdata", "class": "read", "account_param": null, "paginates": "next_url"},
+    {"name": "search", "family": "marketdata", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_equity_fundamentals", "family": "research", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_financials", "family": "research", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_equity_news", "family": "research", "class": "read", "account_param": null, "paginates": "next_cursor"},
+    {"name": "get_earnings_calendar", "family": "research", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_earnings_results", "family": "research", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_equity_analyst_ratings", "family": "research", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_politician_trades", "family": "research", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_sec_filing_index", "family": "research", "class": "read", "account_param": null, "paginates": "next"},
+    {"name": "get_sec_filing_facts", "family": "research", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_sec_filing_facts_catalog", "family": "research", "class": "read", "account_param": null, "paginates": "next_offset"},
+    {"name": "get_sec_filing", "family": "research", "class": "read", "account_param": null, "paginates": null},
+    {"name": "review_equity_order", "family": "orders-equity-advanced", "class": "simulate", "account_param": "account_number", "place_twin": "place_equity_order", "paginates": null},
+    {"name": "place_equity_order", "family": "orders-equity-advanced", "class": "money", "account_param": "account_number", "review_twin": "review_equity_order", "paginates": null},
+    {"name": "get_equity_orders", "family": "orders-equity-advanced", "class": "read", "account_param": "account_number", "paginates": "next_url"},
+    {"name": "cancel_equity_order", "family": "orders-equity-advanced", "class": "cancel", "account_param": "account_number", "paginates": null},
+    {"name": "review_advanced_order", "family": "orders-equity-advanced", "class": "simulate", "account_param": "account_number", "place_twin": "place_advanced_order", "paginates": null},
+    {"name": "place_advanced_order", "family": "orders-equity-advanced", "class": "money", "account_param": "account_number", "review_twin": "review_advanced_order", "paginates": null},
+    {"name": "get_advanced_orders", "family": "orders-equity-advanced", "class": "read", "account_param": "account_number", "paginates": "next_url"},
+    {"name": "cancel_advanced_order", "family": "orders-equity-advanced", "class": "cancel", "account_param": "account_number", "paginates": null},
+    {"name": "review_option_order", "family": "orders-options-crypto", "class": "simulate", "account_param": "account_number", "place_twin": "place_option_order", "paginates": null},
+    {"name": "place_option_order", "family": "orders-options-crypto", "class": "money", "account_param": "account_number", "review_twin": "review_option_order", "paginates": null},
+    {"name": "exercise_option", "family": "orders-options-crypto", "class": "money", "account_param": "account_number", "paginates": null},
+    {"name": "get_option_orders", "family": "orders-options-crypto", "class": "read", "account_param": "account_number", "paginates": "next_url"},
+    {"name": "cancel_option_order", "family": "orders-options-crypto", "class": "cancel", "account_param": "account_number", "paginates": null},
+    {"name": "cancel_option_exercise", "family": "orders-options-crypto", "class": "cancel", "account_param": "account_number", "paginates": null},
+    {"name": "preview_crypto_order", "family": "orders-options-crypto", "class": "simulate", "account_param": "rhs_account_number", "place_twin": "place_crypto_order", "paginates": null},
+    {"name": "place_crypto_order", "family": "orders-options-crypto", "class": "money", "account_param": "rhs_account_number", "review_twin": "preview_crypto_order", "paginates": null},
+    {"name": "get_crypto_orders", "family": "orders-options-crypto", "class": "read", "account_param": "rhs_account_number", "paginates": "next_url"},
+    {"name": "cancel_crypto_order", "family": "orders-options-crypto", "class": "cancel", "account_param": "rhs_account_number", "paginates": null},
+    {"name": "get_scanner_filter_specs", "family": "scanner", "class": "read", "account_param": null, "paginates": null},
+    {"name": "create_scan", "family": "scanner", "class": "write_confirm", "account_param": null, "paginates": null},
+    {"name": "get_scans", "family": "scanner", "class": "read", "account_param": null, "paginates": null},
+    {"name": "run_scan", "family": "scanner", "class": "read", "account_param": null, "paginates": null},
+    {"name": "update_scan_filters", "family": "scanner", "class": "write_confirm", "account_param": null, "paginates": null},
+    {"name": "update_scan_config", "family": "scanner", "class": "write_confirm", "account_param": null, "paginates": null},
+    {"name": "preview_scan", "family": "scanner", "class": "simulate", "account_param": null, "paginates": null},
+    {"name": "get_scanner_datapoints", "family": "scanner", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_watchlists", "family": "watchlists-alerts", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_watchlist_items", "family": "watchlists-alerts", "class": "read", "account_param": null, "paginates": null},
+    {"name": "create_watchlist", "family": "watchlists-alerts", "class": "write_confirm", "account_param": null, "paginates": null},
+    {"name": "update_watchlist", "family": "watchlists-alerts", "class": "write_confirm", "account_param": null, "paginates": null},
+    {"name": "add_to_watchlist", "family": "watchlists-alerts", "class": "write_confirm", "account_param": null, "paginates": null},
+    {"name": "remove_from_watchlist", "family": "watchlists-alerts", "class": "write_confirm", "account_param": null, "paginates": null},
+    {"name": "add_option_to_watchlist", "family": "watchlists-alerts", "class": "write_confirm", "account_param": null, "paginates": null},
+    {"name": "remove_option_from_watchlist", "family": "watchlists-alerts", "class": "write_confirm", "account_param": null, "paginates": null},
+    {"name": "get_option_watchlist", "family": "watchlists-alerts", "class": "read", "account_param": null, "paginates": null},
+    {"name": "get_popular_watchlists", "family": "watchlists-alerts", "class": "read", "account_param": null, "paginates": null},
+    {"name": "follow_watchlist", "family": "watchlists-alerts", "class": "write_confirm", "account_param": null, "paginates": null},
+    {"name": "unfollow_watchlist", "family": "watchlists-alerts", "class": "write_confirm", "account_param": null, "paginates": null},
+    {"name": "create_alert", "family": "watchlists-alerts", "class": "write_confirm", "account_param": null, "paginates": null},
+    {"name": "update_alert", "family": "watchlists-alerts", "class": "write_confirm", "account_param": null, "paginates": null},
+    {"name": "delete_alert", "family": "watchlists-alerts", "class": "cancel", "account_param": null, "paginates": null},
+    {"name": "get_alerts", "family": "watchlists-alerts", "class": "read", "account_param": null, "paginates": "next_cursor"},
+    {"name": "get_alert_log", "family": "watchlists-alerts", "class": "read", "account_param": null, "paginates": "next_cursor"},
+    {"name": "mark_alerts_read", "family": "watchlists-alerts", "class": "write_confirm", "account_param": null, "paginates": null}
+  ]
+}

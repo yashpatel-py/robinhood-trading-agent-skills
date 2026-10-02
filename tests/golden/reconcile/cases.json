@@ -1,0 +1,2508 @@
+{
+ "script": "reconcile",
+ "about": "Synthetic reconcile cases. Expected values are subsets: dict keys listed must match exactly; lists must match in length and order. Hand checks: 10 x 30.00 = 300.00; option 2 contracts x 3.40 x 100 = 680.00; crypto 0.42 x 2600.00 (stop) = 1092.00; KO 2 x 71.55 = 143.10. The 120 s fallback window is inclusive (120 s matches, 121 s does not).",
+ "cases": [
+  {
+   "name": "order id match; placed without review",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "o1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:01Z",
+      "placed_agent": "agentic",
+      "average_price": "30.00",
+      "cumulative_quantity": "10"
+     }
+    ],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ],
+    "audit": {
+     "ok": true,
+     "available": true,
+     "first_ts": "2026-11-01T00:00:00Z",
+     "chain_ok": true,
+     "breaks": [],
+     "possible_injection": [],
+     "places": [
+      {
+       "ts": "2026-11-10T15:00:00.500Z",
+       "tool": "place_equity_order",
+       "order_id": "o1",
+       "fingerprint": "sha256:f1",
+       "ref_id": null,
+       "ok": true,
+       "symbol": "PLTR",
+       "side": "buy",
+       "quantity": "10",
+       "matched_review": false,
+       "review_age_s": null
+      }
+     ]
+    }
+   },
+   "expected": {
+    "status": "ACTION NEEDED",
+    "status_line": "ACTION NEEDED: Dollars at stake: 1 order ($300.00) placed without a matching review in the log",
+    "counts": {
+     "agentic_orders": 1,
+     "agent_orders": 1,
+     "matched": 1,
+     "broker_only": 0,
+     "unattributed": 0,
+     "audit_only": 0,
+     "placed_without_review": 1,
+     "source_unknown": 0,
+     "user_orders_in_agentic": 0,
+     "agent_orders_outside_agentic": 0,
+     "outside_window": 0
+    },
+    "matched": [
+     {
+      "order_id": "o1",
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:01Z",
+      "created_et": "2026-11-10 10:00 ET",
+      "placed_agent": "agentic",
+      "notional_usd": "300.00",
+      "match_method": "order_id",
+      "audit_ts": "2026-11-10T15:00:00.500Z",
+      "fingerprint": "sha256:f1",
+      "ref_id": null,
+      "matched_review": false,
+      "review_age_s": null
+     }
+    ],
+    "placed_without_review": [
+     {
+      "order_id": "o1",
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:01Z",
+      "created_et": "2026-11-10 10:00 ET",
+      "placed_agent": "agentic",
+      "notional_usd": "300.00",
+      "audit_ts": "2026-11-10T15:00:00.500Z",
+      "fingerprint": "sha256:f1",
+      "reason": "no same-session review with the same order fingerprint before this place call"
+     }
+    ]
+   }
+  },
+  {
+   "name": "ref_id match when the broker row carries it",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "o1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:05:00Z",
+      "placed_agent": "agentic",
+      "ref_id": "ref-a",
+      "price": "30.00"
+     }
+    ],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ],
+    "audit": {
+     "ok": true,
+     "available": true,
+     "first_ts": "2026-11-01T00:00:00Z",
+     "chain_ok": true,
+     "breaks": [],
+     "possible_injection": [],
+     "places": [
+      {
+       "ts": "2026-11-10T15:00:00Z",
+       "tool": "place_equity_order",
+       "order_id": null,
+       "fingerprint": "sha256:f1",
+       "ref_id": "ref-a",
+       "ok": true,
+       "symbol": "PLTR",
+       "side": "buy",
+       "quantity": "10",
+       "matched_review": true,
+       "review_age_s": 30
+      }
+     ]
+    }
+   },
+   "expected": {
+    "status": "CLEAR",
+    "matched": [
+     {
+      "order_id": "o1",
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:05:00Z",
+      "created_et": "2026-11-10 10:05 ET",
+      "placed_agent": "agentic",
+      "notional_usd": "300.00",
+      "match_method": "ref_id",
+      "audit_ts": "2026-11-10T15:00:00Z",
+      "fingerprint": "sha256:f1",
+      "ref_id": "ref-a",
+      "matched_review": true,
+      "review_age_s": 30
+     }
+    ]
+   }
+  },
+  {
+   "name": "fallback at exactly 120 s matches",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "o1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:02:00Z",
+      "placed_agent": "agentic",
+      "price": "30.00"
+     }
+    ],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ],
+    "audit": {
+     "ok": true,
+     "available": true,
+     "first_ts": "2026-11-01T00:00:00Z",
+     "chain_ok": true,
+     "breaks": [],
+     "possible_injection": [],
+     "places": [
+      {
+       "ts": "2026-11-10T15:00:00Z",
+       "tool": "place_equity_order",
+       "order_id": null,
+       "fingerprint": "sha256:f1",
+       "ref_id": null,
+       "ok": true,
+       "symbol": "PLTR",
+       "side": "buy",
+       "quantity": "10",
+       "matched_review": true,
+       "review_age_s": 30
+      }
+     ]
+    }
+   },
+   "expected": {
+    "status": "CLEAR",
+    "matched": [
+     {
+      "order_id": "o1",
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:02:00Z",
+      "created_et": "2026-11-10 10:02 ET",
+      "placed_agent": "agentic",
+      "notional_usd": "300.00",
+      "match_method": "asset+symbol+side+quantity within 120 s",
+      "audit_ts": "2026-11-10T15:00:00Z",
+      "fingerprint": "sha256:f1",
+      "ref_id": null,
+      "matched_review": true,
+      "review_age_s": 30
+     }
+    ],
+    "counts": {
+     "agentic_orders": 1,
+     "agent_orders": 1,
+     "matched": 1,
+     "broker_only": 0,
+     "unattributed": 0,
+     "audit_only": 0,
+     "placed_without_review": 0,
+     "source_unknown": 0,
+     "user_orders_in_agentic": 0,
+     "agent_orders_outside_agentic": 0,
+     "outside_window": 0
+    }
+   }
+  },
+  {
+   "name": "fallback at 121 s does not match",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "o1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:02:01Z",
+      "placed_agent": "agentic",
+      "price": "30.00"
+     }
+    ],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ],
+    "audit": {
+     "ok": true,
+     "available": true,
+     "first_ts": "2026-11-01T00:00:00Z",
+     "chain_ok": true,
+     "breaks": [],
+     "possible_injection": [],
+     "places": [
+      {
+       "ts": "2026-11-10T15:00:00Z",
+       "tool": "place_equity_order",
+       "order_id": null,
+       "fingerprint": "sha256:f1",
+       "ref_id": null,
+       "ok": true,
+       "symbol": "PLTR",
+       "side": "buy",
+       "quantity": "10",
+       "matched_review": true,
+       "review_age_s": 30
+      }
+     ]
+    }
+   },
+   "expected": {
+    "status": "ACTION NEEDED",
+    "status_line": "ACTION NEEDED: Dollars at stake: 1 order ($300.00) in Agentic ••••X4F1 has no local audit entry (placed by another agent, app or machine) · 1 place call logged as sent with no matching broker order",
+    "broker_only": [
+     {
+      "order_id": "o1",
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:02:01Z",
+      "created_et": "2026-11-10 10:02 ET",
+      "placed_agent": "agentic",
+      "notional_usd": "300.00",
+      "reason": "no local audit entry: placed by another agent, app or machine"
+     }
+    ],
+    "audit_only": [
+     {
+      "ref_id": null,
+      "ts": "2026-11-10T15:00:00Z",
+      "ts_et": "2026-11-10 10:00 ET",
+      "tool": "place_equity_order",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "order_id": null,
+      "ok": true,
+      "reason": "place call with no broker order: blocked, failed or rejected",
+      "detail": "the call was sent but no broker order matched in the reads for this window: check the window, the account, or the order in the app"
+     }
+    ],
+    "flags": [
+     {
+      "flag": "place_sent_no_broker_order",
+      "count": 1,
+      "text": "1 place call logged as sent with no matching broker order"
+     }
+    ]
+   }
+  },
+  {
+   "name": "fallback needs the same symbol, side and quantity",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "o1",
+      "symbol": "AMD",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:30Z",
+      "placed_agent": "agentic",
+      "price": "150"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "o2",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:30Z",
+      "placed_agent": "agentic",
+      "price": "30"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "o3",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "9",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:30Z",
+      "placed_agent": "agentic",
+      "price": "30"
+     }
+    ],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ],
+    "audit": {
+     "ok": true,
+     "available": true,
+     "first_ts": "2026-11-01T00:00:00Z",
+     "chain_ok": true,
+     "breaks": [],
+     "possible_injection": [],
+     "places": [
+      {
+       "ts": "2026-11-10T15:00:00Z",
+       "tool": "place_equity_order",
+       "order_id": null,
+       "fingerprint": "sha256:f1",
+       "ref_id": null,
+       "ok": true,
+       "symbol": "PLTR",
+       "side": "buy",
+       "quantity": "10",
+       "matched_review": true,
+       "review_age_s": 30
+      }
+     ]
+    }
+   },
+   "expected": {
+    "counts": {
+     "agentic_orders": 3,
+     "agent_orders": 3,
+     "matched": 0,
+     "broker_only": 3,
+     "unattributed": 0,
+     "audit_only": 1,
+     "placed_without_review": 0,
+     "source_unknown": 0,
+     "user_orders_in_agentic": 0,
+     "agent_orders_outside_agentic": 0,
+     "outside_window": 0
+    },
+    "broker_only": [
+     {
+      "order_id": "o1",
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "symbol": "AMD",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:30Z",
+      "created_et": "2026-11-10 10:00 ET",
+      "placed_agent": "agentic",
+      "notional_usd": "1500.00",
+      "reason": "no local audit entry: placed by another agent, app or machine"
+     },
+     {
+      "order_id": "o2",
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:30Z",
+      "created_et": "2026-11-10 10:00 ET",
+      "placed_agent": "agentic",
+      "notional_usd": "300.00",
+      "reason": "no local audit entry: placed by another agent, app or machine"
+     },
+     {
+      "order_id": "o3",
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "9",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:30Z",
+      "created_et": "2026-11-10 10:00 ET",
+      "placed_agent": "agentic",
+      "notional_usd": "270.00",
+      "reason": "no local audit entry: placed by another agent, app or machine"
+     }
+    ]
+   }
+  },
+  {
+   "name": "each order and each place call is used once",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "o1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:30Z",
+      "placed_agent": "agentic",
+      "price": "30.00"
+     }
+    ],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ],
+    "audit": {
+     "ok": true,
+     "available": true,
+     "first_ts": "2026-11-01T00:00:00Z",
+     "chain_ok": true,
+     "breaks": [],
+     "possible_injection": [],
+     "places": [
+      {
+       "ts": "2026-11-10T15:00:00Z",
+       "tool": "place_equity_order",
+       "order_id": null,
+       "fingerprint": "sha256:f1",
+       "ref_id": null,
+       "ok": true,
+       "symbol": "PLTR",
+       "side": "buy",
+       "quantity": "10",
+       "matched_review": true,
+       "review_age_s": 30
+      },
+      {
+       "ts": "2026-11-10T15:00:40Z",
+       "tool": "place_equity_order",
+       "order_id": null,
+       "fingerprint": "sha256:f1",
+       "ref_id": null,
+       "ok": true,
+       "symbol": "PLTR",
+       "side": "buy",
+       "quantity": "10",
+       "matched_review": true,
+       "review_age_s": 30
+      }
+     ]
+    }
+   },
+   "expected": {
+    "counts": {
+     "agentic_orders": 1,
+     "agent_orders": 1,
+     "matched": 1,
+     "broker_only": 0,
+     "unattributed": 0,
+     "audit_only": 1,
+     "placed_without_review": 0,
+     "source_unknown": 0,
+     "user_orders_in_agentic": 0,
+     "agent_orders_outside_agentic": 0,
+     "outside_window": 0
+    },
+    "matched": [
+     {
+      "order_id": "o1",
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:30Z",
+      "created_et": "2026-11-10 10:00 ET",
+      "placed_agent": "agentic",
+      "notional_usd": "300.00",
+      "match_method": "asset+symbol+side+quantity within 120 s",
+      "audit_ts": "2026-11-10T15:00:00Z",
+      "fingerprint": "sha256:f1",
+      "ref_id": null,
+      "matched_review": true,
+      "review_age_s": 30
+     }
+    ],
+    "audit_only": [
+     {
+      "ref_id": null,
+      "ts": "2026-11-10T15:00:40Z",
+      "ts_et": "2026-11-10 10:00 ET",
+      "tool": "place_equity_order",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "order_id": null,
+      "ok": true,
+      "reason": "place call with no broker order: blocked, failed or rejected",
+      "detail": "the call was sent but no broker order matched in the reads for this window: check the window, the account, or the order in the app"
+     }
+    ]
+   }
+  },
+  {
+   "name": "no audit log: agent orders are unattributed, not flagged",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "o1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:30Z",
+      "placed_agent": "agentic",
+      "price": "30.00"
+     }
+    ],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ]
+   },
+   "expected": {
+    "status": "CLEAR",
+    "status_line": "CLEAR: Dollars at stake: none found",
+    "audit_coverage": "none",
+    "unattributed": [
+     {
+      "order_id": "o1",
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:30Z",
+      "created_et": "2026-11-10 10:00 ET",
+      "placed_agent": "agentic",
+      "notional_usd": "300.00",
+      "reason": "no local audit log on this surface: cannot tell which agent placed it"
+     }
+    ],
+    "notes": [
+     "no local audit log: agent orders are listed, but which agent placed them cannot be told"
+    ]
+   }
+  },
+  {
+   "name": "audit log starts inside the window",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "o1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-09T16:00:00Z",
+      "placed_agent": "agentic",
+      "price": "30.00"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "o2",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-12T16:00:00Z",
+      "placed_agent": "agentic",
+      "price": "31.00"
+     }
+    ],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ],
+    "audit": {
+     "ok": true,
+     "available": true,
+     "first_ts": "2026-11-11T00:00:00Z",
+     "chain_ok": true,
+     "breaks": [],
+     "possible_injection": [],
+     "places": []
+    }
+   },
+   "expected": {
+    "status": "ACTION NEEDED",
+    "audit_coverage": "partial",
+    "unattributed": [
+     {
+      "order_id": "o1",
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-09T16:00:00Z",
+      "created_et": "2026-11-09 11:00 ET",
+      "placed_agent": "agentic",
+      "notional_usd": "300.00",
+      "reason": "created before the local audit log starts: cannot tell which agent placed it"
+     }
+    ],
+    "broker_only": [
+     {
+      "order_id": "o2",
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-12T16:00:00Z",
+      "created_et": "2026-11-12 11:00 ET",
+      "placed_agent": "agentic",
+      "notional_usd": "310.00",
+      "reason": "no local audit entry: placed by another agent, app or machine"
+     }
+    ]
+   }
+  },
+  {
+   "name": "agent order in a read-only account",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [
+     {
+      "account_last4": "M7Q5",
+      "asset": "equity",
+      "order_id": "m1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T16:00:00Z",
+      "placed_agent": "agentic",
+      "price": "100.00"
+     }
+    ],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ],
+    "audit": {
+     "ok": true,
+     "available": true,
+     "first_ts": "2026-11-01T00:00:00Z",
+     "chain_ok": true,
+     "breaks": [],
+     "possible_injection": [],
+     "places": []
+    }
+   },
+   "expected": {
+    "status": "ACTION NEEDED",
+    "status_line": "ACTION NEEDED: Dollars at stake: 1 agent order ($1,000.00) found in read-only account(s) ••••M7Q5",
+    "agent_orders_outside_agentic": [
+     {
+      "order_id": "m1",
+      "account_last4": "M7Q5",
+      "asset": "equity",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T16:00:00Z",
+      "created_et": "2026-11-10 11:00 ET",
+      "placed_agent": "agentic",
+      "notional_usd": "1000.00"
+     }
+    ],
+    "read_only_verification": [
+     {
+      "account_last4": "M7Q5",
+      "status": "agent_orders_found",
+      "checked": [
+       "get_equity_orders",
+       "get_option_orders"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "an incomplete read makes the result UNKNOWN",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "partial"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ],
+    "audit": {
+     "ok": true,
+     "available": true,
+     "first_ts": "2026-11-01T00:00:00Z",
+     "chain_ok": true,
+     "breaks": [],
+     "possible_injection": [],
+     "places": []
+    }
+   },
+   "expected": {
+    "status": "UNKNOWN",
+    "status_line": "UNKNOWN: Dollars at stake: none found in what was read; 1 order read incomplete; read-only account(s) not verified: ••••M7Q5",
+    "incomplete_reads": [
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "partial"
+     }
+    ],
+    "read_only_verification": [
+     {
+      "account_last4": "M7Q5",
+      "status": "incomplete",
+      "checked": [
+       "get_option_orders"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "an account you excluded is noted, not unknown",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "status": "not_in_scope"
+     }
+    ],
+    "audit": {
+     "ok": true,
+     "available": true,
+     "first_ts": "2026-11-01T00:00:00Z",
+     "chain_ok": true,
+     "breaks": [],
+     "possible_injection": [],
+     "places": []
+    }
+   },
+   "expected": {
+    "status": "CLEAR",
+    "status_line": "CLEAR: Dollars at stake: none found",
+    "read_only_verification": [
+     {
+      "account_last4": "M7Q5",
+      "status": "not_in_scope",
+      "checked": []
+     }
+    ],
+    "notes": [
+     "excluded by you (not checked): ••••M7Q5"
+    ]
+   }
+  },
+  {
+   "name": "a user order inside Agentic",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "u1",
+      "symbol": "KO",
+      "side": "buy",
+      "quantity": "2",
+      "state": "filled",
+      "created_at": "2026-11-12T17:02:00Z",
+      "placed_agent": "user",
+      "average_price": "71.55",
+      "cumulative_quantity": "2"
+     }
+    ],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ],
+    "audit": {
+     "ok": true,
+     "available": true,
+     "first_ts": "2026-11-01T00:00:00Z",
+     "chain_ok": true,
+     "breaks": [],
+     "possible_injection": [],
+     "places": []
+    }
+   },
+   "expected": {
+    "status": "ACTION NEEDED",
+    "status_line": "ACTION NEEDED: Dollars at stake: 1 order ($143.10) in Agentic ••••X4F1 that Robinhood marks as not placed by an agent",
+    "user_orders_in_agentic": [
+     {
+      "order_id": "u1",
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "symbol": "KO",
+      "side": "buy",
+      "quantity": "2",
+      "state": "filled",
+      "created_at": "2026-11-12T17:02:00Z",
+      "created_et": "2026-11-12 12:02 ET",
+      "placed_agent": "user",
+      "notional_usd": "143.10"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a broken audit chain is flagged",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ],
+    "audit": {
+     "ok": true,
+     "available": true,
+     "first_ts": "2026-11-01T00:00:00Z",
+     "chain_ok": false,
+     "breaks": [
+      {
+       "file": "audit-2026-11.jsonl",
+       "line": 54,
+       "reason": "prev_mismatch"
+      }
+     ],
+     "possible_injection": [],
+     "places": []
+    }
+   },
+   "expected": {
+    "status": "ACTION NEEDED",
+    "status_line": "ACTION NEEDED: Dollars at stake: none found · local audit log chain broken at audit-2026-11.jsonl line 54 (a line was changed or removed)",
+    "flags": [
+     {
+      "flag": "audit_chain_broken",
+      "count": 1,
+      "text": "local audit log chain broken at audit-2026-11.jsonl line 54 (a line was changed or removed)"
+     }
+    ]
+   }
+  },
+  {
+   "name": "possible injection only",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ],
+    "audit": {
+     "ok": true,
+     "available": true,
+     "first_ts": "2026-11-01T00:00:00Z",
+     "chain_ok": true,
+     "breaks": [],
+     "possible_injection": [
+      {
+       "ts": "2026-11-12T15:14:05Z",
+       "tool": "place_equity_order",
+       "after_tool": "get_equity_news",
+       "outcome": "blocked"
+      }
+     ],
+     "places": []
+    }
+   },
+   "expected": {
+    "status": "ACTION NEEDED",
+    "status_line": "ACTION NEEDED: Dollars at stake: none found · 1 possible prompt-injection attempt right after get_equity_news",
+    "flags": [
+     {
+      "flag": "possible_injection",
+      "count": 1,
+      "text": "1 possible prompt-injection attempt right after get_equity_news"
+     }
+    ]
+   }
+  },
+  {
+   "name": "option notional x 100; crypto and OCO are source-unknown; OCO family off",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "option",
+      "order_id": "op1",
+      "symbol": "AMD",
+      "side": "buy",
+      "quantity": "2",
+      "state": "confirmed",
+      "created_at": "2026-11-10T16:00:00Z",
+      "placed_agent": "agentic",
+      "price": "3.40"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "crypto",
+      "order_id": "c1",
+      "symbol": "ETH",
+      "side": "sell",
+      "quantity": "0.42",
+      "state": "confirmed",
+      "created_at": "2026-11-10T16:00:00Z",
+      "stop_price": "2600.00"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "oco",
+      "order_id": "a1",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "10",
+      "state": "cancelled",
+      "created_at": "2026-11-10T16:00:00Z"
+     }
+    ],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "not_enabled"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ],
+    "audit": {
+     "ok": true,
+     "available": true,
+     "first_ts": "2026-11-01T00:00:00Z",
+     "chain_ok": true,
+     "breaks": [],
+     "possible_injection": [],
+     "places": []
+    }
+   },
+   "expected": {
+    "status": "ACTION NEEDED",
+    "broker_only": [
+     {
+      "order_id": "op1",
+      "account_last4": "X4F1",
+      "asset": "option",
+      "symbol": "AMD",
+      "side": "buy",
+      "quantity": "2",
+      "state": "confirmed",
+      "created_at": "2026-11-10T16:00:00Z",
+      "created_et": "2026-11-10 11:00 ET",
+      "placed_agent": "agentic",
+      "notional_usd": "680.00",
+      "reason": "no local audit entry: placed by another agent, app or machine"
+     }
+    ],
+    "source_unknown": [
+     {
+      "order_id": "a1",
+      "account_last4": "X4F1",
+      "asset": "oco",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "10",
+      "state": "cancelled",
+      "created_at": "2026-11-10T16:00:00Z",
+      "created_et": "2026-11-10 11:00 ET",
+      "placed_agent": null,
+      "notional_usd": null,
+      "reason": "source not distinguishable: this order list has no placed_agent filter"
+     },
+     {
+      "order_id": "c1",
+      "account_last4": "X4F1",
+      "asset": "crypto",
+      "symbol": "ETH",
+      "side": "sell",
+      "quantity": "0.42",
+      "state": "confirmed",
+      "created_at": "2026-11-10T16:00:00Z",
+      "created_et": "2026-11-10 11:00 ET",
+      "placed_agent": null,
+      "notional_usd": "1092.00",
+      "reason": "source not distinguishable: this order list has no placed_agent filter"
+     }
+    ],
+    "notes": [
+     "get_advanced_orders on ••••X4F1: not enabled for this account (the tool family is off); this is not the same as having none"
+    ]
+   }
+  },
+  {
+   "name": "a failed place call is informational",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ],
+    "audit": {
+     "ok": true,
+     "available": true,
+     "first_ts": "2026-11-01T00:00:00Z",
+     "chain_ok": true,
+     "breaks": [],
+     "possible_injection": [],
+     "places": [
+      {
+       "ts": "2026-11-10T15:00:00Z",
+       "tool": "place_equity_order",
+       "order_id": null,
+       "fingerprint": "sha256:f1",
+       "ref_id": null,
+       "ok": false,
+       "symbol": "PLTR",
+       "side": "buy",
+       "quantity": "10",
+       "matched_review": true,
+       "review_age_s": 30
+      }
+     ]
+    }
+   },
+   "expected": {
+    "status": "CLEAR",
+    "audit_only": [
+     {
+      "ref_id": null,
+      "ts": "2026-11-10T15:00:00Z",
+      "ts_et": "2026-11-10 10:00 ET",
+      "tool": "place_equity_order",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "order_id": null,
+      "ok": false,
+      "reason": "place call with no broker order: blocked, failed or rejected",
+      "detail": "the place call returned an error"
+     }
+    ],
+    "flags": []
+   }
+  },
+  {
+   "name": "raw audit lines are accepted as audit_events",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "o1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:01Z",
+      "placed_agent": "agentic",
+      "price": "30.00"
+     }
+    ],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ],
+    "audit_events": [
+     {
+      "v": 1,
+      "seq": 7,
+      "ts": "2026-11-10T15:00:00.500Z",
+      "event": "post",
+      "tool": "mcp__rh__place_equity_order",
+      "class": "money",
+      "fingerprint": "sha256:f1",
+      "ref_id": "r1",
+      "inputs": {
+       "symbol": "PLTR",
+       "side": "buy",
+       "quantity": "10"
+      },
+      "result": {
+       "ok": true,
+       "order_id": "o1",
+       "state": "queued"
+      }
+     },
+     {
+      "v": 1,
+      "seq": 8,
+      "ts": "2026-11-10T15:00:05Z",
+      "event": "post",
+      "tool": "get_equity_orders",
+      "class": "read",
+      "result": {
+       "ok": true
+      }
+     }
+    ]
+   },
+   "expected": {
+    "status": "CLEAR",
+    "audit_coverage": "partial",
+    "matched": [
+     {
+      "order_id": "o1",
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:01Z",
+      "created_et": "2026-11-10 10:00 ET",
+      "placed_agent": "agentic",
+      "notional_usd": "300.00",
+      "match_method": "order_id",
+      "audit_ts": "2026-11-10T15:00:00.500Z",
+      "fingerprint": "sha256:f1",
+      "ref_id": "r1",
+      "matched_review": null,
+      "review_age_s": null
+     }
+    ],
+    "notes": [
+     "some logged place calls carry no review information; pass audit_verify output to check for placed-without-review"
+    ]
+   }
+  },
+  {
+   "name": "orders outside the window are ignored",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "old",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-08T12:00:00Z",
+      "placed_agent": "agentic",
+      "price": "30"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "late",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-16T05:00:00Z",
+      "placed_agent": "agentic",
+      "price": "30"
+     }
+    ],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ],
+    "audit": {
+     "ok": true,
+     "available": true,
+     "first_ts": "2026-11-01T00:00:00Z",
+     "chain_ok": true,
+     "breaks": [],
+     "possible_injection": [],
+     "places": []
+    }
+   },
+   "expected": {
+    "status": "CLEAR",
+    "counts": {
+     "agentic_orders": 0,
+     "agent_orders": 0,
+     "matched": 0,
+     "broker_only": 0,
+     "unattributed": 0,
+     "audit_only": 0,
+     "placed_without_review": 0,
+     "source_unknown": 0,
+     "user_orders_in_agentic": 0,
+     "agent_orders_outside_agentic": 0,
+     "outside_window": 2
+    },
+    "notes": [
+     "2 orders outside the window were ignored"
+    ]
+   }
+  },
+  {
+   "name": "a full account number is cut to its last 4",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "ZZ99X4F1",
+    "broker_orders": [
+     {
+      "account_last4": "ZZ99X4F1",
+      "asset": "equity",
+      "order_id": "o1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T16:00:00Z",
+      "placed_agent": "agentic",
+      "price": "30.00"
+     }
+    ],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ],
+    "audit": {
+     "ok": true,
+     "available": true,
+     "first_ts": "2026-11-01T00:00:00Z",
+     "chain_ok": true,
+     "breaks": [],
+     "possible_injection": [],
+     "places": []
+    }
+   },
+   "expected": {
+    "agentic_account_last4": "X4F1",
+    "broker_only": [
+     {
+      "order_id": "o1",
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T16:00:00Z",
+      "created_et": "2026-11-10 11:00 ET",
+      "placed_agent": "agentic",
+      "notional_usd": "300.00",
+      "reason": "no local audit entry: placed by another agent, app or machine"
+     }
+    ]
+   }
+  },
+  {
+   "name": "reads are required",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": []
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "MISSING_FIELD",
+      "field": "reads",
+      "msg": "reads must list every order read you made and its status; without it, completeness cannot be judged"
+     }
+    ]
+   }
+  },
+  {
+   "name": "window times need an offset",
+   "input": {
+    "window": {
+     "start": "2026-11-09T00:00:00",
+     "end": "2026-11-16T00:00:00"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_WINDOW",
+      "field": "window",
+      "msg": "window.start and window.end must be ISO 8601 times with Z or an offset (convert ET dates with rh_time.py to_utc, or pass start_date/end_date)"
+     }
+    ]
+   }
+  },
+  {
+   "name": "asset must be known",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "bond",
+      "order_id": "o1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T16:00:00Z",
+      "placed_agent": "agentic"
+     }
+    ],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_ORDER",
+      "field": "broker_orders[0].asset",
+      "msg": "asset must be one of equity, option, crypto, oco"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a malformed decimal is an error",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "broker_orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "o1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T16:00:00Z",
+      "placed_agent": "agentic",
+      "price": "30,00"
+     }
+    ],
+    "reads": [
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_equity_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_option_orders",
+      "filter": "all",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_crypto_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "X4F1",
+      "tool": "get_advanced_orders",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_equity_orders",
+      "filter": "agentic",
+      "status": "complete"
+     },
+     {
+      "account_last4": "M7Q5",
+      "tool": "get_option_orders",
+      "filter": "agentic",
+      "status": "complete"
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_NUMBER",
+      "field": "broker_orders[0].price",
+      "msg": "expected a decimal string, got '30,00'"
+     }
+    ]
+   }
+  }
+ ]
+}

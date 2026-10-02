@@ -1,0 +1,22 @@
+{"query": "which of my positions have no stop", "should_trigger": true, "split": "train", "expect_skill": "robinhood-exit-guardian"}
+{"query": "protect my NVDA", "should_trigger": true, "split": "train", "expect_skill": "robinhood-exit-guardian"}
+{"query": "did any of my alerts fire", "should_trigger": true, "split": "train", "expect_skill": "robinhood-exit-guardian"}
+{"query": "set a stop on my ETH", "should_trigger": true, "split": "train", "expect_skill": "robinhood-exit-guardian"}
+{"query": "check my stops every morning", "should_trigger": true, "split": "train", "expect_skill": "robinhood-exit-guardian"}
+{"query": "are all my holdings covered by a stop loss or at least an alert?", "should_trigger": true, "split": "train", "expect_skill": "robinhood-exit-guardian"}
+{"query": "put a take profit at 180 and a stop at 142 on my AMD", "should_trigger": true, "split": "train", "expect_skill": "robinhood-exit-guardian"}
+{"query": "my laptop will be closed all week, how do I get pinged if TSLA tanks", "should_trigger": true, "split": "train", "expect_skill": "robinhood-exit-guardian"}
+{"query": "alert me if VOO drops below 480", "should_trigger": true, "split": "validation", "expect_skill": "robinhood-exit-guardian"}
+{"query": "is my ETH stop still working or did it expire", "should_trigger": true, "split": "validation", "expect_skill": "robinhood-exit-guardian"}
+{"query": "audit my exits across all my robinhood accounts", "should_trigger": true, "split": "validation", "expect_skill": "robinhood-exit-guardian"}
+{"query": "any of my price alerts go off today?", "should_trigger": true, "split": "validation", "expect_skill": "robinhood-exit-guardian"}
+{"query": "my IRA can't be traded by the agent, can it at least watch my VTI for a drop", "should_trigger": true, "split": "validation", "expect_skill": "robinhood-exit-guardian"}
+{"query": "buy 10 AAPL with a stop", "should_trigger": false, "split": "train", "expect_skill": "robinhood-trading"}
+{"query": "check my options against my rules", "should_trigger": false, "split": "train", "expect_skill": "robinhood-options-monitor"}
+{"query": "set a trailing stop on my AMD", "should_trigger": false, "split": "train", "expect_skill": "robinhood-trading"}
+{"query": "what's a stop-loss order and how does it work?", "should_trigger": false, "split": "train"}
+{"query": "harvest my TSLA loss", "should_trigger": false, "split": "train", "expect_skill": "robinhood-tax-loss-harvesting"}
+{"query": "what's my buying power", "should_trigger": false, "split": "validation", "expect_skill": "robinhood-trading"}
+{"query": "set a stop loss on my Schwab account", "should_trigger": false, "split": "validation"}
+{"query": "what did my agent do this week", "should_trigger": false, "split": "validation", "expect_skill": "robinhood-agent-report-card"}
+{"query": "run my options screener", "should_trigger": false, "split": "validation", "expect_skill": "robinhood-options-screener"}

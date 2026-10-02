@@ -1,0 +1,73 @@
+# Weekly (and on demand): is the connector snapshot the skills were checked against still
+# fresh, and do the skills still name only tools and parameters that exist in it? Robinhood
+# can add, rename or re-describe tools at any time (the HOOD Summit is the obvious moment), and
+# a skill that quotes a stale tool list is how an agent gets the connector wrong.
+# On failure it opens one tracking issue (or comments on the open one) labeled
+# connector-behavior. It never calls the connector: refreshing the snapshot is a manual step,
+#   python3 tools/snapshot_tools.py ingest <tools-list.json>
+# run by the owner from a tools/list dump (see CONTRIBUTING.md).
+name: drift-watch
+on:
+  schedule:
+    - cron: "0 13 * * 1"
+  workflow_dispatch:
+    inputs:
+      staleness_days:
+        description: "Fail when the snapshot is older than this many days"
+        type: string
+        required: true
+        default: "30"
+permissions: { contents: read }
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Validate the input
+        env:
+          STALENESS: ${{ inputs.staleness_days || '30' }}
+        run: |
+          case "$STALENESS" in ''|*[!0-9]*) echo "::error::staleness_days must be a whole number"; exit 1 ;; esac
+      - name: Connector drift and snapshot age
+        id: drift
+        env:
+          STALENESS: ${{ inputs.staleness_days || '30' }}
+        run: |
+          set -o pipefail
+          python3 tools/check_drift.py --staleness "$STALENESS" 2>&1 | tee drift.txt
+      - name: Open or update the tracking issue
+        if: failure() && steps.drift.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Connector snapshot is stale or drifted"
+          {
+            echo "The weekly drift check failed on $(date -u +%Y-%m-%d). Run: $RUN_URL"
+            echo
+            echo "What to do:"
+            echo "1. Dump the live tool list from your own client (read-only; never call a place_* tool)."
+            echo "2. \`python3 tools/snapshot_tools.py ingest <tools-list.json>\` rewrites the snapshot and appends a dated diff to connector/CHANGES.md."
+            echo "3. Classify any new tool in connector/tool-classes.json, fix the rules and skills the diff touches, and run \`python3 tools/check_drift.py\` until it passes."
+            echo "4. Add a \"Connector changes\" entry to CHANGELOG.md."
+            echo
+            echo "Check output (first 150 lines):"
+            echo
+            echo '```'
+            head -n 150 drift.txt
+            echo '```'
+          } > issue-body.md
+          gh label create connector-behavior --color d93f0b \
+            --description "Robinhood's MCP connector behaves differently than the skills say" --force || true
+          existing="$(gh issue list --state open --label connector-behavior --search "\"$title\" in:title" \
+            --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file issue-body.md
+          else
+            gh issue create --title "$title" --label connector-behavior --body-file issue-body.md
+          fi

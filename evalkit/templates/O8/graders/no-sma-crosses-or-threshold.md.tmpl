@@ -1,0 +1,8 @@
+---
+# No call may use the sma_* family (the SMA's own value vs a number) or send a threshold.
+type: tool_used
+tool: "{{tool:create_alert}}"
+input_match: "\"condition_type\"\\s*:\\s*\"sma_|\"threshold\"\\s*:\\s*(\"[^\"]|-?\\d)"
+max: 0
+weight: 1
+---

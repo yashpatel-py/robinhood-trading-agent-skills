@@ -1,0 +1,12 @@
+{
+  "name": "robinhood-trading",
+  "version": "2.0.0",
+  "description": "Unofficial Preflight skills for Robinhood Agentic Trading: checked order tickets, cross-account wash-sale checks, exit protection, an options monitor, an agent report card and an options screener. Order-placing tools are listed in excludeTools for this extension's own Robinhood server entry (not yet verified in Gemini CLI).",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {
+    "robinhood": {
+      "httpUrl": "https://agent.robinhood.com/mcp/trading",
+      "excludeTools": ["place_equity_order", "place_option_order", "place_crypto_order", "place_advanced_order", "exercise_option"]
+    }
+  }
+}

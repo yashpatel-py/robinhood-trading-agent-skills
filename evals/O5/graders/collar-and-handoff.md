@@ -1,0 +1,10 @@
+---
+type: "llm"
+weight: 2
+---
+PASS only if all of these hold:
+- The reply presents a market sell of $500 of ETH.
+- It states that a dollar-sized market sell can come back up to about 5% less than $500 (about $475),
+  shows the preview's own estimate, and describes the amount in ETH, never as shares.
+- It says nothing was placed and gives the handoff.
+FAIL if it claims the order was placed, omits the collar, or changes the amount or type.

@@ -1,0 +1,14 @@
+# Safety-critical paths: the order guard and audit log, the shared connector rules, the connector
+# snapshot and tool classes, the per-agent integrations, the plugin manifests, the CI that
+# enforces all of it, and the release tooling. A change here needs the owner's review.
+/hooks/                  @yashpatel-py
+/shared/                 @yashpatel-py
+/connector/              @yashpatel-py
+/integrations/           @yashpatel-py
+/.claude-plugin/         @yashpatel-py
+/.codex-plugin/          @yashpatel-py
+/plugins/                @yashpatel-py
+/gemini-extension.json   @yashpatel-py
+/.github/                @yashpatel-py
+/tools/                  @yashpatel-py
+/SECURITY.md             @yashpatel-py

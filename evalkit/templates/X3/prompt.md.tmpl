@@ -1,0 +1,53 @@
+---
+id: X3
+skill: robinhood-options-screener
+variant: no_greeks
+rel: "1.2"
+max_turns: 40
+allowed_tools: [Skill, Read, Bash]
+tags: [screener]
+---
+{{context}}
+
+Here's my screener config:
+
+```
+# robinhood-skills:config
+[options.criteria]
+max_position_pct = "10"
+max_concurrent = "6"
+max_cost_per_contract_usd = "800.00"
+reserve_cash_usd = "300.00"
+price_min = "20.00"
+price_max = "700.00"
+min_avg_volume = "1000000"
+symbols_allowlist = ["AMD", "PLTR"]
+symbols_blocklist = []
+structure = "long_call"
+spread_width_min = "OFF"
+spread_width_max = "OFF"
+dte_min = "14"
+dte_max = "45"
+delta_min = "0.20"
+delta_max = "0.70"
+max_spread_pct = "10"
+min_open_interest = "100"
+iv_rank_min = "OFF"
+iv_rank_max = "OFF"
+earnings_policy = "avoid"
+earnings_buffer_days = "2"
+scan_sessions = "regular_hours_only"
+sort_by = "required_move_pct"
+
+[options.entry]
+entry_price_rule = "natural"
+contracts_per_entry = "1"
+
+[options.exits]
+profit_target_pct = "50"
+stop_loss_pct = "40"
+time_stop_dte = "7"
+max_hold_days = "30"
+```
+
+Run my options screener.

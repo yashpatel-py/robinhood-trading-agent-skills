@@ -1,0 +1,26 @@
+{
+  "session_id": "confirm-session-1",
+  "transcript_path": "/tmp/rh-test/transcript.jsonl",
+  "cwd": "__CWD__",
+  "permission_mode": "default",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "mcp__robinhood-trading__place_equity_order",
+  "tool_input": {
+    "account_number": "__ACCT__",
+    "symbol": "PLTR",
+    "side": "buy",
+    "type": "limit",
+    "quantity": "10",
+    "limit_price": "31.24",
+    "time_in_force": "gfd",
+    "market_hours": "all_day_hours",
+    "ref_id": "__REF__"
+  },
+  "tool_response": [
+    {
+      "type": "text",
+      "text": "{\"data\": {\"id\": \"order-confirm-1\", \"state\": \"queued\", \"symbol\": \"PLTR\"}, \"guide\": \"Test guide text.\"}"
+    }
+  ],
+  "tool_use_id": "toolu_confirm_1"
+}

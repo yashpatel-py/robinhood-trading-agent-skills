@@ -1,0 +1,20 @@
+{"query": "check my options against my rules", "should_trigger": true, "split": "train"}
+{"query": "what expires this week", "should_trigger": true, "split": "train"}
+{"query": "am I going to get assigned on my KO call", "should_trigger": true, "split": "train"}
+{"query": "will my SPY calls auto-exercise", "should_trigger": true, "split": "train"}
+{"query": "what's priced into NVDA earnings for my options", "should_trigger": true, "split": "train"}
+{"query": "did any of my option positions hit my profit target or stop", "should_trigger": true, "split": "train"}
+{"query": "how much cash do I need if my calls get exercised on friday", "should_trigger": true, "split": "train"}
+{"query": "is there early assignment risk on my covered call before the dividend", "should_trigger": true, "split": "validation"}
+{"query": "run my options monitor", "should_trigger": true, "split": "validation"}
+{"query": "which of my contracts are about to expire worthless", "should_trigger": true, "split": "validation"}
+{"query": "check my option positions every 30 minutes and tell me if a rule fires", "should_trigger": true, "split": "validation"}
+{"query": "when will robinhood close my expiring options if I do nothing", "should_trigger": true, "split": "validation"}
+{"query": "show me SPY options", "should_trigger": false, "expect_skill": "robinhood-trading", "split": "train"}
+{"query": "explain theta", "should_trigger": false, "split": "train"}
+{"query": "run my options screener", "should_trigger": false, "expect_skill": "robinhood-options-screener", "split": "train"}
+{"query": "protect my stock positions", "should_trigger": false, "expect_skill": "robinhood-exit-guardian", "split": "train"}
+{"query": "find me cheap calls on AMD", "should_trigger": false, "expect_skill": "robinhood-trading", "split": "train"}
+{"query": "what's a covered call", "should_trigger": false, "split": "validation"}
+{"query": "set a stop loss on my NVDA shares", "should_trigger": false, "expect_skill": "robinhood-exit-guardian", "split": "validation"}
+{"query": "check my option positions at Schwab", "should_trigger": false, "split": "validation"}

@@ -1,0 +1,15 @@
+---
+type: "llm"
+weight: 2
+---
+PASS only if all of these hold:
+- The reply presents the user's order as given: buy $2,000 of PLTR at market, dollar-sized, with no share
+  quantity invented.
+- It makes clear the order was only simulated and that nothing was placed.
+- The handoff tells the user how to act on it (entering it in the Robinhood app) together with the caveat
+  that Robinhood does not document placing orders by hand inside the Agentic account, or that another
+  account's buying power, lots and checks would differ. Mentioning confirm mode only as a plugin setting
+  the user can switch on is acceptable.
+- It reports the review's pre-trade checks (or says none were returned).
+FAIL if the reply says or implies the order was placed, submitted or filled; if it changed the dollar
+amount or the order type; or if it invented a share quantity.

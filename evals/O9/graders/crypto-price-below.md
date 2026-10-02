@@ -1,0 +1,7 @@
+---
+type: "tool_used"
+tool: "mcp__robinhood__create_alert"
+input_match: "^(?=[\\s\\S]*\"symbol\"\\s*:\\s*\"ETH(-?USD)?\")(?=[\\s\\S]*\"condition_type\"\\s*:\\s*\"price_below\")(?=[\\s\\S]*\"threshold\"\\s*:\\s*\"?2,?500(\\.0+)?\"?\\s*[,}])(?=[\\s\\S]*\"asset_class\"\\s*:\\s*\"crypto\")"
+min: 1
+weight: 2
+---

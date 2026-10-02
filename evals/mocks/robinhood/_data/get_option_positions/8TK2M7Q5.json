@@ -1,0 +1,6 @@
+{
+  "replies": {
+    "nonzero": "{\"data\":{\"positions\":[],\"next\":null},\"guide\":\"average_price is the average premium per share of the underlying; multiply by trade_value_multiplier for the per-contract amount. Warn the user when any pending_* quantity is non-zero. Price open positions with get_option_quotes.\"}",
+    "all": "{\"data\":{\"positions\":[],\"next\":null},\"guide\":\"average_price is the average premium per share of the underlying; multiply by trade_value_multiplier for the per-contract amount. Warn the user when any pending_* quantity is non-zero. Price open positions with get_option_quotes.\"}"
+  }
+}

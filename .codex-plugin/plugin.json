@@ -1,0 +1,16 @@
+{
+  "name": "robinhood-trading",
+  "version": "2.0.0",
+  "description": "Unofficial Preflight skills for Robinhood Agentic Trading: checked order tickets, cross-account wash-sale checks, exit protection, an options monitor, an agent report card and an options screener. The skills simulate orders and hand you the ticket to place yourself. In Codex that is advised, not enforced: the bundled order-guard hook runs once you trust it in /hooks, and it is not yet verified on Codex.",
+  "author": {
+    "name": "Yash Patel",
+    "url": "https://github.com/yashpatel-py"
+  },
+  "skills": "./skills/",
+  "hooks": "./.codex-plugin/hooks.json",
+  "interface": {
+    "displayName": "Preflight for Robinhood Agentic Trading (unofficial)",
+    "shortDescription": "Wash-sale checks, exits, options checks and checked tickets for Robinhood's agent MCP",
+    "category": "finance"
+  }
+}

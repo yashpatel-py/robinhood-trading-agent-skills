@@ -1,0 +1,1 @@
+{"data":{"symbol":"AMD","tax_lots":[],"next":null},"guide":"Newest-acquired first. A lot with no cost fields has its basis pending; never show that as zero. is_selectable=false means the lot is still syncing and cannot be chosen for a specific-lot sale yet."}

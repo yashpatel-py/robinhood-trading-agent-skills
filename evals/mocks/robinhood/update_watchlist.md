@@ -1,0 +1,1 @@
+{"data":{"ok":true,"list_id":"{{input.list_id}}","changed":{"display_name":"{{input.display_name}}","icon_emoji":"{{input.icon_emoji}}","display_description":"{{input.display_description}}"}},"guide":""}

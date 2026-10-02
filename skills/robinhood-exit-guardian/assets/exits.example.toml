@@ -1,0 +1,46 @@
+# robinhood-skills:config
+# Exit rules for robinhood-exit-guardian (Preflight for Robinhood Agentic Trading; unofficial,
+# not affiliated with Robinhood Markets, Inc.).
+#
+# Copy the sections you want into ONE config file:
+#   ~/.config/robinhood-skills/config.toml   (or ./.robinhood/config.toml, or $ROBINHOOD_SKILLS_CONFIG)
+# or paste them into your project instructions under the line "# robinhood-skills:config".
+#
+# Every value ships as "UNSET". That is deliberate: a stop or a target is a decision about how much you
+# are willing to lose or when you want out, and only you can make it. While a rule is UNSET (or "ask"),
+# the skill asks you each time and never proposes a number of its own. The agent writes to this file
+# only when you state a value in the conversation, and only after showing you the change.
+#
+# Grammar: # comments, [section] headers, key = "string". Write prices and percentages as strings.
+
+[exits.equity]
+# How to derive a stop for a stock you ask to protect:
+#   "pct:<n>"        n% below the current price            (e.g. "pct:<your n>")
+#   "atr:<m>:<p>"    m x the daily ATR(p) below the price  (the skill fetches ATR(p) for you)
+#   "ask"            ask me each time
+stop_rule = "UNSET"
+# Take-profit for an OCO (only where the OCO tools are enabled for your Agentic account):
+#   "pct:<n>"  n% above the current price
+#   "r:<k>"    k x the stop distance above the current price
+#   "none"     stop only (the skill drafts a stop order, not an OCO)
+#   "ask"      ask me each time
+target_rule = "UNSET"
+# "gtc" keeps a protective exit working until it fills or you cancel it (Robinhood's GTC lifetime is
+# about 90 days; unverified). "gfd" expires at the close of the day it is working.
+time_in_force = "UNSET"
+# "yes": also offer a native price-below alert at the stop level. Alerts notify your phone; they never
+# sell. "no": don't offer one.
+backstop_alerts = "UNSET"
+
+# Optional per-symbol levels, as prices. They replace the rules above for that symbol. Rename the
+# section to your own ticker; delete it if you don't need it.
+[exits.equity.symbols.NVDA]
+stop = "UNSET"
+target = "UNSET"
+
+[exits.crypto]
+# Stop for a coin you ask to protect: "pct:<n>" below the current price, or "ask".
+stop_rule = "UNSET"
+# Crypto stop orders: "gtc" lasts 90 days, "gfd" ends today, "gfw" 7 days, "gfm" 30 days.
+# Robinhood treats a stop order sent without one as "gfd".
+time_in_force = "UNSET"

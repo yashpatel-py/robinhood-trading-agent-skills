@@ -1,0 +1,19 @@
+{
+  "session_id": "confirm-session-1",
+  "transcript_path": "/tmp/rh-test/transcript.jsonl",
+  "cwd": "__CWD__",
+  "permission_mode": "default",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "mcp__robinhood-trading__place_advanced_order",
+  "tool_input": {
+    "account_number": "__ACCT__",
+    "symbol": "AMD",
+    "side": "sell",
+    "quantity": "2",
+    "take_profit_limit_price": "180",
+    "stop_loss_stop_price": "142",
+    "time_in_force": "gtc",
+    "ref_id": "__REF__"
+  },
+  "tool_use_id": "toolu_confirm_1"
+}

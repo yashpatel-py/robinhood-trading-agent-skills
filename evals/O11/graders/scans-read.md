@@ -1,0 +1,6 @@
+---
+type: "tool_used"
+tool: "mcp__robinhood__get_scans"
+min: 1
+weight: 1
+---

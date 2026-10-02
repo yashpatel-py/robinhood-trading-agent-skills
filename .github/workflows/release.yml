@@ -1,0 +1,113 @@
+# On a version tag (v*): re-run the whole validate workflow, check that every manifest, skill and
+# the CHANGELOG agree with the tag, apply the release gate, build the release assets, and publish
+# the GitHub Release.
+# Release gate (final tags only; a prerelease tag such as v2.0.0-rc.1 skips it with a warning):
+# `tools/check_readme.py --release` must pass, so docs/eval-scorecard.md and the README excerpt
+# show the same PASS run on Haiku, Sonnet and Opus (from evals.yml with open_pr, merged),
+# docs/badges/evals.json is green, and the demo media in docs/media/ is recorded. The docs promise
+# those results before the tag; this step is what keeps that promise.
+#   dist/zips/<skill>.zip     each skill folder, for Claude Desktop / claude.ai upload
+#   dist/chatgpt/<skill>.md   single-file bundles for clients without skills ("advised only")
+#   dist/SHA256SUMS           checksums (the zips are byte-reproducible)
+# Release notes are the CHANGELOG section for the tag, so date that heading before tagging.
+# The eval report files are attached separately, by running evals.yml with release_tag set (it is
+# paid, so it never runs automatically). The Gemini CLI gallery indexes tags on its own.
+name: release
+on:
+  push:
+    tags: ["v*"]
+permissions: { contents: read }
+concurrency: { group: "release-${{ github.ref }}", cancel-in-progress: false }
+jobs:
+  validate:
+    uses: ./.github/workflows/validate.yml
+
+  release:
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Versions equal the tag (and the CHANGELOG heading is dated)
+        run: python3 tools/check_versions.py "$TAG"
+      - name: Release gate (published PASS eval run on Haiku, Sonnet and Opus; green badge; demo media)
+        run: |
+          case "$TAG" in
+            *-*)
+              echo "::warning::$TAG is a prerelease: the eval-scorecard and demo-media release gate is skipped."
+              ;;
+            *)
+              python3 tools/check_readme.py --release
+              ;;
+          esac
+      - name: Build the release assets
+        run: python3 tools/build_release.py
+      - name: Verify the checksums
+        run: cd dist && sha256sum -c SHA256SUMS
+      - name: Release notes from CHANGELOG.md
+        run: |
+          python3 - <<'PY'
+          import os, re, sys
+          tag = os.environ["TAG"]
+          version = tag[1:] if tag[:1] in "vV" else tag
+          text = open("CHANGELOG.md", encoding="utf-8").read()
+          heading = re.compile(r"^##\s+\[([^\]]+)\].*$", re.M)
+          matches = list(heading.finditer(text))
+          section = None
+          for i, m in enumerate(matches):
+              if m.group(1).strip() == version:
+                  end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
+                  body = text[m.end():end]
+                  body = re.split(r"^\[[^\]]+\]:\s", body, maxsplit=1, flags=re.M)[0]
+                  section = body.strip()
+                  break
+          if not section:
+              print("::error::CHANGELOG.md has no section for {}".format(version))
+              sys.exit(1)
+          notes = [
+              "*Unofficial. Not affiliated with Robinhood Markets, Inc.* Simulates orders by default; "
+              "nothing in this release is investment or tax advice.",
+              "",
+              section,
+              "",
+              "---",
+              "Assets: `<skill>.zip` (upload to Claude Desktop or claude.ai), `<skill>.md` (single-file "
+              "bundle for ChatGPT, Grok and other clients; advised only, nothing enforces it there), and "
+              "`SHA256SUMS` (verify with `sha256sum -c SHA256SUMS`).",
+          ]
+          os.makedirs("dist", exist_ok=True)
+          with open("dist/RELEASE_NOTES.md", "w", encoding="utf-8") as fh:
+              fh.write("\n".join(notes) + "\n")
+          PY
+      - name: Publish the skills with gh skill publish (preview; skipped with a warning if unavailable)
+        continue-on-error: true
+        timeout-minutes: 5
+        run: |
+          if ! gh skill publish --help >/dev/null 2>&1; then
+            echo "::warning::gh skill is not available in this runner's GitHub CLI; skipping."
+            exit 0
+          fi
+          gh skill publish --dry-run .
+          # Creates the release for this tag when it succeeds; the next step then updates it.
+          gh skill publish --tag "$TAG" . || echo "::warning::gh skill publish did not complete; the release is created below."
+      - name: Create or update the GitHub Release
+        run: |
+          shopt -s nullglob
+          assets=(dist/zips/*.zip dist/chatgpt/*.md dist/SHA256SUMS)
+          if [ "${#assets[@]}" -lt 3 ]; then echo "::error::release assets are missing"; exit 1; fi
+          title="$TAG: Preflight for Robinhood Agentic Trading (unofficial)"
+          prerelease=()
+          case "$TAG" in *-*) prerelease=(--prerelease) ;; esac
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "$title" --notes-file dist/RELEASE_NOTES.md "${prerelease[@]}"
+            gh release upload "$TAG" "${assets[@]}" --clobber
+          else
+            gh release create "$TAG" --verify-tag --title "$title" --notes-file dist/RELEASE_NOTES.md \
+              "${prerelease[@]}" "${assets[@]}"
+          fi

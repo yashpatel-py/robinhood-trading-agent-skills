@@ -1,0 +1,1 @@
+{"data":{"positions":[{"asset_code":"ETH","quantity":"0.42","quantity_transferable":"0.42","cost_bases":[{"direct_cost_basis":"820.13","direct_quantity":"0.42"}]}],"next":null},"guide":"Quantities are coin units. Price positions with get_crypto_quotes."}

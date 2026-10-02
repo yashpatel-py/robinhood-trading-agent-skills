@@ -1,0 +1,16 @@
+{
+  "session_id": "test-session-1",
+  "transcript_path": "/tmp/rh-test/transcript.jsonl",
+  "cwd": "/tmp/rh-test/project",
+  "permission_mode": "default",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "mcp__robinhood-trading__get_alerts",
+  "tool_input": {},
+  "tool_response": [
+    {
+      "type": "text",
+      "text": "{\"data\": {\"alerts\": [{\"alert_id\": \"a1\"}, {\"alert_id\": \"a2\"}]}, \"guide\": \"Test guide text.\"}"
+    }
+  ],
+  "tool_use_id": "toolu_test_2"
+}

@@ -1,0 +1,1392 @@
+{
+ "script": "scorecard",
+ "about": "Synthetic scorecard cases. Expected values are subsets: listed dict keys must match exactly; lists must match in length and order. Hand checks: slippage buy (29.50-29.45)/29.45 x 10000 = 16.98 bps, sell (30.45-30.40)/30.45 x 10000 = 16.42 bps, crypto (3004-3000)/3000 x 10000 = 13.33 bps, average 15.58 -> 15.6; SPY pair 290.00 x (606/600 - 1) = 2.90 vs agent 10 x (31.00 - 29.00) = 20.00; turnover (4 x 71.00 + 2 x 3.40 x 100) / 10000 = 9.64%.",
+ "cases": [
+  {
+   "name": "Robinhood's window total wins over its bucket sum, with a note",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [],
+    "realized_pnl": {
+     "data_points": [
+      {
+       "realized_gain": "10.00",
+       "number_of_trades": 1
+      },
+      {
+       "realized_gain": "5.00",
+       "number_of_trades": "2"
+      }
+     ],
+     "total_returns": "14.00"
+    }
+   },
+   "expected": {
+    "realized_usd": "14.00",
+    "realized_source": "total_returns",
+    "closing_trades_n": 3,
+    "notes": [
+     "Robinhood's window total (14.00) differs from the sum of its buckets (15.00); the total is shown",
+     "turnover not computed: pass portfolio_value_usd from get_portfolio"
+    ]
+   }
+  },
+  {
+   "name": "null buckets are n/a, not $0",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [],
+    "realized_pnl": {
+     "data_points": [
+      {
+       "realized_gain": null,
+       "number_of_trades": 0
+      },
+      {
+       "realized_gain": null,
+       "number_of_trades": 0
+      }
+     ]
+    }
+   },
+   "expected": {
+    "realized_usd": null,
+    "realized_source": null,
+    "realized_na_buckets": 2
+   }
+  },
+  {
+   "name": "the response envelope is unwrapped",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [],
+    "realized_pnl": {
+     "data": {
+      "data_points": [
+       {
+        "realized_gain": "-3.10",
+        "number_of_trades": 1
+       }
+      ]
+     },
+     "guide": "..."
+    }
+   },
+   "expected": {
+    "realized_usd": "-3.10",
+    "realized_source": "bucket_sum"
+   }
+  },
+  {
+   "name": "total_returns given as an object",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [],
+    "realized_pnl": {
+     "data_points": [],
+     "total_returns": {
+      "amount": "5.00",
+      "currency": "USD"
+     }
+    }
+   },
+   "expected": {
+    "realized_usd": "5.00",
+    "realized_source": "total_returns"
+   }
+  },
+  {
+   "name": "no realized data at all",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": []
+   },
+   "expected": {
+    "realized_usd": null,
+    "realized_source": null,
+    "notes": [
+     "get_realized_pnl not provided: realized P&L not reported",
+     "turnover not computed: pass portfolio_value_usd from get_portfolio"
+    ]
+   }
+  },
+  {
+   "name": "trade-history rows are attributed only through a matching filled agent sell",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "s1",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "30.00",
+      "cumulative_quantity": "10",
+      "last_transaction_at": "2026-11-10T15:00:02Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "s2",
+      "symbol": "KO",
+      "side": "sell",
+      "quantity": "3",
+      "state": "filled",
+      "created_at": "2026-11-10T16:00:00Z",
+      "placed_agent": "user",
+      "average_price": "70.00",
+      "cumulative_quantity": "3",
+      "last_transaction_at": "2026-11-10T16:00:01Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "s3",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "2",
+      "state": "filled",
+      "created_at": "2026-11-10T17:00:00Z",
+      "average_price": "150.00",
+      "cumulative_quantity": "2",
+      "last_transaction_at": "2026-11-10T17:00:01Z"
+     }
+    ],
+    "realized_trades": [
+     {
+      "timestamp": "2026-11-10T15:00:02Z",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "10",
+      "price": "1.00",
+      "realized_gain": "12.00"
+     },
+     {
+      "timestamp": "2026-11-10T16:00:01Z",
+      "symbol": "KO",
+      "side": "sell",
+      "quantity": "3",
+      "price": "1.00",
+      "realized_gain": "4.50"
+     },
+     {
+      "timestamp": "2026-11-10T17:00:01Z",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "2",
+      "price": "1.00",
+      "realized_gain": "-6.00"
+     },
+     {
+      "timestamp": "2026-11-10T18:00:00Z",
+      "symbol": "AMD",
+      "side": "buy",
+      "quantity": "1",
+      "price": "1.00",
+      "realized_gain": "40.00"
+     },
+     {
+      "timestamp": "2026-11-10T19:00:00Z",
+      "symbol": "BTC",
+      "side": "sell",
+      "quantity": "0.01",
+      "price": "1.00",
+      "realized_gain": "3.00"
+     },
+     {
+      "timestamp": "2026-11-10T20:00:00Z",
+      "symbol": "",
+      "side": "",
+      "quantity": "1",
+      "price": "1.00",
+      "realized_gain": "-1.00"
+     },
+     {
+      "timestamp": "2026-11-10T21:00:00Z",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "10",
+      "price": "1.00",
+      "realized_gain": null
+     }
+    ]
+   },
+   "expected": {
+    "per_trade": {
+     "agent_rows": 1,
+     "other_source_rows": 1,
+     "unclassified_rows": 5,
+     "agent": [
+      {
+       "timestamp": "2026-11-10T15:00:02Z",
+       "symbol": "PLTR",
+       "side": "sell",
+       "quantity": "10",
+       "realized_gain": "12.00",
+       "order_id": "s1"
+      }
+     ],
+     "other_source": [
+      {
+       "timestamp": "2026-11-10T16:00:01Z",
+       "symbol": "KO",
+       "side": "sell",
+       "quantity": "3",
+       "realized_gain": "4.50",
+       "order_id": "s2",
+       "placed_agent": "user"
+      }
+     ],
+     "unclassified": [
+      {
+       "timestamp": "2026-11-10T17:00:01Z",
+       "symbol": "AMD",
+       "side": "sell",
+       "quantity": "2",
+       "realized_gain": "-6.00",
+       "order_id": "s3",
+       "reason": "matched order has no source tag"
+      },
+      {
+       "timestamp": "2026-11-10T18:00:00Z",
+       "symbol": "AMD",
+       "side": "buy",
+       "quantity": "1",
+       "realized_gain": "40.00",
+       "reason": "not a sell row: an option close or other realizing row, not a share sale"
+      },
+      {
+       "timestamp": "2026-11-10T19:00:00Z",
+       "symbol": "BTC",
+       "side": "sell",
+       "quantity": "0.01",
+       "realized_gain": "3.00",
+       "reason": "no filled equity sell with the same symbol, quantity and time (could be an option close under the underlying, crypto, or a partial fill)"
+      },
+      {
+       "timestamp": "2026-11-10T20:00:00Z",
+       "symbol": null,
+       "side": null,
+       "quantity": "1",
+       "realized_gain": "-1.00",
+       "reason": "no symbol or side (prediction market, adjustment or similar)"
+      },
+      {
+       "timestamp": "2026-11-10T21:00:00Z",
+       "symbol": "PLTR",
+       "side": "sell",
+       "quantity": "10",
+       "realized_gain": null,
+       "reason": "no filled equity sell with the same symbol, quantity and time (could be an option close under the underlying, crypto, or a partial fill)"
+      }
+     ]
+    },
+    "win_rate": {
+     "value": 100.0,
+     "n": 1,
+     "value_raw": "100"
+    }
+   }
+  },
+  {
+   "name": "fill time must be within the tolerance (121 s misses at the default)",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "s1",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "30.00",
+      "cumulative_quantity": "10",
+      "last_transaction_at": "2026-11-10T15:00:00Z"
+     }
+    ],
+    "realized_trades": [
+     {
+      "timestamp": "2026-11-10T15:02:01Z",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "10",
+      "price": "1.00",
+      "realized_gain": "12.00"
+     }
+    ]
+   },
+   "expected": {
+    "per_trade": {
+     "agent_rows": 0,
+     "other_source_rows": 0,
+     "unclassified_rows": 1,
+     "agent": [],
+     "other_source": [],
+     "unclassified": [
+      {
+       "timestamp": "2026-11-10T15:02:01Z",
+       "symbol": "PLTR",
+       "side": "sell",
+       "quantity": "10",
+       "realized_gain": "12.00",
+       "reason": "no filled equity sell with the same symbol, quantity and time (could be an option close under the underlying, crypto, or a partial fill)"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "a wider tolerance can be passed",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "s1",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "30.00",
+      "cumulative_quantity": "10",
+      "last_transaction_at": "2026-11-10T15:00:00Z"
+     }
+    ],
+    "realized_trades": [
+     {
+      "timestamp": "2026-11-10T15:02:01Z",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "10",
+      "price": "1.00",
+      "realized_gain": "12.00"
+     }
+    ],
+    "match_tolerance_s": 300
+   },
+   "expected": {
+    "per_trade": {
+     "agent_rows": 1,
+     "other_source_rows": 0,
+     "unclassified_rows": 0,
+     "agent": [
+      {
+       "timestamp": "2026-11-10T15:02:01Z",
+       "symbol": "PLTR",
+       "side": "sell",
+       "quantity": "10",
+       "realized_gain": "12.00",
+       "order_id": "s1"
+      }
+     ],
+     "other_source": [],
+     "unclassified": []
+    },
+    "win_rate": {
+     "value": 100.0,
+     "n": 1,
+     "value_raw": "100"
+    }
+   }
+  },
+  {
+   "name": "no losses: profit factor is null",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "s1",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "30.00",
+      "cumulative_quantity": "10",
+      "last_transaction_at": "2026-11-10T15:00:02Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "s2",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "2",
+      "state": "filled",
+      "created_at": "2026-11-11T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "150.00",
+      "cumulative_quantity": "2",
+      "last_transaction_at": "2026-11-11T15:00:02Z"
+     }
+    ],
+    "realized_trades": [
+     {
+      "timestamp": "2026-11-10T15:00:02Z",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "10",
+      "price": "1.00",
+      "realized_gain": "12.00"
+     },
+     {
+      "timestamp": "2026-11-11T15:00:02Z",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "2",
+      "price": "1.00",
+      "realized_gain": "8.00"
+     }
+    ]
+   },
+   "expected": {
+    "win_rate": {
+     "value": 100.0,
+     "n": 2,
+     "value_raw": "100"
+    },
+    "avg_win_usd": "10.00",
+    "avg_loss_usd": null,
+    "profit_factor": null
+   }
+  },
+  {
+   "name": "only losses: win rate 0, profit factor 0",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "s1",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "30.00",
+      "cumulative_quantity": "10",
+      "last_transaction_at": "2026-11-10T15:00:02Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "s2",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "2",
+      "state": "filled",
+      "created_at": "2026-11-11T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "150.00",
+      "cumulative_quantity": "2",
+      "last_transaction_at": "2026-11-11T15:00:02Z"
+     }
+    ],
+    "realized_trades": [
+     {
+      "timestamp": "2026-11-10T15:00:02Z",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "10",
+      "price": "1.00",
+      "realized_gain": "-12.00"
+     },
+     {
+      "timestamp": "2026-11-11T15:00:02Z",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "2",
+      "price": "1.00",
+      "realized_gain": "-8.00"
+     }
+    ]
+   },
+   "expected": {
+    "win_rate": {
+     "value": 0.0,
+     "n": 2,
+     "value_raw": "0"
+    },
+    "avg_win_usd": null,
+    "avg_loss_usd": "-10.00",
+    "profit_factor": 0.0
+   }
+  },
+  {
+   "name": "slippage: buy vs review ask, sell vs review bid, kit-sent crypto included, a review after the order is ignored",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "b1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "29.50",
+      "cumulative_quantity": "10",
+      "last_transaction_at": "2026-11-10T15:00:01Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "s1",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-11T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "30.40",
+      "cumulative_quantity": "10",
+      "last_transaction_at": "2026-11-11T15:00:01Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "crypto",
+      "order_id": "c1",
+      "symbol": "ETH",
+      "side": "buy",
+      "quantity": "0.1",
+      "state": "filled",
+      "created_at": "2026-11-11T16:00:00Z",
+      "average_price": "3004.00",
+      "cumulative_quantity": "0.1",
+      "last_transaction_at": "2026-11-11T16:00:01Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "b2",
+      "symbol": "AMD",
+      "side": "buy",
+      "quantity": "1",
+      "state": "filled",
+      "created_at": "2026-11-12T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "150.00",
+      "cumulative_quantity": "1",
+      "last_transaction_at": "2026-11-12T15:00:01Z"
+     }
+    ],
+    "matched": [
+     {
+      "order_id": "b1",
+      "fingerprint": "sha256:b1"
+     },
+     {
+      "order_id": "s1",
+      "fingerprint": "sha256:s1"
+     },
+     {
+      "order_id": "c1",
+      "fingerprint": "sha256:c1"
+     },
+     {
+      "order_id": "b2",
+      "fingerprint": "sha256:b2"
+     }
+    ],
+    "reviews": [
+     {
+      "fingerprint": "sha256:b1",
+      "ts": "2026-11-10T14:59:30Z",
+      "quote_bid": "29.40",
+      "quote_ask": "29.45"
+     },
+     {
+      "fingerprint": "sha256:s1",
+      "ts": "2026-11-11T14:59:00Z",
+      "bid": "30.45",
+      "ask": "30.50"
+     },
+     {
+      "fingerprint": "sha256:c1",
+      "ts": "2026-11-11T15:59:40Z",
+      "bid": "2998.00",
+      "ask": "3000.00"
+     },
+     {
+      "fingerprint": "sha256:b2",
+      "ts": "2026-11-12T15:02:30Z",
+      "bid": "149.90",
+      "ask": "150.00"
+     }
+    ]
+   },
+   "expected": {
+    "slippage_bps_vs_review": {
+     "avg": 15.6,
+     "n": 3,
+     "avg_raw": "15.57720775799342627982637350",
+     "rows": [
+      {
+       "order_id": "b1",
+       "symbol": "PLTR",
+       "side": "buy",
+       "fill": "29.50",
+       "review_quote": "29.45",
+       "review_ts": "2026-11-10T14:59:30Z",
+       "bps": 17.0,
+       "bps_raw": "16.97792869269949066213921902"
+      },
+      {
+       "order_id": "s1",
+       "symbol": "PLTR",
+       "side": "sell",
+       "fill": "30.40",
+       "review_quote": "30.45",
+       "review_ts": "2026-11-11T14:59:00Z",
+       "bps": 16.4,
+       "bps_raw": "16.42036124794745484400656814"
+      },
+      {
+       "order_id": "c1",
+       "symbol": "ETH",
+       "side": "buy",
+       "fill": "3004.00",
+       "review_quote": "3000.00",
+       "review_ts": "2026-11-11T15:59:40Z",
+       "bps": 13.3,
+       "bps_raw": "13.33333333333333333333333333"
+      }
+     ]
+    },
+    "counts": {
+     "orders": 4,
+     "filled": 4,
+     "partially_filled": 0,
+     "rejected": 0,
+     "failed": 0,
+     "cancelled": 0,
+     "open": 0,
+     "other": 0
+    },
+    "counts_source_unknown": {
+     "orders": 0,
+     "by_asset": {}
+    }
+   }
+  },
+  {
+   "name": "a sale larger than the in-window buys leaves shares unpaired",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "b1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "29.50",
+      "cumulative_quantity": "10",
+      "last_transaction_at": "2026-11-10T15:00:01Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "s1",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "15",
+      "state": "filled",
+      "created_at": "2026-11-12T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "30.40",
+      "cumulative_quantity": "15",
+      "last_transaction_at": "2026-11-12T15:00:01Z"
+     }
+    ]
+   },
+   "expected": {
+    "spy_request": {
+     "symbols": [
+      "SPY"
+     ],
+     "start_time": "2026-11-09T15:00:01Z",
+     "end_time": "2026-11-12T16:00:01Z",
+     "interval": "hour"
+    },
+    "trade_matched_spy": null,
+    "notes": [
+     "get_realized_pnl not provided: realized P&L not reported",
+     "5 share(s) sold by the agent had no agent buy inside the window, so they are not in the SPY pairs",
+     "turnover not computed: pass portfolio_value_usd from get_portfolio"
+    ]
+   }
+  },
+  {
+   "name": "no SPY bar within a day of a fill: the pair is left out",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "b1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "29.50",
+      "cumulative_quantity": "10",
+      "last_transaction_at": "2026-11-10T15:00:01Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "s1",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "15",
+      "state": "filled",
+      "created_at": "2026-11-12T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "30.40",
+      "cumulative_quantity": "15",
+      "last_transaction_at": "2026-11-12T15:00:01Z"
+     }
+    ],
+    "spy_bars": [
+     {
+      "t": "2026-11-10T14:30:00Z",
+      "close": "670.00"
+     },
+     {
+      "t": "2026-11-05T14:30:00Z",
+      "close": "660.00"
+     }
+    ]
+   },
+   "expected": {
+    "trade_matched_spy": null,
+    "trade_matched_spy_note": "no pair had SPY bars around both fills",
+    "notes": [
+     "get_realized_pnl not provided: realized P&L not reported",
+     "1 pair(s) left out of the SPY comparison: no SPY bar at or within a day before a fill",
+     "5 share(s) sold by the agent had no agent buy inside the window, so they are not in the SPY pairs",
+     "turnover not computed: pass portfolio_value_usd from get_portfolio"
+    ]
+   }
+  },
+  {
+   "name": "no round trip in the window: no SPY comparison and no request",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "b1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "29.50",
+      "cumulative_quantity": "10",
+      "last_transaction_at": "2026-11-10T15:00:01Z"
+     }
+    ]
+   },
+   "expected": {
+    "trade_matched_spy": null,
+    "trade_matched_spy_note": "no agent buy->sell pair with both fill times inside the window",
+    "spy_request": null
+   }
+  },
+  {
+   "name": "fills passed explicitly override the order rows",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "b1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:00Z",
+      "placed_agent": "agentic",
+      "cumulative_quantity": "0"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "s1",
+      "symbol": "PLTR",
+      "side": "sell",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-11T15:00:00Z",
+      "placed_agent": "agentic",
+      "cumulative_quantity": "0"
+     }
+    ],
+    "fills": [
+     {
+      "order_id": "b1",
+      "avg_fill_price": "29.00",
+      "filled_at": "2026-11-10T15:00:05Z",
+      "quantity": "10"
+     },
+     {
+      "order_id": "s1",
+      "avg_fill_price": "31.00",
+      "filled_at": "2026-11-11T15:00:05Z",
+      "quantity": "10"
+     }
+    ],
+    "spy_bars": [
+     {
+      "t": "2026-11-10T14:30:00Z",
+      "close": "600.00"
+     },
+     {
+      "t": "2026-11-11T14:30:00Z",
+      "close": "606.00"
+     }
+    ],
+    "portfolio_value_usd": "6000.00"
+   },
+   "expected": {
+    "trade_matched_spy": {
+     "agent_pnl_usd": "20.00",
+     "spy_pnl_usd": "2.90",
+     "n": 1,
+     "method": "same dollars, same holding period",
+     "caveat": "small sample; not a performance claim",
+     "fill_time_source": "last_transaction_at of each filled order (or the fills you passed)",
+     "pairs": [
+      {
+       "symbol": "PLTR",
+       "quantity": "10",
+       "entry_order_id": "b1",
+       "exit_order_id": "s1",
+       "entry_filled_at": "2026-11-10T15:00:05Z",
+       "exit_filled_at": "2026-11-11T15:00:05Z",
+       "entry_filled_et": "2026-11-10 10:00 ET",
+       "exit_filled_et": "2026-11-11 10:00 ET",
+       "entry_usd": "290.00",
+       "agent_pnl_usd": "20.00",
+       "spy_entry": "600.00",
+       "spy_exit": "606.00",
+       "spy_bar_entry": "2026-11-10T14:30:00Z",
+       "spy_bar_exit": "2026-11-11T14:30:00Z",
+       "spy_pnl_usd": "2.90"
+      }
+     ]
+    },
+    "flags": [
+     {
+      "flag": "averaging_down",
+      "count": 0,
+      "orders": []
+     },
+     {
+      "flag": "trade_within_24h_of_loss",
+      "count": 0,
+      "orders": []
+     },
+     {
+      "flag": "turnover_pct",
+      "value": 10.0,
+      "value_raw": "10.0",
+      "traded_usd": "600.00",
+      "account_value_usd": "6000.00"
+     }
+    ]
+   }
+  },
+  {
+   "name": "partial fill of a cancelled order counts toward turnover; option notional x 100",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "p1",
+      "symbol": "KO",
+      "side": "buy",
+      "quantity": "10",
+      "state": "cancelled",
+      "created_at": "2026-11-10T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "71.00",
+      "cumulative_quantity": "4",
+      "last_transaction_at": "2026-11-10T15:30:00Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "option",
+      "order_id": "op1",
+      "symbol": "AMD",
+      "side": "buy",
+      "quantity": "2",
+      "state": "filled",
+      "created_at": "2026-11-10T16:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "3.40",
+      "cumulative_quantity": "2",
+      "last_transaction_at": "2026-11-10T16:00:01Z"
+     }
+    ],
+    "portfolio_value_usd": "10000"
+   },
+   "expected": {
+    "counts": {
+     "orders": 2,
+     "filled": 1,
+     "partially_filled": 0,
+     "rejected": 0,
+     "failed": 0,
+     "cancelled": 1,
+     "open": 0,
+     "other": 0
+    },
+    "flags": [
+     {
+      "flag": "averaging_down",
+      "count": 0,
+      "orders": []
+     },
+     {
+      "flag": "trade_within_24h_of_loss",
+      "count": 0,
+      "orders": []
+     },
+     {
+      "flag": "turnover_pct",
+      "value": 9.6,
+      "value_raw": "9.6400",
+      "traded_usd": "964.00",
+      "account_value_usd": "10000.00"
+     }
+    ]
+   }
+  },
+  {
+   "name": "turnover needs the account value",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "b1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "10",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "29.50",
+      "cumulative_quantity": "10",
+      "last_transaction_at": "2026-11-10T15:00:01Z"
+     }
+    ]
+   },
+   "expected": {
+    "flags": [
+     {
+      "flag": "averaging_down",
+      "count": 0,
+      "orders": []
+     },
+     {
+      "flag": "trade_within_24h_of_loss",
+      "count": 0,
+      "orders": []
+     },
+     {
+      "flag": "turnover_pct",
+      "value": null,
+      "value_raw": null,
+      "traded_usd": "295.00",
+      "account_value_usd": null
+     }
+    ],
+    "notes": [
+     "get_realized_pnl not provided: realized P&L not reported",
+     "turnover not computed: pass portfolio_value_usd from get_portfolio"
+    ]
+   }
+  },
+  {
+   "name": "averaging down resets after a sell; buys within 24 h of a loss",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "b1",
+      "symbol": "AMD",
+      "side": "buy",
+      "quantity": "2",
+      "state": "filled",
+      "created_at": "2026-11-09T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "160.00",
+      "cumulative_quantity": "2",
+      "last_transaction_at": "2026-11-09T15:00:01Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "b2",
+      "symbol": "AMD",
+      "side": "buy",
+      "quantity": "2",
+      "state": "filled",
+      "created_at": "2026-11-09T18:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "155.00",
+      "cumulative_quantity": "2",
+      "last_transaction_at": "2026-11-09T18:00:01Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "s1",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "4",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "150.00",
+      "cumulative_quantity": "4",
+      "last_transaction_at": "2026-11-10T15:00:01Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "b3",
+      "symbol": "AMD",
+      "side": "buy",
+      "quantity": "1",
+      "state": "filled",
+      "created_at": "2026-11-10T16:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "149.00",
+      "cumulative_quantity": "1",
+      "last_transaction_at": "2026-11-10T16:00:01Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "b4",
+      "symbol": "KO",
+      "side": "buy",
+      "quantity": "1",
+      "state": "filled",
+      "created_at": "2026-11-11T15:00:02Z",
+      "placed_agent": "agentic",
+      "average_price": "70.00",
+      "cumulative_quantity": "1",
+      "last_transaction_at": "2026-11-11T15:00:03Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "b5",
+      "symbol": "KO",
+      "side": "buy",
+      "quantity": "1",
+      "state": "rejected",
+      "created_at": "2026-11-12T20:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "69.00",
+      "cumulative_quantity": "0"
+     }
+    ],
+    "realized_trades": [
+     {
+      "timestamp": "2026-11-10T15:00:01Z",
+      "symbol": "AMD",
+      "side": "sell",
+      "quantity": "4",
+      "price": "1.00",
+      "realized_gain": "-50.00"
+     }
+    ],
+    "portfolio_value_usd": "5000.00"
+   },
+   "expected": {
+    "flags": [
+     {
+      "flag": "averaging_down",
+      "count": 1,
+      "orders": [
+       {
+        "order_id": "b2",
+        "symbol": "AMD",
+        "fill": "155.00",
+        "previous_buy_order_id": "b1",
+        "previous_fill": "160.00"
+       }
+      ]
+     },
+     {
+      "flag": "trade_within_24h_of_loss",
+      "count": 1,
+      "orders": [
+       {
+        "order_id": "b3",
+        "symbol": "AMD",
+        "created_et": "2026-11-10 11:00 ET",
+        "loss_at_et": "2026-11-10 10:00 ET"
+       }
+      ]
+     },
+     {
+      "flag": "turnover_pct",
+      "value": 29.0,
+      "value_raw": "28.9800",
+      "traded_usd": "1449.00",
+      "account_value_usd": "5000.00"
+     }
+    ]
+   }
+  },
+  {
+   "name": "orders outside the Agentic account or the window are not counted",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "x1",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "1",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "30",
+      "cumulative_quantity": "1",
+      "last_transaction_at": "2026-11-10T15:00:01Z"
+     },
+     {
+      "account_last4": "M7Q5",
+      "asset": "equity",
+      "order_id": "x2",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "1",
+      "state": "filled",
+      "created_at": "2026-11-10T15:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "30",
+      "cumulative_quantity": "1",
+      "last_transaction_at": "2026-11-10T15:00:01Z"
+     },
+     {
+      "account_last4": "X4F1",
+      "asset": "equity",
+      "order_id": "x3",
+      "symbol": "PLTR",
+      "side": "buy",
+      "quantity": "1",
+      "state": "filled",
+      "created_at": "2026-11-16T05:00:00Z",
+      "placed_agent": "agentic",
+      "average_price": "30",
+      "cumulative_quantity": "1",
+      "last_transaction_at": "2026-11-16T05:00:01Z"
+     }
+    ]
+   },
+   "expected": {
+    "counts": {
+     "orders": 1,
+     "filled": 1,
+     "partially_filled": 0,
+     "rejected": 0,
+     "failed": 0,
+     "cancelled": 0,
+     "open": 0,
+     "other": 0
+    }
+   }
+  },
+  {
+   "name": "a fill for an unknown order is an error",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [],
+    "fills": [
+     {
+      "order_id": "nope",
+      "avg_fill_price": "1",
+      "filled_at": "2026-11-10T15:00:00Z",
+      "quantity": "1"
+     }
+    ]
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_INPUT",
+      "field": "fills[0]",
+      "msg": "each fill needs the order_id of an order in orders"
+     }
+    ]
+   }
+  },
+  {
+   "name": "the tolerance must be a whole number of seconds",
+   "input": {
+    "window": {
+     "start_date": "2026-11-09",
+     "end_date": "2026-11-15"
+    },
+    "agentic_account_last4": "X4F1",
+    "orders": [],
+    "match_tolerance_s": "120"
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_INPUT",
+      "field": "match_tolerance_s",
+      "msg": "match_tolerance_s must be an integer 0-3600"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a window is required",
+   "input": {
+    "agentic_account_last4": "X4F1",
+    "orders": []
+   },
+   "expected": {
+    "ok": false,
+    "errors": [
+     {
+      "code": "BAD_WINDOW",
+      "field": "window",
+      "msg": "give window {start, end} (UTC instants) or {start_date, end_date}"
+     }
+    ]
+   }
+  }
+ ]
+}

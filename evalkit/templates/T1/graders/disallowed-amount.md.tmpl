@@ -1,0 +1,9 @@
+---
+# $390.00 when only the 2026-06-02 lot is sold (5 x $78.00); $90.00 when both lots are sold together,
+# because the earliest-acquired lot (2025-03-10, $18.00 loss per share) is matched first
+# (Treas. Reg. 1.1091-1(b)-(c)).
+type: regex
+match: contains
+pattern: "\\$(390|90)\\.00"
+weight: 1
+---

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security issue (guard bypass, order placed unexpectedly)
+    url: https://github.com/yashpatel-py/robinhood-trading-agent-skills/security/advisories/new
+    about: Report privately, never as a public issue. If that page is a 404 or says private reporting is off, open a bug-form issue titled "Private security contact request" with no details (SECURITY.md). See SECURITY.md for what's in scope.
+  - name: A problem with your Robinhood account, an order or a fill
+    url: https://robinhood.com/us/en/support/
+    about: This project is unofficial and can't see or change your account. Contact Robinhood support.

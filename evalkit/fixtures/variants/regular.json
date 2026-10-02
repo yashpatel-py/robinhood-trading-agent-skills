@@ -1,0 +1,11 @@
+{
+  "$comment": "Variant overlay (WP-M): the regular trading session. Only the clock moves; every date in the household stays anchored to the base anchor date, so golden numbers do not change. Quote and index timestamps, previous-close dates and the session follow 'now'.",
+  "variant": "regular",
+  "description": "Regular session: Tuesday of the anchor week, 11:02 ET (default 2026-11-17 11:02 ET).",
+  "now": "@+1d 11:02:00",
+  "patch": [
+    {"op": "set", "path": "crypto_orders.agentic[_ref=eth-stop].created_at", "value": "@+1d 08:15:00",
+     "why": "a crypto stop with no time_in_force is day-only; keep it 'placed today' on the variant's day"},
+    {"op": "set", "path": "crypto_orders.agentic[_ref=eth-stop].updated_at", "value": "@+1d 08:15:01"}
+  ]
+}

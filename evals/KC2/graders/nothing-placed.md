@@ -1,0 +1,6 @@
+---
+type: "regex"
+match: "contains"
+pattern: "Nothing was placed"
+weight: 2
+---

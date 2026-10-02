@@ -1,0 +1,25 @@
+# robinhood-skills config: the [report] section (robinhood-agent-report-card)
+# Unofficial; not affiliated with Robinhood Markets, Inc.
+#
+# Copy this section into your config file, for example ~/.config/robinhood-skills/config.toml
+# (or ./.robinhood/config.toml in a project, or $ROBINHOOD_SKILLS_CONFIG). On claude.ai or ChatGPT,
+# paste it into the project instructions under a line reading "# robinhood-skills:config".
+#
+# The report card works with no config at all: it reports the last 7 days unless you state a window
+# in the request ("last week", "since Nov 1"). A window you state always wins over this file.
+
+[report]
+# How many days a report covers when you don't name a window. A whole number of days, written as a
+# string. This is a reporting default, not a financial value, so it ships set.
+window_days = "7"
+
+# Read-only accounts: the report checks them for agent orders only when it may read them. It takes
+# that from [policy] read_scope (in the core skill's assets/policy.example.toml): "all" reads them with
+# no question, "agentic_only" leaves them out, "ask" (or no setting) asks once. A scheduled run has
+# no one to ask, so without read_scope = "all" (or accounts named in its prompt) it reports them as
+# "not verified" and the status as UNKNOWN, never as clear.
+#
+# The optional "is my agent following my rules?" check reads your [policy] section (max order size,
+# symbol allow/deny lists, orders per day and so on). That section belongs to the core
+# robinhood-trading skill; see its assets/policy.example.toml. These are your own soft limits:
+# Robinhood does not enforce them, and the report only compares past orders against them.

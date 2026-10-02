@@ -1,0 +1,20 @@
+{"query": "run my options screener", "should_trigger": true, "split": "train"}
+{"query": "set up my options screener", "should_trigger": true, "split": "train"}
+{"query": "schedule the screener for 9:45", "should_trigger": true, "split": "train"}
+{"query": "run the options screener with my saved criteria", "should_trigger": true, "split": "train"}
+{"query": "do a pass of my robinhood options screener before the open", "should_trigger": true, "split": "train"}
+{"query": "set up my options screener with a delta band of 0.30-0.55", "should_trigger": true, "split": "train"}
+{"query": "set up the UNSET criteria in my options screener", "should_trigger": true, "split": "train"}
+{"query": "rerun my option screener, I changed the config", "should_trigger": true, "split": "validation"}
+{"query": "set my options screener to run every weekday at 10am", "should_trigger": true, "split": "validation"}
+{"query": "set up my options screener: dte_min 21, dte_max 45", "should_trigger": true, "split": "validation"}
+{"query": "run my options screener again, it came back empty last time", "should_trigger": true, "split": "validation"}
+{"query": "run the options screener and simulate the top candidate", "should_trigger": true, "split": "validation"}
+{"query": "find me cheap calls on AMD", "should_trigger": false, "expect_skill": "robinhood-trading", "split": "train"}
+{"query": "check my open options against my exit rules", "should_trigger": false, "expect_skill": "robinhood-options-monitor", "split": "train"}
+{"query": "what's a debit spread", "should_trigger": false, "split": "train"}
+{"query": "show me the December SPY chain around the money", "should_trigger": false, "expect_skill": "robinhood-trading", "split": "train"}
+{"query": "explain how delta works on an option", "should_trigger": false, "split": "train"}
+{"query": "what expires this week in my account", "should_trigger": false, "expect_skill": "robinhood-options-monitor", "split": "validation"}
+{"query": "run my saved scans", "should_trigger": false, "expect_skill": "robinhood-trading", "split": "validation"}
+{"query": "screen for large caps with RSI under 30", "should_trigger": false, "expect_skill": "robinhood-trading", "split": "validation"}

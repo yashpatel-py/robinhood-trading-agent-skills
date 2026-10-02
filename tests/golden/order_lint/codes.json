@@ -1,0 +1,2082 @@
+{
+ "script": "order_lint",
+ "about": "Every error and warning code with a triggering case and a passing case. Each case patches a valid base order: params are merged (null deletes), remove drops keys, context and provenance are merged (provenance replaces when given). Written from the tool schemas, not from lint output.",
+ "bases": {
+  "equity_limit_buy": {
+   "tool": "review_equity_order",
+   "params": {
+    "account_number": "demo-X4F1",
+    "symbol": "PLTR",
+    "side": "buy",
+    "type": "limit",
+    "quantity": "10",
+    "limit_price": "31.24",
+    "time_in_force": "gfd",
+    "market_hours": "regular_hours"
+   },
+   "provenance": {
+    "quantity": "user",
+    "limit_price": "user"
+   },
+   "context": {
+    "agentic_allowed": true,
+    "session": "regular",
+    "bid": "31.18",
+    "ask": "31.24",
+    "market_price": "31.20"
+   }
+  },
+  "equity_market_buy": {
+   "tool": "review_equity_order",
+   "params": {
+    "account_number": "demo-X4F1",
+    "symbol": "PLTR",
+    "side": "buy",
+    "type": "market",
+    "quantity": "5"
+   },
+   "provenance": {
+    "quantity": "user"
+   },
+   "context": {
+    "agentic_allowed": true,
+    "session": "regular",
+    "bid": "31.18",
+    "ask": "31.24"
+   }
+  },
+  "equity_dollar_buy": {
+   "tool": "review_equity_order",
+   "params": {
+    "account_number": "demo-X4F1",
+    "symbol": "PLTR",
+    "side": "buy",
+    "type": "market",
+    "dollar_amount": "100.00"
+   },
+   "provenance": {
+    "dollar_amount": "user"
+   },
+   "context": {
+    "agentic_allowed": true,
+    "session": "regular"
+   }
+  },
+  "equity_sell_lots": {
+   "tool": "review_equity_order",
+   "params": {
+    "account_number": "demo-X4F1",
+    "symbol": "TSLA",
+    "side": "sell",
+    "type": "limit",
+    "quantity": "20",
+    "limit_price": "262.00",
+    "tax_lots": [
+     {
+      "open_lot_id": "L7",
+      "quantity": "15"
+     },
+     {
+      "open_lot_id": "L9",
+      "quantity": "5"
+     }
+    ]
+   },
+   "provenance": {
+    "quantity": "user",
+    "limit_price": "user"
+   },
+   "context": {
+    "agentic_allowed": true,
+    "session": "regular",
+    "sellable_qty": "30",
+    "lots_available": {
+     "L7": "20",
+     "L9": "5"
+    },
+    "bid": "261.90",
+    "ask": "262.10"
+   }
+  },
+  "oco_sell": {
+   "tool": "review_advanced_order",
+   "params": {
+    "account_number": "demo-X4F1",
+    "symbol": "AMD",
+    "side": "sell",
+    "quantity": "10",
+    "take_profit_limit_price": "180.00",
+    "stop_loss_stop_price": "142.00",
+    "time_in_force": "gtc"
+   },
+   "provenance": {
+    "quantity": "user",
+    "take_profit_limit_price": "user",
+    "stop_loss_stop_price": "user"
+   },
+   "context": {
+    "agentic_allowed": true,
+    "market_price": "161.40",
+    "bid": "161.38",
+    "ask": "161.42",
+    "sellable_qty": "12"
+   }
+  },
+  "option_long_call": {
+   "tool": "review_option_order",
+   "params": {
+    "account_number": "demo-X4F1",
+    "legs": [
+     {
+      "option_id": "opt-a",
+      "side": "buy",
+      "position_effect": "open",
+      "ratio_quantity": 1
+     }
+    ],
+    "quantity": "1",
+    "type": "limit",
+    "price": "6.30",
+    "time_in_force": "gfd",
+    "market_hours": "regular_hours",
+    "chain_symbol": "AMD",
+    "underlying_type": "equity"
+   },
+   "provenance": {
+    "quantity": "user",
+    "price": "user"
+   },
+   "context": {
+    "agentic_allowed": true,
+    "option_level": "option_level_2",
+    "account_type": "margin",
+    "retirement": false,
+    "session": "regular",
+    "bid": "6.10",
+    "ask": "6.30"
+   }
+  },
+  "option_spread": {
+   "tool": "review_option_order",
+   "params": {
+    "account_number": "demo-X4F1",
+    "legs": [
+     {
+      "option_id": "opt-a",
+      "side": "buy",
+      "position_effect": "open"
+     },
+     {
+      "option_id": "opt-b",
+      "side": "sell",
+      "position_effect": "open"
+     }
+    ],
+    "quantity": "2",
+    "type": "limit",
+    "price": "2.20",
+    "direction": "debit",
+    "time_in_force": "gfd",
+    "market_hours": "regular_hours",
+    "chain_symbol": "AMD",
+    "underlying_type": "equity"
+   },
+   "provenance": {
+    "quantity": "user",
+    "price": "user"
+   },
+   "context": {
+    "agentic_allowed": true,
+    "option_level": "option_level_3",
+    "account_type": "margin",
+    "retirement": false,
+    "session": "regular"
+   }
+  },
+  "option_stop_market": {
+   "tool": "review_option_order",
+   "params": {
+    "account_number": "demo-X4F1",
+    "legs": [
+     {
+      "option_id": "opt-a",
+      "side": "sell",
+      "position_effect": "close"
+     }
+    ],
+    "quantity": "1",
+    "type": "stop_market",
+    "stop_price": "3.00",
+    "time_in_force": "gfd",
+    "market_hours": "regular_hours",
+    "chain_symbol": "AMD",
+    "underlying_type": "equity"
+   },
+   "provenance": {
+    "quantity": "user",
+    "stop_price": "user"
+   },
+   "context": {
+    "agentic_allowed": true,
+    "option_level": "option_level_2",
+    "account_type": "margin",
+    "retirement": false,
+    "session": "regular",
+    "bid": "3.30",
+    "ask": "3.40"
+   }
+  },
+  "crypto_limit_buy": {
+   "tool": "preview_crypto_order",
+   "params": {
+    "rhs_account_number": "demo-5555",
+    "symbol": "BTC",
+    "side": "buy",
+    "type": "limit",
+    "quantity": "0.01",
+    "limit_price": "60000",
+    "time_in_force": "gtc"
+   },
+   "provenance": {
+    "quantity": "user",
+    "limit_price": "user"
+   },
+   "context": {
+    "agentic_allowed": true,
+    "min_order_quantity_increment": "0.00000001",
+    "pair_halted": false,
+    "bid": "59990",
+    "ask": "60010"
+   }
+  },
+  "crypto_stop": {
+   "tool": "preview_crypto_order",
+   "params": {
+    "rhs_account_number": "demo-5555",
+    "symbol": "ETH",
+    "side": "sell",
+    "type": "stop_loss",
+    "quantity": "0.5",
+    "stop_price": "2000",
+    "time_in_force": "gtc"
+   },
+   "provenance": {
+    "quantity": "user",
+    "stop_price": "user"
+   },
+   "context": {
+    "agentic_allowed": true,
+    "min_order_quantity_increment": "0.000001",
+    "pair_halted": false
+   }
+  },
+  "crypto_market_sell_qty": {
+   "tool": "preview_crypto_order",
+   "params": {
+    "rhs_account_number": "demo-5555",
+    "symbol": "ETH",
+    "side": "sell",
+    "type": "market",
+    "quantity": "0.5"
+   },
+   "provenance": {
+    "quantity": "user"
+   },
+   "context": {
+    "agentic_allowed": true,
+    "min_order_quantity_increment": "0.000001",
+    "pair_halted": false,
+    "bid": "2500",
+    "ask": "2501"
+   }
+  }
+ },
+ "errors": [
+  {
+   "code": "UNKNOWN_PARAM",
+   "trigger": {
+    "base": "equity_limit_buy",
+    "params": {
+     "note": "buy the dip"
+    }
+   },
+   "pass": {
+    "base": "equity_limit_buy"
+   }
+  },
+  {
+   "code": "UNKNOWN_PARAM",
+   "trigger": {
+    "base": "option_spread",
+    "tool": "place_option_order"
+   },
+   "pass": {
+    "base": "option_spread",
+    "remove": [
+     "chain_symbol",
+     "underlying_type"
+    ],
+    "tool": "place_option_order"
+   }
+  },
+  {
+   "code": "MISSING_REQUIRED",
+   "trigger": {
+    "base": "equity_limit_buy",
+    "remove": [
+     "symbol"
+    ]
+   },
+   "pass": {
+    "base": "equity_limit_buy"
+   }
+  },
+  {
+   "code": "BAD_ENUM",
+   "trigger": {
+    "base": "equity_limit_buy",
+    "params": {
+     "side": "hold"
+    }
+   },
+   "pass": {
+    "base": "equity_limit_buy"
+   }
+  },
+  {
+   "code": "BAD_VALUE_TYPE",
+   "trigger": {
+    "base": "equity_limit_buy",
+    "params": {
+     "quantity": 10
+    }
+   },
+   "pass": {
+    "base": "equity_limit_buy"
+   }
+  },
+  {
+   "code": "NO_USER_SOURCE",
+   "trigger": {
+    "base": "equity_limit_buy",
+    "provenance": {
+     "limit_price": "user"
+    }
+   },
+   "pass": {
+    "base": "equity_limit_buy"
+   }
+  },
+  {
+   "code": "NO_USER_SOURCE",
+   "trigger": {
+    "base": "option_spread",
+    "provenance": {
+     "quantity": "user",
+     "price": "agent_mid"
+    }
+   },
+   "pass": {
+    "base": "option_spread"
+   }
+  },
+  {
+   "code": "NO_USER_SOURCE",
+   "trigger": {
+    "base": "oco_sell",
+    "provenance": {
+     "quantity": "user",
+     "take_profit_limit_price": "user"
+    }
+   },
+   "pass": {
+    "base": "oco_sell",
+    "provenance": {
+     "quantity": "user_config",
+     "take_profit_limit_price": "user_config",
+     "stop_loss_stop_price": "user_config"
+    }
+   }
+  },
+  {
+   "code": "NOT_AGENTIC_ACCOUNT",
+   "trigger": {
+    "base": "equity_limit_buy",
+    "context": {
+     "agentic_allowed": false
+    }
+   },
+   "pass": {
+    "base": "equity_limit_buy"
+   }
+  },
+  {
+   "code": "ONE_OF_QTY_OR_DOLLAR",
+   "trigger": {
+    "base": "equity_market_buy",
+    "remove": [
+     "quantity"
+    ]
+   },
+   "pass": {
+    "base": "equity_market_buy"
+   }
+  },
+  {
+   "code": "DOLLAR_REQUIRES_MARKET",
+   "trigger": {
+    "base": "equity_dollar_buy",
+    "params": {
+     "type": "limit",
+     "limit_price": "31.24"
+    },
+    "provenance": {
+     "dollar_amount": "user",
+     "limit_price": "user"
+    }
+   },
+   "pass": {
+    "base": "equity_dollar_buy"
+   }
+  },
+  {
+   "code": "LIMIT_PRICE_REQUIRED",
+   "trigger": {
+    "base": "equity_limit_buy",
+    "remove": [
+     "limit_price"
+    ]
+   },
+   "pass": {
+    "base": "equity_limit_buy"
+   }
+  },
+  {
+   "code": "STOP_PRICE_REQUIRED",
+   "trigger": {
+    "base": "equity_limit_buy",
+    "params": {
+     "type": "stop_limit"
+    }
+   },
+   "pass": {
+    "base": "equity_limit_buy",
+    "params": {
+     "type": "stop_limit",
+     "stop_price": "31.00"
+    },
+    "provenance": {
+     "quantity": "user",
+     "limit_price": "user",
+     "stop_price": "user"
+    }
+   }
+  },
+  {
+   "code": "NON_REGULAR_REQUIRES_LIMIT",
+   "trigger": {
+    "base": "equity_market_buy",
+    "params": {
+     "market_hours": "extended_hours"
+    }
+   },
+   "pass": {
+    "base": "equity_limit_buy",
+    "params": {
+     "market_hours": "extended_hours"
+    }
+   }
+  },
+  {
+   "code": "FRACTIONAL_REQUIRES_MARKET_REGULAR",
+   "trigger": {
+    "base": "equity_limit_buy",
+    "params": {
+     "quantity": "0.5"
+    }
+   },
+   "pass": {
+    "base": "equity_market_buy",
+    "params": {
+     "quantity": "0.5"
+    }
+   }
+  },
+  {
+   "code": "MAX_6_DECIMALS",
+   "trigger": {
+    "base": "equity_market_buy",
+    "params": {
+     "quantity": "0.1234567"
+    }
+   },
+   "pass": {
+    "base": "equity_market_buy",
+    "params": {
+     "quantity": "0.123456"
+    }
+   }
+  },
+  {
+   "code": "DOLLAR_OR_FRACTIONAL_REGULAR_ONLY",
+   "trigger": {
+    "base": "equity_dollar_buy",
+    "params": {
+     "market_hours": "all_day_hours"
+    }
+   },
+   "pass": {
+    "base": "equity_dollar_buy",
+    "params": {
+     "market_hours": "regular_hours"
+    }
+   }
+  },
+  {
+   "code": "DOLLAR_OR_FRACTIONAL_REGULAR_ONLY",
+   "trigger": {
+    "base": "equity_market_buy",
+    "params": {
+     "quantity": "0.5",
+     "market_hours": "extended_hours"
+    }
+   },
+   "pass": {
+    "base": "equity_market_buy",
+    "params": {
+     "quantity": "0.5"
+    }
+   }
+  },
+  {
+   "code": "TAX_LOTS_SELL_ONLY",
+   "trigger": {
+    "base": "equity_limit_buy",
+    "params": {
+     "tax_lots": [
+      {
+       "open_lot_id": "L7",
+       "quantity": "10"
+      }
+     ]
+    }
+   },
+   "pass": {
+    "base": "equity_sell_lots"
+   }
+  },
+  {
+   "code": "TAX_LOTS_MAX_30",
+   "trigger": {
+    "base": "equity_sell_lots",
+    "params": {
+     "quantity": "31",
+     "tax_lots": [
+      {
+       "open_lot_id": "L00",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L01",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L02",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L03",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L04",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L05",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L06",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L07",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L08",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L09",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L10",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L11",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L12",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L13",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L14",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L15",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L16",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L17",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L18",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L19",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L20",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L21",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L22",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L23",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L24",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L25",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L26",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L27",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L28",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L29",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L30",
+       "quantity": "1"
+      }
+     ]
+    },
+    "context": {
+     "lots_available": {
+      "L00": "1",
+      "L01": "1",
+      "L02": "1",
+      "L03": "1",
+      "L04": "1",
+      "L05": "1",
+      "L06": "1",
+      "L07": "1",
+      "L08": "1",
+      "L09": "1",
+      "L10": "1",
+      "L11": "1",
+      "L12": "1",
+      "L13": "1",
+      "L14": "1",
+      "L15": "1",
+      "L16": "1",
+      "L17": "1",
+      "L18": "1",
+      "L19": "1",
+      "L20": "1",
+      "L21": "1",
+      "L22": "1",
+      "L23": "1",
+      "L24": "1",
+      "L25": "1",
+      "L26": "1",
+      "L27": "1",
+      "L28": "1",
+      "L29": "1",
+      "L30": "1"
+     },
+     "sellable_qty": "40"
+    }
+   },
+   "pass": {
+    "base": "equity_sell_lots",
+    "params": {
+     "quantity": "30",
+     "tax_lots": [
+      {
+       "open_lot_id": "L00",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L01",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L02",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L03",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L04",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L05",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L06",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L07",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L08",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L09",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L10",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L11",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L12",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L13",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L14",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L15",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L16",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L17",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L18",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L19",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L20",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L21",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L22",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L23",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L24",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L25",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L26",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L27",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L28",
+       "quantity": "1"
+      },
+      {
+       "open_lot_id": "L29",
+       "quantity": "1"
+      }
+     ]
+    },
+    "context": {
+     "lots_available": {
+      "L00": "1",
+      "L01": "1",
+      "L02": "1",
+      "L03": "1",
+      "L04": "1",
+      "L05": "1",
+      "L06": "1",
+      "L07": "1",
+      "L08": "1",
+      "L09": "1",
+      "L10": "1",
+      "L11": "1",
+      "L12": "1",
+      "L13": "1",
+      "L14": "1",
+      "L15": "1",
+      "L16": "1",
+      "L17": "1",
+      "L18": "1",
+      "L19": "1",
+      "L20": "1",
+      "L21": "1",
+      "L22": "1",
+      "L23": "1",
+      "L24": "1",
+      "L25": "1",
+      "L26": "1",
+      "L27": "1",
+      "L28": "1",
+      "L29": "1"
+     },
+     "sellable_qty": "40"
+    }
+   }
+  },
+  {
+   "code": "TAX_LOTS_SUM_MISMATCH",
+   "trigger": {
+    "base": "equity_sell_lots",
+    "params": {
+     "quantity": "20.1"
+    }
+   },
+   "pass": {
+    "base": "equity_sell_lots"
+   }
+  },
+  {
+   "code": "TAX_LOTS_SUM_MISMATCH",
+   "trigger": {
+    "base": "equity_sell_lots",
+    "params": {
+     "quantity": "0.31",
+     "type": "market",
+     "tax_lots": [
+      {
+       "open_lot_id": "L7",
+       "quantity": "0.1"
+      },
+      {
+       "open_lot_id": "L9",
+       "quantity": "0.2"
+      }
+     ]
+    },
+    "remove": [
+     "limit_price"
+    ],
+    "provenance": {
+     "quantity": "user"
+    }
+   },
+   "pass": {
+    "base": "equity_sell_lots",
+    "params": {
+     "quantity": "0.3",
+     "type": "market",
+     "tax_lots": [
+      {
+       "open_lot_id": "L7",
+       "quantity": "0.1"
+      },
+      {
+       "open_lot_id": "L9",
+       "quantity": "0.2"
+      }
+     ]
+    },
+    "remove": [
+     "limit_price"
+    ],
+    "provenance": {
+     "quantity": "user"
+    }
+   }
+  },
+  {
+   "code": "TAX_LOTS_EXCEEDS_AVAILABLE",
+   "trigger": {
+    "base": "equity_sell_lots",
+    "params": {
+     "tax_lots": [
+      {
+       "open_lot_id": "L7",
+       "quantity": "14"
+      },
+      {
+       "open_lot_id": "L9",
+       "quantity": "6"
+      }
+     ]
+    }
+   },
+   "pass": {
+    "base": "equity_sell_lots"
+   }
+  },
+  {
+   "code": "TAX_LOTS_EXCEEDS_AVAILABLE",
+   "trigger": {
+    "base": "equity_sell_lots",
+    "params": {
+     "tax_lots": [
+      {
+       "open_lot_id": "L7",
+       "quantity": "15"
+      },
+      {
+       "open_lot_id": "L99",
+       "quantity": "5"
+      }
+     ]
+    }
+   },
+   "pass": {
+    "base": "equity_sell_lots"
+   }
+  },
+  {
+   "code": "TAX_LOTS_NOT_ALLOWED_WITH",
+   "trigger": {
+    "base": "equity_sell_lots",
+    "params": {
+     "market_hours": "all_day_hours"
+    }
+   },
+   "pass": {
+    "base": "equity_sell_lots",
+    "params": {
+     "market_hours": "extended_hours"
+    }
+   }
+  },
+  {
+   "code": "TAX_LOTS_NOT_ALLOWED_WITH",
+   "trigger": {
+    "base": "equity_sell_lots",
+    "params": {
+     "type": "stop_limit",
+     "stop_price": "250"
+    },
+    "provenance": {
+     "quantity": "user",
+     "limit_price": "user",
+     "stop_price": "user"
+    }
+   },
+   "pass": {
+    "base": "equity_sell_lots"
+   }
+  },
+  {
+   "code": "EXCEEDS_SELLABLE",
+   "trigger": {
+    "base": "equity_sell_lots",
+    "context": {
+     "sellable_qty": "19"
+    }
+   },
+   "pass": {
+    "base": "equity_sell_lots"
+   }
+  },
+  {
+   "code": "EXCEEDS_SELLABLE",
+   "trigger": {
+    "base": "equity_sell_lots",
+    "context": {
+     "sellable_qty": null,
+     "position_qty": "30",
+     "held_qty": "12"
+    }
+   },
+   "pass": {
+    "base": "equity_sell_lots",
+    "context": {
+     "sellable_qty": null,
+     "position_qty": "30",
+     "held_qty": "10"
+    }
+   }
+  },
+  {
+   "code": "WHOLE_SHARES",
+   "trigger": {
+    "base": "oco_sell",
+    "params": {
+     "quantity": "10.5"
+    }
+   },
+   "pass": {
+    "base": "oco_sell"
+   }
+  },
+  {
+   "code": "SIDE_ORDER",
+   "trigger": {
+    "base": "oco_sell",
+    "params": {
+     "take_profit_limit_price": "142.00",
+     "stop_loss_stop_price": "180.00"
+    }
+   },
+   "pass": {
+    "base": "oco_sell"
+   }
+  },
+  {
+   "code": "SIDE_ORDER",
+   "trigger": {
+    "base": "oco_sell",
+    "params": {
+     "side": "buy"
+    }
+   },
+   "pass": {
+    "base": "oco_sell",
+    "params": {
+     "side": "buy",
+     "take_profit_limit_price": "142.00",
+     "stop_loss_stop_price": "180.00"
+    }
+   }
+  },
+  {
+   "code": "PRICES_MUST_DIFFER",
+   "trigger": {
+    "base": "oco_sell",
+    "params": {
+     "take_profit_limit_price": "170",
+     "stop_loss_stop_price": "170.00"
+    }
+   },
+   "pass": {
+    "base": "oco_sell"
+   }
+  },
+  {
+   "code": "MIN_DISTANCE_0_25PCT",
+   "trigger": {
+    "base": "oco_sell",
+    "params": {
+     "take_profit_limit_price": "100.249",
+     "stop_loss_stop_price": "90"
+    },
+    "context": {
+     "market_price": "100.00",
+     "bid": "99.99",
+     "ask": "100.01"
+    }
+   },
+   "pass": {
+    "base": "oco_sell",
+    "params": {
+     "take_profit_limit_price": "100.25",
+     "stop_loss_stop_price": "90"
+    },
+    "context": {
+     "market_price": "100.00",
+     "bid": "99.99",
+     "ask": "100.01"
+    }
+   }
+  },
+  {
+   "code": "MIN_DISTANCE_0_25PCT",
+   "trigger": {
+    "base": "oco_sell",
+    "params": {
+     "take_profit_limit_price": "110",
+     "stop_loss_stop_price": "99.751"
+    },
+    "context": {
+     "market_price": "100.00",
+     "bid": "99.99",
+     "ask": "100.01"
+    }
+   },
+   "pass": {
+    "base": "oco_sell",
+    "params": {
+     "take_profit_limit_price": "110",
+     "stop_loss_stop_price": "99.75"
+    },
+    "context": {
+     "market_price": "100.00",
+     "bid": "99.99",
+     "ask": "100.01"
+    }
+   }
+  },
+  {
+   "code": "MIN_GAP_0_10",
+   "trigger": {
+    "base": "oco_sell",
+    "params": {
+     "take_profit_limit_price": "10.05",
+     "stop_loss_stop_price": "9.96"
+    },
+    "context": {
+     "market_price": "10.00",
+     "bid": "9.99",
+     "ask": "10.01"
+    }
+   },
+   "pass": {
+    "base": "oco_sell",
+    "params": {
+     "take_profit_limit_price": "10.05",
+     "stop_loss_stop_price": "9.95"
+    },
+    "context": {
+     "market_price": "10.00",
+     "bid": "9.99",
+     "ask": "10.01"
+    }
+   }
+  },
+  {
+   "code": "SESSION_NOT_REGULAR",
+   "trigger": {
+    "base": "oco_sell",
+    "params": {
+     "market_hours": "extended_hours"
+    }
+   },
+   "pass": {
+    "base": "oco_sell",
+    "params": {
+     "market_hours": "regular_hours"
+    }
+   }
+  },
+  {
+   "code": "BAD_TIF",
+   "trigger": {
+    "base": "oco_sell",
+    "params": {
+     "time_in_force": "gtd"
+    }
+   },
+   "pass": {
+    "base": "oco_sell",
+    "params": {
+     "time_in_force": "gfd"
+    }
+   }
+  },
+  {
+   "code": "QTY_EXCEEDS_SELLABLE",
+   "trigger": {
+    "base": "oco_sell",
+    "context": {
+     "sellable_qty": "9"
+    }
+   },
+   "pass": {
+    "base": "oco_sell",
+    "context": {
+     "sellable_qty": "10"
+    }
+   }
+  },
+  {
+   "code": "LEGS_1_TO_4",
+   "trigger": {
+    "base": "option_spread",
+    "params": {
+     "legs": [
+      {
+       "option_id": "opt-0",
+       "side": "buy",
+       "position_effect": "open"
+      },
+      {
+       "option_id": "opt-1",
+       "side": "buy",
+       "position_effect": "open"
+      },
+      {
+       "option_id": "opt-2",
+       "side": "buy",
+       "position_effect": "open"
+      },
+      {
+       "option_id": "opt-3",
+       "side": "buy",
+       "position_effect": "open"
+      },
+      {
+       "option_id": "opt-4",
+       "side": "buy",
+       "position_effect": "open"
+      }
+     ]
+    }
+   },
+   "pass": {
+    "base": "option_spread"
+   }
+  },
+  {
+   "code": "LEGS_1_TO_4",
+   "trigger": {
+    "base": "option_spread",
+    "params": {
+     "legs": []
+    }
+   },
+   "pass": {
+    "base": "option_spread"
+   }
+  },
+  {
+   "code": "DUPLICATE_CONTRACT",
+   "trigger": {
+    "base": "option_spread",
+    "params": {
+     "legs": [
+      {
+       "option_id": "opt-a",
+       "side": "buy",
+       "position_effect": "open"
+      },
+      {
+       "option_id": "OPT-A",
+       "side": "sell",
+       "position_effect": "open"
+      }
+     ]
+    }
+   },
+   "pass": {
+    "base": "option_spread"
+   }
+  },
+  {
+   "code": "RATIO_NOT_LOWEST_TERMS",
+   "trigger": {
+    "base": "option_spread",
+    "params": {
+     "legs": [
+      {
+       "option_id": "opt-a",
+       "side": "buy",
+       "position_effect": "open",
+       "ratio_quantity": 2
+      },
+      {
+       "option_id": "opt-b",
+       "side": "sell",
+       "position_effect": "open",
+       "ratio_quantity": 4
+      }
+     ]
+    }
+   },
+   "pass": {
+    "base": "option_spread",
+    "params": {
+     "legs": [
+      {
+       "option_id": "opt-a",
+       "side": "buy",
+       "position_effect": "open",
+       "ratio_quantity": 1
+      },
+      {
+       "option_id": "opt-b",
+       "side": "sell",
+       "position_effect": "open",
+       "ratio_quantity": 2
+      }
+     ]
+    }
+   }
+  },
+  {
+   "code": "SINGLE_LEG_RATIO_MUST_BE_1",
+   "trigger": {
+    "base": "option_long_call",
+    "params": {
+     "legs": [
+      {
+       "option_id": "opt-a",
+       "side": "buy",
+       "position_effect": "open",
+       "ratio_quantity": 2
+      }
+     ]
+    }
+   },
+   "pass": {
+    "base": "option_long_call"
+   }
+  },
+  {
+   "code": "DIRECTION_REQUIRED_MULTI",
+   "trigger": {
+    "base": "option_spread",
+    "remove": [
+     "direction"
+    ]
+   },
+   "pass": {
+    "base": "option_spread"
+   }
+  },
+  {
+   "code": "DIRECTION_OMIT_SINGLE",
+   "trigger": {
+    "base": "option_long_call",
+    "params": {
+     "direction": "debit"
+    }
+   },
+   "pass": {
+    "base": "option_long_call"
+   }
+  },
+  {
+   "code": "MULTI_LEG_LIMIT_ONLY",
+   "trigger": {
+    "base": "option_spread",
+    "params": {
+     "type": "market"
+    },
+    "remove": [
+     "price"
+    ],
+    "provenance": {
+     "quantity": "user"
+    }
+   },
+   "pass": {
+    "base": "option_spread"
+   }
+  },
+  {
+   "code": "PRICE_REQUIRED",
+   "trigger": {
+    "base": "option_long_call",
+    "remove": [
+     "price"
+    ]
+   },
+   "pass": {
+    "base": "option_long_call"
+   }
+  },
+  {
+   "code": "PRICE_MUST_BE_OMITTED",
+   "trigger": {
+    "base": "option_long_call",
+    "params": {
+     "type": "market"
+    }
+   },
+   "pass": {
+    "base": "option_long_call",
+    "params": {
+     "type": "market"
+    },
+    "remove": [
+     "price"
+    ],
+    "provenance": {
+     "quantity": "user"
+    }
+   }
+  },
+  {
+   "code": "STOP_PRICE_RULES",
+   "trigger": {
+    "base": "option_long_call",
+    "params": {
+     "stop_price": "5.00"
+    },
+    "provenance": {
+     "quantity": "user",
+     "price": "user",
+     "stop_price": "user"
+    }
+   },
+   "pass": {
+    "base": "option_long_call"
+   }
+  },
+  {
+   "code": "STOP_PRICE_RULES",
+   "trigger": {
+    "base": "option_long_call",
+    "params": {
+     "type": "stop_limit"
+    }
+   },
+   "pass": {
+    "base": "option_long_call",
+    "params": {
+     "type": "stop_limit",
+     "stop_price": "6.00"
+    },
+    "provenance": {
+     "quantity": "user",
+     "price": "user",
+     "stop_price": "user"
+    }
+   }
+  },
+  {
+   "code": "MARKET_STOP_GFD_REGULAR_ONLY",
+   "trigger": {
+    "base": "option_long_call",
+    "params": {
+     "type": "market",
+     "time_in_force": "gtc"
+    },
+    "remove": [
+     "price"
+    ],
+    "provenance": {
+     "quantity": "user"
+    }
+   },
+   "pass": {
+    "base": "option_long_call",
+    "params": {
+     "type": "market"
+    },
+    "remove": [
+     "price"
+    ],
+    "provenance": {
+     "quantity": "user"
+    }
+   }
+  },
+  {
+   "code": "MARKET_STOP_GFD_REGULAR_ONLY",
+   "trigger": {
+    "base": "option_stop_market",
+    "params": {
+     "market_hours": "regular_curb_hours",
+     "underlying_type": "index",
+     "chain_symbol": "SPX"
+    },
+    "context": {
+     "chain_extended_hours_state": "enabled"
+    }
+   },
+   "pass": {
+    "base": "option_stop_market"
+   }
+  },
+  {
+   "code": "STOP_MARKET_SELL_TO_CLOSE_ONLY",
+   "trigger": {
+    "base": "option_stop_market",
+    "params": {
+     "legs": [
+      {
+       "option_id": "opt-a",
+       "side": "buy",
+       "position_effect": "open"
+      }
+     ]
+    }
+   },
+   "pass": {
+    "base": "option_stop_market"
+   }
+  },
+  {
+   "code": "STOP_BELOW_ASK",
+   "trigger": {
+    "base": "option_stop_market",
+    "params": {
+     "stop_price": "3.40"
+    }
+   },
+   "pass": {
+    "base": "option_stop_market",
+    "params": {
+     "stop_price": "3.39"
+    }
+   }
+  },
+  {
+   "code": "NON_LIMIT_SINGLE_LEG_ONLY",
+   "trigger": {
+    "base": "option_long_call",
+    "params": {
+     "type": "stop_limit",
+     "stop_price": "6.00",
+     "market_hours": "regular_curb_hours",
+     "underlying_type": "index",
+     "chain_symbol": "SPX"
+    },
+    "context": {
+     "chain_extended_hours_state": "enabled"
+    },
+    "provenance": {
+     "quantity": "user",
+     "price": "user",
+     "stop_price": "user"
+    }
+   },
+   "pass": {
+    "base": "option_long_call",
+    "params": {
+     "market_hours": "regular_curb_hours",
+     "underlying_type": "index",
+     "chain_symbol": "SPX"
+    },
+    "context": {
+     "chain_extended_hours_state": "enabled"
+    }
+   }
+  },
+  {
+   "code": "EQUITY_SESSION_ON_OPTION",
+   "trigger": {
+    "base": "option_long_call",
+    "params": {
+     "market_hours": "extended_hours"
+    }
+   },
+   "pass": {
+    "base": "option_long_call"
+   }
+  },
+  {
+   "code": "CURB_REQUIRES_INDEX_ENABLED",
+   "trigger": {
+    "base": "option_long_call",
+    "params": {
+     "market_hours": "regular_curb_overnight_hours"
+    }
+   },
+   "pass": {
+    "base": "option_long_call",
+    "params": {
+     "market_hours": "regular_curb_overnight_hours",
+     "underlying_type": "index",
+     "chain_symbol": "SPX"
+    },
+    "context": {
+     "chain_extended_hours_state": "enabled"
+    }
+   }
+  },
+  {
+   "code": "CURB_REQUIRES_INDEX_ENABLED",
+   "trigger": {
+    "base": "option_long_call",
+    "params": {
+     "market_hours": "regular_curb_hours",
+     "underlying_type": "index",
+     "chain_symbol": "SPX"
+    },
+    "context": {
+     "chain_extended_hours_state": "disabled"
+    }
+   },
+   "pass": {
+    "base": "option_long_call",
+    "params": {
+     "market_hours": "regular_curb_hours",
+     "underlying_type": "index",
+     "chain_symbol": "SPX"
+    },
+    "context": {
+     "chain_extended_hours_state": "enabled"
+    }
+   }
+  },
+  {
+   "code": "LEVEL_INSUFFICIENT",
+   "trigger": {
+    "base": "option_spread",
+    "context": {
+     "option_level": "option_level_2"
+    }
+   },
+   "pass": {
+    "base": "option_spread"
+   }
+  },
+  {
+   "code": "LEVEL_INSUFFICIENT",
+   "trigger": {
+    "base": "option_long_call",
+    "context": {
+     "option_level": ""
+    }
+   },
+   "pass": {
+    "base": "option_long_call",
+    "context": {
+     "option_level": "option_level_3"
+    }
+   }
+  },
+  {
+   "code": "LEVEL_INSUFFICIENT",
+   "trigger": {
+    "base": "option_long_call",
+    "context": {
+     "option_level": "option_level_0"
+    }
+   },
+   "pass": {
+    "base": "option_long_call"
+   }
+  },
+  {
+   "code": "MULTI_LEG_CASH_OR_RETIREMENT",
+   "trigger": {
+    "base": "option_spread",
+    "context": {
+     "account_type": "cash"
+    }
+   },
+   "pass": {
+    "base": "option_spread",
+    "context": {
+     "account_type": "limited_margin"
+    }
+   }
+  },
+  {
+   "code": "MULTI_LEG_CASH_OR_RETIREMENT",
+   "trigger": {
+    "base": "option_spread",
+    "context": {
+     "retirement": true
+    }
+   },
+   "pass": {
+    "base": "option_spread"
+   }
+  },
+  {
+   "code": "QTY_POSITIVE_INT_STRING",
+   "trigger": {
+    "base": "option_long_call",
+    "params": {
+     "quantity": "1.5"
+    }
+   },
+   "pass": {
+    "base": "option_long_call"
+   }
+  },
+  {
+   "code": "QTY_POSITIVE_INT_STRING",
+   "trigger": {
+    "base": "option_long_call",
+    "params": {
+     "quantity": 1
+    }
+   },
+   "pass": {
+    "base": "option_long_call",
+    "params": {
+     "quantity": "1"
+    }
+   }
+  },
+  {
+   "code": "BAD_TYPE",
+   "trigger": {
+    "base": "crypto_stop",
+    "params": {
+     "type": "stop_market"
+    }
+   },
+   "pass": {
+    "base": "crypto_stop"
+   }
+  },
+  {
+   "code": "TIF_MARKET_LIMIT_GTC_ONLY",
+   "trigger": {
+    "base": "crypto_limit_buy",
+    "params": {
+     "time_in_force": "gfd"
+    }
+   },
+   "pass": {
+    "base": "crypto_limit_buy"
+   }
+  },
+  {
+   "code": "TIF_STOP_VALUES",
+   "trigger": {
+    "base": "crypto_stop",
+    "params": {
+     "time_in_force": "gtd"
+    }
+   },
+   "pass": {
+    "base": "crypto_stop",
+    "params": {
+     "time_in_force": "gfw"
+    }
+   }
+  },
+  {
+   "code": "IOC_NEVER",
+   "trigger": {
+    "base": "crypto_limit_buy",
+    "params": {
+     "time_in_force": "ioc"
+    }
+   },
+   "pass": {
+    "base": "crypto_limit_buy"
+   }
+  },
+  {
+   "code": "TAX_LOTS_UNAVAILABLE",
+   "trigger": {
+    "base": "crypto_stop",
+    "params": {
+     "tax_lots": [
+      {
+       "open_lot_id": "c1",
+       "quantity": "0.5"
+      }
+     ]
+    }
+   },
+   "pass": {
+    "base": "crypto_stop"
+   }
+  },
+  {
+   "code": "OFF_INCREMENT",
+   "trigger": {
+    "base": "crypto_limit_buy",
+    "params": {
+     "quantity": "0.015"
+    },
+    "context": {
+     "min_order_quantity_increment": "0.01"
+    }
+   },
+   "pass": {
+    "base": "crypto_limit_buy",
+    "params": {
+     "quantity": "0.02"
+    },
+    "context": {
+     "min_order_quantity_increment": "0.01"
+    }
+   }
+  },
+  {
+   "code": "PAIR_HALTED",
+   "trigger": {
+    "base": "crypto_limit_buy",
+    "context": {
+     "pair_halted": true
+    }
+   },
+   "pass": {
+    "base": "crypto_limit_buy"
+   }
+  },
+  {
+   "code": "ONE_OF_QTY_OR_DOLLAR",
+   "trigger": {
+    "base": "crypto_limit_buy",
+    "params": {
+     "dollar_amount": "600"
+    },
+    "provenance": {
+     "quantity": "user",
+     "limit_price": "user",
+     "dollar_amount": "user"
+    }
+   },
+   "pass": {
+    "base": "crypto_limit_buy"
+   }
+  },
+  {
+   "code": "LIMIT_PRICE_REQUIRED",
+   "trigger": {
+    "base": "crypto_limit_buy",
+    "remove": [
+     "limit_price"
+    ]
+   },
+   "pass": {
+    "base": "crypto_limit_buy"
+   }
+  },
+  {
+   "code": "STOP_PRICE_REQUIRED",
+   "trigger": {
+    "base": "crypto_stop",
+    "remove": [
+     "stop_price"
+    ]
+   },
+   "pass": {
+    "base": "crypto_stop"
+   }
+  }
+ ],
+ "warnings": [
+  {
+   "code": "QUEUES_NEXT_OPEN",
+   "trigger": {
+    "base": "equity_market_buy",
+    "context": {
+     "session": "outside_regular_trading_day"
+    }
+   },
+   "pass": {
+    "base": "equity_market_buy"
+   }
+  },
+  {
+   "code": "QUEUES_NEXT_OPEN",
+   "trigger": {
+    "base": "option_long_call",
+    "context": {
+     "session": "closed_day"
+    }
+   },
+   "pass": {
+    "base": "option_long_call"
+   }
+  },
+  {
+   "code": "SELL_LIMIT_NOT_MARKETABLE",
+   "trigger": {
+    "base": "equity_sell_lots",
+    "params": {
+     "limit_price": "262.10"
+    },
+    "context": {
+     "user_wants_immediate": true
+    }
+   },
+   "pass": {
+    "base": "equity_sell_lots",
+    "params": {
+     "limit_price": "261.90"
+    },
+    "context": {
+     "user_wants_immediate": true
+    }
+   }
+  },
+  {
+   "code": "BUY_LIMIT_NOT_MARKETABLE",
+   "trigger": {
+    "base": "equity_limit_buy",
+    "params": {
+     "limit_price": "31.18"
+    },
+    "context": {
+     "user_wants_immediate": true
+    }
+   },
+   "pass": {
+    "base": "equity_limit_buy",
+    "context": {
+     "user_wants_immediate": true
+    }
+   }
+  },
+  {
+   "code": "UPPERCASE_TIF",
+   "trigger": {
+    "base": "oco_sell",
+    "params": {
+     "time_in_force": "GTC"
+    }
+   },
+   "pass": {
+    "base": "oco_sell"
+   }
+  },
+  {
+   "code": "NOT_LOWERCASE",
+   "trigger": {
+    "base": "equity_limit_buy",
+    "params": {
+     "side": "BUY"
+    }
+   },
+   "pass": {
+    "base": "equity_limit_buy"
+   }
+  },
+  {
+   "code": "STOP_WOULD_TRIGGER",
+   "trigger": {
+    "base": "oco_sell",
+    "params": {
+     "stop_loss_stop_price": "170.00"
+    }
+   },
+   "pass": {
+    "base": "oco_sell"
+   }
+  },
+  {
+   "code": "TP_WOULD_FILL",
+   "trigger": {
+    "base": "oco_sell",
+    "params": {
+     "take_profit_limit_price": "150.00",
+     "stop_loss_stop_price": "140.00"
+    }
+   },
+   "pass": {
+    "base": "oco_sell"
+   }
+  },
+  {
+   "code": "TIF_NOT_STATED",
+   "trigger": {
+    "base": "oco_sell",
+    "remove": [
+     "time_in_force"
+    ]
+   },
+   "pass": {
+    "base": "oco_sell"
+   }
+  },
+  {
+   "code": "SEND_CHAIN_SYMBOL_AND_UNDERLYING_TYPE",
+   "trigger": {
+    "base": "option_long_call",
+    "remove": [
+     "chain_symbol"
+    ]
+   },
+   "pass": {
+    "base": "option_long_call"
+   }
+  },
+  {
+   "code": "NON_STANDARD_MULTIPLIER",
+   "trigger": {
+    "base": "option_long_call",
+    "context": {
+     "multiplier": "106"
+    }
+   },
+   "pass": {
+    "base": "option_long_call",
+    "context": {
+     "multiplier": "100"
+    }
+   }
+  },
+  {
+   "code": "STOP_TIF_DEFAULTS_TO_DAY",
+   "trigger": {
+    "base": "crypto_stop",
+    "remove": [
+     "time_in_force"
+    ]
+   },
+   "pass": {
+    "base": "crypto_stop"
+   }
+  },
+  {
+   "code": "SELL_COLLAR_5PCT",
+   "trigger": {
+    "base": "crypto_market_sell_qty",
+    "params": {
+     "dollar_amount": "500"
+    },
+    "remove": [
+     "quantity"
+    ],
+    "provenance": {
+     "dollar_amount": "user"
+    }
+   },
+   "pass": {
+    "base": "crypto_market_sell_qty"
+   }
+  }
+ ]
+}

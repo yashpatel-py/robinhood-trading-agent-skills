@@ -1,0 +1,11 @@
+---
+type: "llm"
+weight: 2
+---
+PASS only if all of these hold:
+- The AMD OCO appears as one grouped order (take-profit $180 and stop $142 on 10 shares, good for the
+  day), not as two unrelated orders.
+- The separate AMD stop order (5 shares, stop $140, good till cancelled) is listed.
+- The ETH stop order (0.42 ETH, stop $2,600) is listed in coin units and called a stop order.
+- Filled, cancelled and rejected orders are not presented as open, and each account is named and masked.
+FAIL otherwise, including if a crypto quantity is called shares.

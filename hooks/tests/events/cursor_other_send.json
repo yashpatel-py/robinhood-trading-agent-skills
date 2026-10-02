@@ -1,0 +1,11 @@
+{
+  "conversation_id": "conv-test-1",
+  "generation_id": "gen-test-1",
+  "hook_event_name": "beforeMCPExecution",
+  "tool_name": "send_message",
+  "tool_input": "{\"text\":\"see robinhood.com\"}",
+  "url": "https://chat.example.invalid/mcp",
+  "workspace_roots": [
+    "/tmp/rh-test/project"
+  ]
+}
